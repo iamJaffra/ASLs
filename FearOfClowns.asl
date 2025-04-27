@@ -28,7 +28,6 @@ init {
 	var loadSig = new SigScanTarget(1, "A1 ?? ?? ?? ?? 8B C8 A1 ?? ?? ?? ?? 8B 1D ?? ?? ?? ?? 8B 04 98 89 88 10 00 00 00 C7 05 ?? ?? ?? ?? 5E B1 00 00");
 	
 	vars.loadAddr = IntPtr.Zero;
-	int scanAttempts = 10;
 
 	foreach (var page in game.MemoryPages(true).Reverse()) {
 		var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
