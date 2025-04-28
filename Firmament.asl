@@ -100,19 +100,19 @@ init {
 			vars.fNamePoolSignature = "89 5C 24 ?? 89 44 24 ?? 74 ?? 48 8D 15";
 			vars.fNamePoolOffset = 13;
 
-			vars.LevelPagerOffset = 0x2F0;				// class ALEVELPAGER* LEVELPAGER;
-				vars.LinkingOffset = 0x4D0;				// bTransportPodLinking
-				vars.StatusOffset = 0x45C;				// ?
-				vars.NewGameOffset = 0x350;				// bIsNewGame
-				vars.TargetAgeNameOffset = 0x468;		// FString TargetAgeName;
+			vars.LevelPagerOffset = 0x2F0;              // class ALEVELPAGER* LEVELPAGER;
+				vars.LinkingOffset = 0x4D0;             // bTransportPodLinking
+				vars.StatusOffset = 0x45C;              // ?
+				vars.NewGameOffset = 0x350;             // bIsNewGame
+				vars.TargetAgeNameOffset = 0x468;       // FString TargetAgeName;
 
 			vars.GameInstanceOffset = 0x198;
-				vars.NewGameFromInGameOffset = 0x930;	// bNewGameFiredOffFromInGame
-				vars.LoadingSaveGameOffset = 0x931;		// bLoadGameFiredOffFromInGame
-				vars.GameChangeOffset = 0x932;			// bProcessingGameChange
+				vars.NewGameFromInGameOffset = 0x930;   // bNewGameFiredOffFromInGame
+				vars.LoadingSaveGameOffset = 0x931;     // bLoadGameFiredOffFromInGame
+				vars.GameChangeOffset = 0x932;          // bProcessingGameChange
 
 			vars.GameStateOffset = 0x138;
-				vars.BoolGameStatesOffset = 0x450;		// TMap<class FName, class FBoolGameState> BoolGameStates
+				vars.BoolGameStatesOffset = 0x450;      // TMap<class FName, class FBoolGameState> BoolGameStates
 
 			break;
 
@@ -121,19 +121,19 @@ init {
 			vars.fNamePoolSignature = "8B D9 74 ?? 48 8D 15 ???????? EB";
 			vars.fNamePoolOffset = 7;
 
-			vars.LevelPagerOffset = 0x378;				// class ALEVELPAGER* LEVELPAGER;
-				vars.LinkingOffset = 0x5D0;				// bTransportPodLinking
-				vars.StatusOffset = 0x524;				// ?
-				vars.NewGameOffset = 0x3E8;				// bIsNewGame
-				vars.TargetAgeNameOffset = 0x410;		// FString TargetAgeName;
+			vars.LevelPagerOffset = 0x378;              // class ALEVELPAGER* LEVELPAGER;
+				vars.LinkingOffset = 0x5D0;             // bTransportPodLinking
+				vars.StatusOffset = 0x524;              // ?
+				vars.NewGameOffset = 0x3E8;             // bIsNewGame
+				vars.TargetAgeNameOffset = 0x410;       // FString TargetAgeName;
 
 			vars.GameInstanceOffset = 0x1D0;
-				vars.NewGameFromInGameOffset = 0xF18;	// bNewGameFiredOffFromInGame
-				vars.LoadingSaveGameOffset = 0xF19;		// bLoadGameFiredOffFromInGame
-				vars.GameChangeOffset = 0xF1A;			// bProcessingGameChange
+				vars.NewGameFromInGameOffset = 0xF18;   // bNewGameFiredOffFromInGame
+				vars.LoadingSaveGameOffset = 0xF19;     // bLoadGameFiredOffFromInGame
+				vars.GameChangeOffset = 0xF1A;          // bProcessingGameChange
 
 			vars.GameStateOffset = 0x170;
-				vars.BoolGameStatesOffset = 0x4F8;		// TMap<class FName, class FBoolGameState> BoolGameStates
+				vars.BoolGameStatesOffset = 0x4F8;      // TMap<class FName, class FBoolGameState> BoolGameStates
 
 			break;
 
@@ -146,10 +146,10 @@ init {
 	// GWorld is the same for all versions (so far)
 
 	var gWorldTrg = new SigScanTarget(3, 
-		"48 8B 1D ????????",	// mov rbx,[Firmament-Win64-Shipping.exe+5BCBBE8]   <--- GWorld
-		"48 85 DB",				// test rbx,rbx
-		"74 ??",				// je Firmament-Win64-Shipping.exe+8F6534
-		"41 B0 01"				// mov r8l,01
+		"48 8B 1D ????????",    // mov rbx,[Firmament-Win64-Shipping.exe+5BCBBE8]   <--- GWorld
+		"48 85 DB",             // test rbx,rbx
+		"74 ??",                // je Firmament-Win64-Shipping.exe+8F6534
+		"41 B0 01"              // mov r8l,01
 	) { OnFound = onFound };
 
 	
@@ -198,9 +198,9 @@ init {
 
 	vars.GetIndexOfBoolGamestate = (Func<string, int>)(stateName => {
 		IntPtr BoolGameStateMapPtr;
-		//			  GWorld.BP_FirmamentGameState_C.BoolGameStateTMap[]
+		//              GWorld.BP_FirmamentGameState_C.BoolGameStateTMap[]
 		new DeepPointer(gWorld, vars.GameStateOffset, vars.BoolGameStatesOffset).Deref(game, out BoolGameStateMapPtr);
-		//										 GWorld.BP_FirmamentGameState_C.BoolGameStateTMap[].MapSize
+		//                                         GWorld.BP_FirmamentGameState_C.BoolGameStateTMap[].MapSize
 		var BoolGameStateMapSize = new DeepPointer(gWorld, vars.GameStateOffset, vars.BoolGameStatesOffset + 0xC).Deref<int>(game);
 
 		for (int i = 0; i < BoolGameStateMapSize; i++) {
