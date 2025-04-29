@@ -34,7 +34,6 @@ startup {
 	settings.Add("AutosaveTimer", false, "Display Time Since Last Autosave (Any%).");
 	
 
-
 	// Autosave Stuff
 
 	string username = Environment.UserName;
@@ -116,8 +115,9 @@ init {
 
 			break;
 
-		// Steam 2.0.6
+		// Steam 2.0.6 (and later?)
 		case "1EC9EA4EBE788CE0AC827228C9003BC8":
+		default:
 			vars.fNamePoolSignature = "8B D9 74 ?? 48 8D 15 ???????? EB";
 			vars.fNamePoolOffset = 7;
 
@@ -136,8 +136,6 @@ init {
 				vars.BoolGameStatesOffset = 0x4F8;      // TMap<class FName, class FBoolGameState> BoolGameStates
 
 			break;
-
-		default : throw new InvalidOperationException("Unknown version!"); break;
 	}
 
 	var fNamePoolTrg = new SigScanTarget(vars.fNamePoolOffset, vars.fNamePoolSignature) { OnFound = onFound };
@@ -322,6 +320,7 @@ update {
 
 
 	// Display Time since last Autosave
+	
 	if (settings["AutosaveTimer"]) {
 		var lastWrite = File.GetLastWriteTime(vars.filePath);
 

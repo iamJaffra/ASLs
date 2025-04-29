@@ -39,16 +39,29 @@ init {
 
 	// FNamePool
 
-	vars.FNameToString = (Func<ulong, string>)(fName =>	{
-		var number   = (fName & 0xFFFFFFFF00000000) >> 0x20;
-		var chunkIdx = (fName & 0x00000000FFFF0000) >> 0x10;
-		var nameIdx  = (fName & 0x000000000000FFFF) >> 0x00;
+	var fNamePoolCache = new Dictionary<ulong, string>() {{0, "None"}};
 
-		var chunk = game.ReadPointer(fNamePool + 0x10 + (int)chunkIdx * 0x8);
-		var nameEntry = chunk + (int)nameIdx * 0x2;
+	vars.FNameToString = (Func<ulong, string>)(fName =>
+	{
+		var number   	= (fName & 0xFFFFFFFF00000000) >> 0x20;
+		var nameLookup	= (fName & 0x00000000FFFFFFFF) >> 0x00;
 
-		var length = game.ReadValue<short>(nameEntry) >> 6;
-		var name = game.ReadString(nameEntry + 0x2, length);
+		string name;
+		if (fNamePoolCache.ContainsKey(nameLookup)) {
+			name = fNamePoolCache[nameLookup];
+		} 
+		else {
+			var chunkIdx	= (fName & 0x00000000FFFF0000) >> 0x10;
+			var nameIdx 	= (fName & 0x000000000000FFFF) >> 0x00;
+
+			var chunk = game.ReadPointer(fNamePool + 0x10 + (int)chunkIdx * 0x8);
+			var nameEntry = chunk + (int)nameIdx * 0x2;
+
+			var length = game.ReadValue<short>(nameEntry) >> 6;
+			name = game.ReadString(nameEntry + 0x2, length);
+
+			fNamePoolCache[nameLookup] = name;
+		}
 
 		return number == 0 ? name : name + "_" + number;
 	});
@@ -64,7 +77,7 @@ init {
 		var BoolGameStateMapSize = new DeepPointer(gWorld, 0x170, 0x4F8 + 0xC).Deref<int>(game);
 
 		for (int i = 0; i < BoolGameStateMapSize; i++) {
-			 idFName = game.ReadValue<ulong>(BoolGameStateMapPtr + i * 0x50 + 0x8 + 0x10);
+			var idFName = game.ReadValue<ulong>(BoolGameStateMapPtr + i * 0x50 + 0x8 + 0x10);
 			var id = vars.FNameToString(idFName);
 
 			if (id == stateName) {
@@ -151,8 +164,9 @@ init {
 			vars.LoadSaveOffset = 0xF33;
 			break;
 
-		// Steam 1.3
+		// Steam 1.3 (and later?)
 		case "D8FAAF543DF8ABDA32AB697875478B32":
+		default:
 			vars.CurrentlyOnRideOffset = 0xF61;
 			vars.PlayerInDomeOffset = 0xF34;
 			vars.NewGameOffset = 0xF30;
@@ -160,8 +174,6 @@ init {
 			vars.NewGameFromInGameOffset = 0xF32;
 			vars.LoadSaveOffset = 0xF33;
 			break;
-
-		default : throw new InvalidOperationException("Unknown version!"); break;
 	}
 
 
