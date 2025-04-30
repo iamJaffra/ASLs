@@ -1,10 +1,11 @@
 state("eoa") {
-	string8 age:		"eoa.exe", 0x006DB610, 0xFC;
-	byte menu:			"eoa.exe", 0x006DEB00, 0x8, 0x40, 0x14, 0x38;
-	byte tabletWithNPC:	"eoa.exe", 0x006F0BB4, 0x8, 0x14, 0x38, 0x8, 0x84, 0x1C, 0x6C, 0x8, 0x4, 0x20;
+	string8 age: "eoa.exe", 0x006DB610, 0xFC;
+	byte menu: "eoa.exe", 0x006DEB00, 0x8, 0x40, 0x14, 0x38;
+	byte tabletWithNPC: "eoa.exe", 0x006F0BB4, 0x8, 0x14, 0x38, 0x8, 0x84, 0x1C, 0x6C, 0x8, 0x4, 0x20;
 }
 
 startup {
+	// Settings
 	settings.Add("startTimer", true, "Start the timer when you click OK");
 	settings.Add("splitAgeChange", true, "Split any time you link from one age to another");
 		settings.Add("Exception", true, "... except when linking from the Keep back to Kveer", "splitAgeChange");
@@ -17,6 +18,9 @@ init {
 	
 	vars.wingsTimer = new Stopwatch();
 	vars.wingsDelay = TimeSpan.FromSeconds(1.250);
+
+	// List of Ages
+	vars.ages = new HashSet<string> { "Kveer", "Descent", "Direbo", "Tahgira", "Todelmer", "Siralehn", "Laki", "Myst" };
 }
 
 reset {
@@ -52,13 +56,10 @@ split {
 		return true;
 	}
 	
-	string[] ages = {"Kveer", "Descent", "Direbo", "Tahgira", "Todelmer", "Siralehn", "Laki", "Myst"};
-
-	if (settings["splitAgeChange"] && current.age != old.age && Array.Exists(ages, age => age == current.age)) 	
+	if (settings["splitAgeChange"] && current.age != old.age && vars.ages.Contains(current.age)) 
 	{
-		if (settings["Exception"] && current.age == "Kveer") {
-			return false;
+		if (!(settings["Exception"] && current.age == "Kveer")) {
+			return true;
 		} 
-		return true;
 	}
 }
