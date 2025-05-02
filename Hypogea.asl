@@ -14,14 +14,14 @@ startup {
 
 init {
 	vars.Helper.TryLoad = (Func<dynamic, bool>)(mono => {
-        vars.Helper["traversalState"] = mono.Make<int>("PlayerController", "pc", "currState");
+		vars.Helper["traversalState"] = mono.Make<int>("PlayerController", "pc", "currState");
 		vars.Helper["batteryCount"] = mono.Make<int>("PlayerController", "pc", "batteryCount");
 		vars.Helper["sequencePlayer"] = mono.Make<int>("CameraController", "cc", "currentSequence");
 		vars.Helper["isMenuScene"] = mono.Make<bool>("SaveManager", "sm", "isMenuScene");
 		vars.Helper["savedElementsIDs"] = mono.Make<IntPtr>("SaveManager", "sm", "savedElementsIDs");
 		
-        return true;
-    });
+		return true;
+	});
 
 	vars.CheckForID = (Func<string, bool>)((id) => {
 		// SaveManager.savedElementsIDs._size
