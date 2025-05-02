@@ -178,7 +178,7 @@ init {
 }
 
 start {
-	if (settings["startNewGame"]) {
+	if (settings["NewGame"]) {
 		if (current.igt < 1000000
                 && Math.Abs(current.playerX - vars.startX) < 0.0001
                 && Math.Abs(current.playerY - vars.startY) < 0.0001) {
@@ -190,11 +190,12 @@ start {
 
 onStart {
     vars.completedSplits.Clear();
+	vars.snapperWeed = 0;
 	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
 }
 
 reset {
-	if (settings["resetNewGame"]) {
+	if (settings["NewGame"]) {
 		if (current.igt < 1000000
                 && Math.Abs(current.playerX - vars.startX) < 0.0001
                 && Math.Abs(current.playerY - vars.startY) < 0.0001) {
