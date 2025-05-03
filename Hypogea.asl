@@ -41,6 +41,11 @@ init {
 	vars.completedSplits = new HashSet<string>();
 }
 
+update {
+	// SaveManager.savedElementsIDs._size
+	current.numberOfEvents = game.ReadValue<int>((IntPtr)current.savedElementsIDs + 0xC);
+}
+
 start {
 	if (settings["Start"] && current.traversalState == 13 && current.sequencePlayer == 0 && old.sequencePlayer != 0) {
 		return true;
@@ -52,24 +57,25 @@ onStart {
 }
 
 split {
-	// Get out of tutorial area
-	if (settings["FinishTutorial"] && !vars.completedSplits.Contains("IntroEndDoorWaitTrigger|1") && vars.CheckForID("IntroEndDoorWaitTrigger|1")) {
-		vars.completedSplits.Add("IntroEndDoorWaitTrigger|1");
-		return true;
+	// Event-based splits
+	// Only check when a new event has occured
+	if (current.numberOfEvents != old.numberOfEvents) {
+		// Get out of tutorial area
+		if (settings["FinishTutorial"] && !vars.completedSplits.Contains("FinishTutorial") && vars.CheckForID("IntroEndDoorWaitTrigger|1")) {
+			vars.completedSplits.Add("FinishTutorial");
+			return true;
+		}
+		// Activate crane
+		if (settings["Crane"] && !vars.completedSplits.Contains("Crane") && vars.CheckForID("cranePullLever|1")) {
+			vars.completedSplits.Add("Crane");
+			return true;
+		}
+		// Take elevator
+		if (settings["Elevator"] && !vars.completedSplits.Contains("Elevator") && vars.CheckForID("CraneMainHub|-1")) {
+			vars.completedSplits.Add("Elevator");
+			return true;
+		}
 	}
-
-	// Activate crane
-	if (settings["Crane"] && !vars.completedSplits.Contains("cranePullLever|1") && vars.CheckForID("cranePullLever|1")) {
-		vars.completedSplits.Add("cranePullLever|1");
-		return true;
-	}
-
-	// Take elevator
-	if (settings["Elevator"] && !vars.completedSplits.Contains("CraneMainHub|-1") && vars.CheckForID("CraneMainHub|-1")) {
-		vars.completedSplits.Add("CraneMainHub|-1");
-		return true;
-	}
-
 	// End split
 	// Currently, this doesn't check whether the barred door has been unlocked first because I couldn't find a way to check for that
 	if (settings["End"] && current.traversalState == 11 && old.traversalState != 11) {
