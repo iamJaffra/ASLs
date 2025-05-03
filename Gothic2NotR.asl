@@ -1,21 +1,21 @@
 state("Gothic2") {
-    long igt:	        "ZSPEEDRUNTIMER.DLL", 0x19FE0;
+	long igt:			"ZSPEEDRUNTIMER.DLL", 0x19FE0;
 	int fireDragon: 	"Gothic2.exe", 0x006B40D8, 0x9128, 0xE64;
-	int rockDragon:	    "Gothic2.exe", 0x006B40D8, 0x9128, 0xEA0;
-	int swampDragon:    "Gothic2.exe", 0x006B40D8, 0x9128, 0xEDC;
-	int iceDragon:	    "Gothic2.exe", 0x006B40D8, 0x9128, 0xE28;
-	int world:	        "Gothic2.exe", 0x004CECC0, 0x920;
-	int chapter:	    "Gothic2.exe", 0x006B40D8, 0x330C, 0xA68;
-	int firstNPC:	    "Gothic2.exe", 0x006B0884, 0x8, 0x6284, 0x8;
+	int rockDragon:		"Gothic2.exe", 0x006B40D8, 0x9128, 0xEA0;
+	int swampDragon:	"Gothic2.exe", 0x006B40D8, 0x9128, 0xEDC;
+	int iceDragon:		"Gothic2.exe", 0x006B40D8, 0x9128, 0xE28;
+	int world:			"Gothic2.exe", 0x004CECC0, 0x920;
+	int chapter:		"Gothic2.exe", 0x006B40D8, 0x330C, 0xA68;
+	int firstNPC:		"Gothic2.exe", 0x006B0884, 0x8, 0x6284, 0x8;
 	int firstItem:		"Gothic2.exe", 0x006B629C, 0x1C, 0x66C, 0x8;
-	int inCutscene:	    "Gothic2.exe", 0x004D1F18;
-	float playerX:	    "Gothic2.exe", 0x004CEF4C;
-    float playerY:	    "Gothic2.exe", 0x004CEF44;
-	int guild:	        "Gothic2.exe", 0x006B629C, 0x1C, 0x230;
+	int inCutscene:		"Gothic2.exe", 0x004D1F18;
+	float playerX:		"Gothic2.exe", 0x004CEF4C;
+	float playerY:		"Gothic2.exe", 0x004CEF44;
+	int guild:			"Gothic2.exe", 0x006B629C, 0x1C, 0x230;
 	string10 worldname:	"Gothic2.exe", 0x006B0884, 0x8, 0x6274, 0x0;
 	int inDialogue:		"Gothic2.exe", 0x006B629C, 0x1C, 0x298;
 	int inventoryOpen:	"Gothic2.exe", 0x005A43F0;
-    int load:           "Gothic2.exe", 0x005A37FC;
+	int load:		   "Gothic2.exe", 0x005A37FC;
 }
 
 startup {
@@ -69,7 +69,7 @@ startup {
 init {
 	// Starting coordinates
 	vars.startX = -15710.02637; 
-    vars.startY =  29912.93750;
+	vars.startY =  29912.93750;
 
 	// NPC IDs	
 	vars.importantNPCs = new HashSet<int> {
@@ -172,7 +172,7 @@ init {
 			item = game.ReadPointer(item + 0x8);
 		}
 		return false;
-    });
+	});
 
 	vars.snapperWeed = 0;
 	vars.canReset = true;
@@ -181,8 +181,8 @@ init {
 start {
 	if (settings["NewGame"]) {
 		if (current.igt < 500000
-                && Math.Abs(current.playerX - vars.startX) < 0.0001
-                && Math.Abs(current.playerY - vars.startY) < 0.0001) {
+				&& Math.Abs(current.playerX - vars.startX) < 0.0001
+				&& Math.Abs(current.playerY - vars.startY) < 0.0001) {
 
 			vars.canReset = false;
 			return true;
@@ -191,7 +191,7 @@ start {
 }
 
 onStart {
-    vars.completedSplits.Clear();
+	vars.completedSplits.Clear();
 	vars.snapperWeed = 0;
 	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
 }
@@ -199,8 +199,8 @@ onStart {
 reset {
 	if (settings["NewGame"]) {
 		if (current.igt < 500000 && vars.canReset
-                && Math.Abs(current.playerX - vars.startX) < 0.0001
-                && Math.Abs(current.playerY - vars.startY) < 0.0001) {
+				&& Math.Abs(current.playerX - vars.startX) < 0.0001
+				&& Math.Abs(current.playerY - vars.startY) < 0.0001) {
 
 			return true;
 		}
@@ -353,5 +353,5 @@ gameTime {
 }
 
 exit {
-    vars.timeKeeper = timer.CurrentTime.GameTime;
+	vars.timeKeeper = timer.CurrentTime.GameTime;
 }

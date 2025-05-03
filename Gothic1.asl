@@ -73,7 +73,7 @@ startup {
 init {
 	// Important Coordinates
 	vars.startX = 5547.608887; 
-    vars.startY = 36488.625;
+	vars.startY = 36488.625;
 
 	vars.g1X = 2858.224854;
 	vars.g1Y = -1903.604614;
@@ -106,7 +106,7 @@ init {
 			item = game.ReadPointer(item + 0x8);
 		}
 		return false;
-    });
+	});
 
 	vars.PlayerHasMagicItem = (Func<string, bool>)(TargetItemName => {
 		IntPtr item = (IntPtr)current.firstMagicItem;
@@ -122,7 +122,7 @@ init {
 			item = game.ReadPointer(item + 0x8);
 		}
 		return false;
-    });
+	});
 
 	vars.PlayerHasWeapon = (Func<string, bool>)(TargetItemName => {
 		IntPtr item = (IntPtr)current.firstWeapon;
@@ -138,7 +138,7 @@ init {
 			item = game.ReadPointer(item + 0x8);
 		}
 		return false;
-    });
+	});
 
 	vars.eggsDuped = false;
 	vars.canReset = true;
@@ -189,8 +189,8 @@ gameTime {
 start {
 	if (settings["resetNewGame"]) {
 		if (current.igt < 500000
-                && Math.Abs(current.xCoord - vars.startX) < 0.0001
-                && Math.Abs(current.yCoord - vars.startY) < 0.0001) {
+				&& Math.Abs(current.xCoord - vars.startX) < 0.0001
+				&& Math.Abs(current.yCoord - vars.startY) < 0.0001) {
 
 			vars.canReset = false;
 			return true;
@@ -199,7 +199,7 @@ start {
 }
 
 onStart {
-    vars.completedSplits.Clear();
+	vars.completedSplits.Clear();
 	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
 	vars.eggsDuped = false;
 }
@@ -207,8 +207,8 @@ onStart {
 reset {
 	if (settings["resetNewGame"]) {
 		if (current.igt < 500000 && vars.canReset
-                && Math.Abs(current.xCoord - vars.startX) < 0.0001
-                && Math.Abs(current.yCoord - vars.startY) < 0.0001) {
+				&& Math.Abs(current.xCoord - vars.startX) < 0.0001
+				&& Math.Abs(current.yCoord - vars.startY) < 0.0001) {
 
 			return true;
 		}
@@ -350,5 +350,5 @@ split {
 }
 
 exit {
-    vars.timeKeeper = timer.CurrentTime.GameTime;
+	vars.timeKeeper = timer.CurrentTime.GameTime;
 }
