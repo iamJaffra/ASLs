@@ -2,9 +2,9 @@ state("GothicMod", "v1.30") {
 	long igt:			"ZSPEEDRUNTIMER.DLL", 0x1A048;
 	byte manualReset:	"ZSPEEDRUNTIMER.DLL", 0x1A024;
 	int enteredSleeperTemple: "GothicMod.exe", 0x004D7840;
-	int cutscene:		"GothicMod.exe", 0x0046D480;
 	string20 world:		"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x625C, 0x0;
 	int firstNPC:		"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x626C, 0x8;
+	int firstVob:		"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x6268, 0x8;
 	int firstWeapon:	"GothicMod.exe", 0x0046A3DC, 0x604;
 	int firstMagicItem:	"GothicMod.exe", 0x0046A3DC, 0x61C;
 	int firstMiscItem:	"GothicMod.exe", 0x0046A3DC, 0x658;
@@ -15,6 +15,8 @@ state("GothicMod", "v1.30") {
 	float xCoord:		"GothicMod.exe", 0x0046A5FC;
 	float yCoord:		"GothicMod.exe", 0x0046A604;
 	int vobs:			"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0xBC;
+	int cutscene:		"binkw32.dll", 0x6522C;
+	int inMenu:			"GothicMod.exe", 0x46D3B0;
 }
 
 startup {
@@ -31,7 +33,7 @@ startup {
 		settings.Add("Any%_Priest5", true, "Loot priest 5 (Vrash Harrag Arushnat)", "Any%");
 		settings.Add("Any%_XardasTemple", false, "Reach Xardas in the Sleeper temple", "Any%");
 		settings.Add("Any%_Descent", false, "Pass through the little door after the descent at the end", "Any%");
-		settings.Add("Any%_End", true, "Destroy Sleeper", "Any%");
+		settings.Add("Any%_End", true, "Beat the game", "Any%");
 
 	settings.Add("NMG", false, "Additional splits for No Major Glitches");
 		settings.Add("NMG_Bow", true, "Collect bow from Cavalorn's hut", "NMG");
@@ -59,14 +61,13 @@ startup {
 		settings.Add("AllChapters_Temple2", true, "Enter Sleeper temple for the second time", "AllChapters");
 		settings.Add("AllChapters_Priest1", true, "Loot priest 1 (Varrag Hashor)", "AllChapters");
 		settings.Add("AllChapters_Priest5", true, "Loot priest 5 (Vrash Harrag Arushnat)", "AllChapters");
-		settings.Add("AllChapters_End", true, "Destroy Sleeper", "AllChapters");
+		settings.Add("AllChapters_End", true, "Beat the game", "AllChapters");
 	
 	settings.Add("extraSettings", false, "Extra settings");
 		settings.Add("manualReset", false, "Automatically turn on manual reset when you have 2 minecrawler eggs and turn it off when you have 3", "extraSettings");
 
 	vars.completedSplits = new HashSet<string>();
 	vars.timeKeeper = new TimeSpan();
-	vars.eggsDuped = false;
 }
 
 init {
@@ -138,47 +139,9 @@ init {
 		}
 		return false;
     });
-}
 
-isLoading {
-	return true;
-}
-
-gameTime {
-	return (vars.timeKeeper + TimeSpan.FromMilliseconds(current.igt / 1000));
-}
-
-start {
-	if (settings["resetNewGame"]) {
-		if (current.igt < 1000000
-                && Math.Abs(current.xCoord - vars.startX) < 0.0001
-                && Math.Abs(current.yCoord - vars.startY) < 0.0001) {
-
-			return true;
-		}
-	}
-}
-
-onStart {
-    vars.completedSplits.Clear();
-	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
 	vars.eggsDuped = false;
-}
-
-reset {
-	if (settings["resetNewGame"]) {
-		if (current.igt < 1000000
-                && Math.Abs(current.xCoord - vars.startX) < 0.0001
-                && Math.Abs(current.yCoord - vars.startY) < 0.0001) {
-
-			return true;
-		}
-	}
-}
-
-onStart {
-	vars.completedSplits = new HashSet<string>();
-	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
+	vars.canReset = true;
 }
 
 update {
@@ -209,12 +172,46 @@ update {
 			misc = game.ReadPointer(misc + 0x8);
 		}	
 	}
+
+	if (!vars.canReset && current.igt > 500000) {
+		vars.canReset = true;
+	}
 }
-	
-onSplit {
-	print("COMPLETED SPLITS:");
-	foreach (var s in vars.completedSplits) {
-		print(s);
+
+isLoading {
+	return true;
+}
+
+gameTime {
+	return (vars.timeKeeper + TimeSpan.FromMilliseconds(current.igt / 1000));
+}
+
+start {
+	if (settings["resetNewGame"]) {
+		if (current.igt < 500000
+                && Math.Abs(current.xCoord - vars.startX) < 0.0001
+                && Math.Abs(current.yCoord - vars.startY) < 0.0001) {
+
+			vars.canReset = false;
+			return true;
+		}
+	}
+}
+
+onStart {
+    vars.completedSplits.Clear();
+	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
+	vars.eggsDuped = false;
+}
+
+reset {
+	if (settings["resetNewGame"]) {
+		if (current.igt < 500000 && vars.canReset
+                && Math.Abs(current.xCoord - vars.startX) < 0.0001
+                && Math.Abs(current.yCoord - vars.startY) < 0.0001) {
+
+			return true;
+		}
 	}
 }
 
@@ -257,7 +254,7 @@ split {
 				return vars.completedSplits.Add("Descent");
 			}
 		}
-		if (settings["Any%_End"] && !vars.completedSplits.Contains("End") && current.cutscene == 1 && current.world == "ORCTEMPEL" && current.vobs < 4000) {
+		if (settings["Any%_End"] && !vars.completedSplits.Contains("End") && current.cutscene > 0 && current.inMenu == 0 && current.world == "ORCTEMPEL" && current.vobs < 4000) {
 			return vars.completedSplits.Add("End");
 		}
 	}
@@ -325,21 +322,8 @@ split {
 		if (settings["AllChapters_LeaveOrcGraveyard"] && current.world == "WORLD" && vars.oldWorld == "ORCGRAVEYARD") {
 			return true;
 		}
-		if (settings["AllChapters_Ritual"] && !vars.completedSplits.Contains("Ritual") && current.world == "WORLD") {
-			IntPtr npc = (IntPtr)current.firstNPC;
-			while (npc != IntPtr.Zero) {
-				var npcData = game.ReadPointer(npc + 0x4);
-		
-				var npcId = game.ReadValue<int>(npcData + 0x100);
-				var npcHp = game.ReadValue<int>(npcData + 0x184);
-
-				if (npcId == 1200 && npcHp == 1) {    
-					// Yberion is dead
-					return vars.completedSplits.Add("Ritual");
-				}
-
-				npc = game.ReadPointer(npc + 0x8);
-			}
+		if (settings["AllChapters_Ritual"] && !vars.completedSplits.Contains("Ritual") && current.world == "WORLD" && current.inDialogue == 1 && current.cutscene > 0) {
+			return vars.completedSplits.Add("Ritual");
 		}
 		if (settings["AllChapters_Temple2"] && !vars.completedSplits.Contains("Temple2") && current.world == "ORCTEMPEL" && vars.PlayerHasWeapon("MYTHRILKLINGE02")) {
 			return vars.completedSplits.Add("Temple2");
@@ -359,7 +343,7 @@ split {
 		if (settings["AllChapters_Priest5"] && !vars.completedSplits.Contains("Priest5") && current.world == "ORCTEMPEL" && vars.PlayerHasMiscItem("BANNKLINGE") ) {
 			return vars.completedSplits.Add("Priest5");
 		}
-		if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.cutscene == 1 && current.world == "ORCTEMPEL" && current.vobs < 4000) {
+		if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.cutscene > 0 && current.inMenu == 0 && current.world == "ORCTEMPEL" && current.vobs < 4000) {
 			return vars.completedSplits.Add("End");
 		}
 	}

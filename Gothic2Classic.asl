@@ -224,14 +224,23 @@ init {
 		}
 		return false;
     });
+
+	vars.canReset = true;
+}
+
+update {
+	if (!vars.canReset && current.igt > 500000) {
+		vars.canReset = true;
+	}
 }
 
 start {
 	if (settings["NewGame"]) {
-		if (current.igt < 1000000
+		if (current.igt < 500000
                 && Math.Abs(current.playerX - vars.startX) < 0.0001
                 && Math.Abs(current.playerY - vars.startY) < 0.0001) {
-
+			
+			vars.canReset = false;
 			return true;
 		}
 	}
@@ -244,7 +253,7 @@ onStart {
 
 reset {
 	if (settings["NewGame"]) {
-		if (current.igt < 1000000
+		if (current.igt < 500000 && vars.canReset
                 && Math.Abs(current.playerX - vars.startX) < 0.0001
                 && Math.Abs(current.playerY - vars.startY) < 0.0001) {
 
