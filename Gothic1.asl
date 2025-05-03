@@ -1,22 +1,22 @@
 state("GothicMod", "v1.30") {
-	long igt:			"ZSPEEDRUNTIMER.DLL", 0x1A048;
-	byte manualReset:	"ZSPEEDRUNTIMER.DLL", 0x1A024;
+	long igt:           "ZSPEEDRUNTIMER.DLL", 0x1A048;
+	byte manualReset:   "ZSPEEDRUNTIMER.DLL", 0x1A024;
 	int enteredSleeperTemple: "GothicMod.exe", 0x004D7840;
-	string20 world:		"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x625C, 0x0;
-	int firstNPC:		"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x626C, 0x8;
-	int firstVob:		"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x6268, 0x8;
-	int firstWeapon:	"GothicMod.exe", 0x0046A3DC, 0x604;
-	int firstMagicItem:	"GothicMod.exe", 0x0046A3DC, 0x61C;
-	int firstMiscItem:	"GothicMod.exe", 0x0046A3DC, 0x658;
-	int exp:			"GothicMod.exe", 0x0046A3DC, 0x31C;
-	int guild:			"GothicMod.exe", 0x0046A3DC, 0x1E8;
-	int inDialogue:		"GothicMod.exe", 0x0046C648;
-	int camera:			"GothicMod.exe", 0x0046C800;
-	float xCoord:		"GothicMod.exe", 0x0046A5FC;
-	float yCoord:		"GothicMod.exe", 0x0046A604;
-	int vobs:			"GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0xBC;
-	int cutscene:		"binkw32.dll", 0x6522C;
-	int inMenu:			"GothicMod.exe", 0x46D3B0;
+	string20 world:     "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x625C, 0x0;
+	int firstNPC:       "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x626C, 0x8;
+	int firstVob:       "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x6268, 0x8;
+	int firstWeapon:    "GothicMod.exe", 0x0046A3DC, 0x604;
+	int firstMagicItem: "GothicMod.exe", 0x0046A3DC, 0x61C;
+	int firstMiscItem:  "GothicMod.exe", 0x0046A3DC, 0x658;
+	int exp:            "GothicMod.exe", 0x0046A3DC, 0x31C;
+	int guild:          "GothicMod.exe", 0x0046A3DC, 0x1E8;
+	int inDialogue:     "GothicMod.exe", 0x0046C648;
+	int camera:         "GothicMod.exe", 0x0046C800;
+	float xCoord:       "GothicMod.exe", 0x0046A5FC;
+	float yCoord:       "GothicMod.exe", 0x0046A604;
+	int vobs:           "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0xBC;
+	int cutscene:       "binkw32.dll", 0x6522C;
+	int inMenu:         "GothicMod.exe", 0x46D3B0;
 }
 
 startup {

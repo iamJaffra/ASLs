@@ -1,17 +1,17 @@
 state("Gothic2") {
-	long igt:			"ZSPEEDRUNTIMER.DLL", 0x19F70;
-	int world:		  "Gothic2.exe", 0x004C0664, 0xB8, 0x91C;
-	int chapter:		"Gothic2.exe", 0x00584C20, 0x2700, 0x9B4;
-	byte inCutscene:	"Gothic2.exe", 0x004C38B8;
-	float playerX:		"Gothic2.exe", 0x004C0894;
-	float playerY:		"Gothic2.exe", 0x004C088C;
-	int exp:			"Gothic2.exe", 0x004C0664, 0x3A0;
-	int guild:		  "Gothic2.exe", 0x004C0664, 0x21C;
-	int firstItem:		"Gothic2.exe", 0x005831DC, 0x5E0, 0x8;
-	int firstNPC:		"Gothic2.exe", 0x005813DC, 0x8, 0x6280, 0x8;
-	int playerAddr:		"Gothic2.exe", 0x004C0664;
+	long igt:           "ZSPEEDRUNTIMER.DLL", 0x19F70;
+	int world:          "Gothic2.exe", 0x004C0664, 0xB8, 0x91C;
+	int chapter:        "Gothic2.exe", 0x00584C20, 0x2700, 0x9B4;
+	byte inCutscene:    "Gothic2.exe", 0x004C38B8;
+	float playerX:      "Gothic2.exe", 0x004C0894;
+	float playerY:      "Gothic2.exe", 0x004C088C;
+	int exp:            "Gothic2.exe", 0x004C0664, 0x3A0;
+	int guild:          "Gothic2.exe", 0x004C0664, 0x21C;
+	int firstItem:      "Gothic2.exe", 0x005831DC, 0x5E0, 0x8;
+	int firstNPC:       "Gothic2.exe", 0x005813DC, 0x8, 0x6280, 0x8;
+	int playerAddr:     "Gothic2.exe", 0x004C0664;
 	int inventoryOpen:  "Gothic2.exe", 0x0057DCA8;
-	int inDialogue:		"Gothic2.exe", 0x004C0664, 0x284;
+	int inDialogue:     "Gothic2.exe", 0x004C0664, 0x284;
 }
 
 startup {
