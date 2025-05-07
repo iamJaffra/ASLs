@@ -63,39 +63,39 @@ split {
 			print("Split: Turned on water in pumping room");
 			return true;
 		}
-		else if(settings["enterBonusArea"] && current.stack == "FILMR01.dxr" && old.card == 3 && current.card == 5){
+		else if(settings["enterBonusArea"] && current.stack == "FILMR01.dxr" && old.card == 3 && current.card == 5) {
 			print("Split: Entering SE Bonus Area");
 			return true;
 		}
-		else if(settings["leaveBonusArea"] && current.stack == "FILMR01.dxr" && old.card == 54 && current.card == 55){
+		else if(settings["leaveBonusArea"] && current.stack == "FILMR01.dxr" && old.card == 54 && current.card == 55) {
 			print("Split: Leaving SE Bonus Area");
 			return true;
 		}
-		else if(settings["blockPipe"] && current.stack == "FILML01.dxr" && old.card == 128 && current.card == 132){
+		else if(settings["blockPipe"] && current.stack == "FILML01.dxr" && old.card == 128 && current.card == 132) {
 			print("Split: Turned wheel to block water");
 			return true;
 		}
-		else if(settings["reservoirFragment"] && current.stack == "FILMK01.dxr" && old.card == 618 && current.card == 641){
+		else if(settings["reservoirFragment"] && current.stack == "FILMK01.dxr" && old.card == 618 && current.card == 641) {
 			print("Split: Collected Reservoir Fragment");
 			return true;
 		}
-		else if(settings["iconDoor"] && current.stack == "FILMM01.dxr" && old.card == 232 && current.card == 243){
+		else if(settings["iconDoor"] && current.stack == "FILMM01.dxr" && old.card == 232 && current.card == 243) {
 			print("Split: Unlocked Icon Door");
 			return true;
 		}
-		else if(settings["radioFragment"] && current.stack == "FILMF01.dxr"  && old.card == 750 && current.card == 751){
+		else if(settings["radioFragment"] && current.stack == "FILMF01.dxr"  && old.card == 750 && current.card == 751) {
 			print("Split: Collected Radio Fragment");
 			return true;
 		}
-		else if(settings["pentagonFragment"] && current.stack == "FILMN01.dxr" && old.card == 117 && current.card == 118){ 	
+		else if(settings["pentagonFragment"] && current.stack == "FILMN01.dxr" && old.card == 117 && current.card == 118) { 	
 			print("Split: Collected Pentagon Fragment");
 			return true;
 		}
-		else if(settings["stoneBarnFragment"] && current.stack == "FILMC01.dxr" && old.card == 270 && current.card == 272){
+		else if(settings["stoneBarnFragment"] && current.stack == "FILMC01.dxr" && old.card == 270 && current.card == 272) {
 			print("Split: Collected Barn Fragment");
 			return true;
 		}
-		else if(settings["leaveRhem"] && current.stack == "FILMC01.dxr" && old.card == 334 && current.card == 335){
+		else if(settings["leaveRhem"] && current.stack == "FILMC01.dxr" && old.card == 334 && current.card == 335) {
 			print("Split: Leaving Rhem");
 			return true;
 		}
