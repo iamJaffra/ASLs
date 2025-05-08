@@ -1,4 +1,4 @@
-state("scummvm") {
+state("scummvm", "GOG") {
 	// Main variables
 	int Room: 0x017AE444, 0xA4, 0x20, 0x8, 0x4;
 	ushort CapturedIxupi: 0x17AE444, 0x100, 0x88, 0x1A2;
@@ -56,13 +56,6 @@ startup {
 		settings.Add("Water", true, "Water", "Ixupi");
 		settings.Add("Cloth", true, "Cloth", "Ixupi");
 		settings.Add("Wax", true, "Wax", "Ixupi");
-	settings.Add("SkullDials", false, "Split when solving Skull Dials");
-		settings.Add("SkullDialNest", false, "Nest", "SkullDials");
-		settings.Add("SkullDialMaze", false, "Maze", "SkullDials");
-		settings.Add("SkullDialWerewolf", false, "Werewolf", "SkullDials");
-		settings.Add("SkullDialChina", false, "China", "SkullDials");
-		settings.Add("SkullDialEgypt", false, "Egypt", "SkullDials");
-		settings.Add("SkullDialLyre", false, "Lyre", "SkullDials");
 	settings.Add("Puzzles", false, "Puzzles");
 		settings.Add("AtlantisGlobe", false, "Solve Atlantis Globe", "Puzzles");
 		settings.Add("Organ", false, "Solve Organ", "Puzzles");
@@ -90,6 +83,13 @@ startup {
 		settings.Add("Anansi", false, "Solve Anansi", "Puzzles");
 		settings.Add("Solitaire", false, "Solve Solitaire", "Puzzles");
 		settings.Add("Gallows", false, "Solve Gallows", "Puzzles");
+		settings.Add("SkullDials", false, "Skull Dials", "Puzzles");
+			settings.Add("SkullDialNest", false, "Nest", "SkullDials");
+			settings.Add("SkullDialMaze", false, "Maze", "SkullDials");
+			settings.Add("SkullDialWerewolf", false, "Werewolf", "SkullDials");
+			settings.Add("SkullDialChina", false, "China", "SkullDials");
+			settings.Add("SkullDialEgypt", false, "Egypt", "SkullDials");
+			settings.Add("SkullDialLyre", false, "Lyre", "SkullDials");
 
 	// Flags
 	vars.completedSplits = new HashSet<string>();
