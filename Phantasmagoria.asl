@@ -244,7 +244,7 @@ update {
 
 reset {
 	// Reset on main menu
-	if (current.room == 91 && old.room != 91) {
+	if (settings["ResetOnMainMenu"] && current.room == 91 && old.room != 91) {
 		return true;
 	}
 }
@@ -259,7 +259,7 @@ split {
 	// End of game
 	// When video 2640 is loaded into local variable [2] of script 40100
 	// then the final cutscene is playing and the run is over
-	if (vars.bFoundLocals && current.room == 40100 && vars.Watchers["Video"].Current == 2640 && vars.Watchers["Video"].Changed) {
+	if (settings["End"] && vars.bFoundLocals && current.room == 40100 && vars.Watchers["Video"].Current == 2640 && vars.Watchers["Video"].Changed) {
 		return true;
 	}
 	// Chapter splits
