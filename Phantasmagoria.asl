@@ -93,7 +93,7 @@ init {
 	var globalsCandidates = vars.ScanAll(globalsTrg);
 	
 	foreach (var addr in globalsCandidates) {
-		print("Candicate address: " + addr.ToString("X"));
+		print("Candidate address: " + addr.ToString("X"));
 	}
 	
 	// Store the two bytes at each candidate's gGameTime offset
