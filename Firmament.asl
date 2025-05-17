@@ -29,12 +29,12 @@ startup {
 		settings.Add("JulestonSplits", true, "Juleston subsplits", "RealmSubsplits");
 			settings.Add("Juleston1", true, "...", "JulestonSplits");
 
-	settings.Add("Ending", true, "Ending");
+	settings.Add("Ending", true, "Reach the ending");
 
 	settings.Add("AutosaveTimer", false, "Display Time Since Last Autosave (Any%).");
 	
 
-	// Autosave Stuff
+	// Autosave Stuff For Any%
 
 	string username = Environment.UserName;
 	print("Current user: " + username);
@@ -44,28 +44,30 @@ startup {
 
 	vars.lastModified = File.GetLastWriteTime(vars.filePath);
 	vars.autosave = 0;
+	
+	var componentsCache = new Dictionary<string, LiveSplit.UI.Components.ILayoutComponent>();
 
-	// Create Text Component
-
-	var lcCache = new Dictionary<string, LiveSplit.UI.Components.ILayoutComponent>();
 	vars.SetText = (Action<string, object>)((text1, text2) => {
-		LiveSplit.UI.Components.ILayoutComponent lc;
-		if (!lcCache.TryGetValue(text1, out lc))
-			lcCache[text1] = lc = LiveSplit.UI.Components.ComponentManager.LoadLayoutComponent("LiveSplit.Text.dll", timer);
+		LiveSplit.UI.Components.ILayoutComponent component;
+		if (!componentsCache.TryGetValue(text1, out component)) {
+			componentsCache[text1] = component = LiveSplit.UI.Components.ComponentManager.LoadLayoutComponent("LiveSplit.Text.dll", timer);
+		}
+		
+		if (!timer.Layout.LayoutComponents.Contains(component)) {
+			timer.Layout.LayoutComponents.Add(component);
+		}
 
-		if (!timer.Layout.LayoutComponents.Contains(lc))
-			timer.Layout.LayoutComponents.Add(lc);
-
-		dynamic tc = lc.Component;
-		tc.Settings.Text1 = text1;
-		tc.Settings.Text2 = text2.ToString();
+		dynamic textComponent = component.Component;
+		textComponent.Settings.Text1 = text1;
+		textComponent.Settings.Text2 = text2.ToString();
 	});
 
 	vars.RemoveAllTexts = (Action)(() => {
-		foreach (var lc in lcCache.Values)
-			timer.Layout.LayoutComponents.Remove(lc);
-
-		lcCache.Clear();
+		foreach (var component in componentsCache.Values) {
+			timer.Layout.LayoutComponents.Remove(component);
+		}
+		
+		componentsCache.Clear();
 	});
 
 
@@ -94,7 +96,7 @@ init {
 	print(hash);
 	
 	switch (hash) {
-		// Steam 1.0.6
+		// 1.0.6
 		case "A0A152187D4EB8555E7349ABEFB8EECD": 
 			vars.fNamePoolSignature = "89 5C 24 ?? 89 44 24 ?? 74 ?? 48 8D 15";
 			vars.fNamePoolOffset = 13;
@@ -115,7 +117,7 @@ init {
 
 			break;
 
-		// Steam 2.0.6 (and later?)
+		// 2.0.6 (and later?)
 		case "1EC9EA4EBE788CE0AC827228C9003BC8":
 		default:
 			vars.fNamePoolSignature = "8B D9 74 ?? 48 8D 15 ???????? EB";
@@ -141,7 +143,7 @@ init {
 	var fNamePoolTrg = new SigScanTarget(vars.fNamePoolOffset, vars.fNamePoolSignature) { OnFound = onFound };
 
 
-	// GWorld is the same for all versions (so far)
+	// GWorld
 
 	var gWorldTrg = new SigScanTarget(3, 
 		"48 8B 1D ????????",    // mov rbx,[Firmament-Win64-Shipping.exe+5BCBBE8]   <--- GWorld
@@ -432,10 +434,10 @@ isLoading {
 }
 
 
-shutdown
-{
+shutdown {
 	vars.RemoveAllTexts();
 }
+
 exit {
 	timer.IsGameTimePaused = true;
 	vars.reBooting = true;
