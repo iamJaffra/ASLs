@@ -1,6 +1,7 @@
 state("scummvm") {}
 
 startup {
+	settings.Add("ResetOnMainMenu", true, "Reset on main menu");
 	settings.Add("Misc", false, "Miscellaneous checkpoints");
 		settings.Add("Light", false, "Turn on light in Green Tunnel", "Misc");
 		settings.Add("FirstBlood", false, "First Blood", "Misc");
@@ -19,7 +20,7 @@ startup {
 		settings.Add("Water", true, "Water", "Ixupi");
 		settings.Add("Cloth", true, "Cloth", "Ixupi");
 		settings.Add("Wax", true, "Wax", "Ixupi");
-		
+
 	settings.Add("Puzzles", false, "Puzzles");
 		settings.Add("AtlantisGlobe", false, "Solve Atlantis Globe", "Puzzles");
 		settings.Add("Organ", false, "Solve Organ", "Puzzles");
@@ -208,7 +209,7 @@ onStart {
 
 reset {
 	// Reset on main menu
-	if (current.room == 910 && old.room != 910) {
+	if (settings["ResetOnMainMenu"] && current.room == 910 && old.room != 910) {
 		return true;
 	}
 }
