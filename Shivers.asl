@@ -1,4 +1,5 @@
-state("scummvm", "GOG") {
+state("scummvm") {}
+/*
 	// Main variables
 	int Room: 0x017AE444, 0xA4, 0x20, 0x8, 0x4;
 	ushort CapturedIxupi: 0x17AE444, 0x100, 0x88, 0x1A2;
@@ -19,23 +20,28 @@ state("scummvm", "GOG") {
 	byte PuzzleGroupA: 0x17AE444, 0x100, 0x88, 0x346;
 	// Gears (7), Stonehenge (6)
 	byte PuzzleGroupB: 0x17AE444, 0x100, 0x88, 0x347;
+
 	// Maze Door (0), Theater Door (3), Geoffrey Door (1), Horse Puzzle (5), Red Door (7)
 	byte PuzzleGroupC: 0x17AE444, 0x100, 0x88, 0x34A;
 	// Columns of Ra (6), Burial Door (5), Shaman (1), Lyre (0)
 	byte PuzzleGroupD: 0x17AE444, 0x100, 0x88, 0x34B;
+
 	// Library Statue (7)
 	byte PuzzleGroupE: 0x17AE444, 0x100, 0x88, 0x34E;
+
 	// Alchemy (5)
 	byte PuzzleGroupF: 0x17AE444, 0x100, 0x88, 0x352;
+
 	// Skull Dial Door (1), Beth's Body Page (7), Guillotine (6)
 	byte PuzzleGroupG: 0x17AE444, 0x100, 0x88, 0x356;
 	// Workshop Drawers (7), UFO (3), Jukebox (5), Mastermind (6)
 	byte PuzzleGroupH: 0x17AE444, 0x100, 0x88, 0x357;
+	
 	// Clock Chains (5), Anansi (7)
 	byte PuzzleGroupI: 0x17AE444, 0x100, 0x88, 0x35A;
 	// Chinese Solitaire (4), Gallows (6)
 	byte PuzzleGroupJ: 0x17AE444, 0x100, 0x88, 0x35B;
-}
+*/
 
 startup {
 	// Settings
@@ -95,175 +101,318 @@ startup {
 	vars.completedSplits = new HashSet<string>();
 }
 
-start {
-	return (old.Room == 1012 && (current.Room == 1000 || current.Room == 1010));
+init {
+	vars.ScanAll = (Func<SigScanTarget, IEnumerable<IntPtr>>)(trg => {
+		var results = new List<IntPtr>();
+
+		foreach (var page in game.MemoryPages(true)) {
+			var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
+			var matches = scanner.ScanAll(trg);
+
+			results.AddRange(matches);
+		}
+
+		return results;
+	});
+
+#region Globals Scan
+	var globals =
+		"00 00 00 00"+
+		"01 00 5D 21"+
+		"?? ?? ?? ??"+
+		"11 00 05 00"+
+		"00 00 00 00"+
+		"05 00 4B 15"+
+		"05 00 17 16"+
+		"05 00 31 16"+
+		"03 00 F0 09"+
+		"00 00 00 00";
+
+	// gGameTime
+	var gGameTimeOffset = 88 * 0x4 + 0x2;
+
+	// The global variables block can appear in multiple places in memory,
+	// but only the variables of one of the blocks keep updating.
+	// To identify the true block, we can use the gGameTime variable.
+	// If this variable doesn't constantly change, it's the wrong block.
+	
+	var realGlobalsPtr = IntPtr.Zero;
+	
+	var globalsTrg = new SigScanTarget(0, globals);
+	var globalsCandidates = vars.ScanAll(globalsTrg);
+	
+	foreach (var addr in globalsCandidates) {
+		print("Candidate address: " + addr.ToString("X"));
+	}
+	
+	// Store the two bytes at each candidate's gGameTime offset
+	var firstScanMap = new Dictionary<IntPtr, byte[]>();
+
+	foreach (var ptr in globalsCandidates) {
+		var gameTime = game.ReadBytes((IntPtr)ptr + gGameTimeOffset, 2);
+		firstScanMap[ptr] = gameTime;
+	}
+
+	// Wait before second scan
+	Thread.Sleep(50); 
+
+	foreach (var ptr in globalsCandidates) {
+		var currentBytes = game.ReadBytes((IntPtr)ptr + gGameTimeOffset, 2);
+		var oldBytes = firstScanMap[ptr];
+
+		if (currentBytes[0] != oldBytes[0] || currentBytes[1] != oldBytes[1]) {
+			realGlobalsPtr = ptr;
+			print("Real globals address found: " + ptr.ToString("X"));
+			break;
+		}
+	}
+
+	if (realGlobalsPtr == IntPtr.Zero) {
+		throw new Exception("No changing address found. Retrying...");
+	}
+#endregion
+
+#region Watchers
+	vars.Watchers = new Dictionary<string, MemoryWatcher> {
+		// + 0x2 because, unlike objects, variables only use the last two bytes of the SCI address format (SSSS:OOOO)
+
+		{ "Room",              new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr +  11 * 0x4 + 2)) },
+		{ "Captures",          new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 104 * 0x4 + 2)) },
+		{ "Life",              new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 109 * 0x4 + 2)) },
+
+		// Group A Bits
+		//  15     14     13     12     11     10     09     08  |  07     06     05     04     03     02     01     00
+		// ──────────────────────────────────────────────────────┼──────────────────────────────────────────────────────
+		// Gears  Stone  Tunnel                                           Organ  Globe  Pinball       Curtain                 
+		//        henge  light
+		{ "PuzzleGroupA",      new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 209 * 0x4 + 2)) },
+
+		// Group B Bits
+		//  15     14     13     12     11     10     09     08  |  07     06     05     04     03     02     01     00
+		// ──────────────────────────────────────────────────────┼──────────────────────────────────────────────────────
+		//        Columns Burial                     Shaman Lyre   Red Door      Horse         Theater    Geoffrey  Maze
+		//        of Ra   Door                                                   Puzzle        Door       Door      Door   
+		{ "PuzzleGroupB",      new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 210 * 0x4 + 2)) },
+
+		// Group C Bits
+		//  15     14     13     12     11     10     09     08  |  07     06     05     04     03     02     01     00
+		// ──────────────────────────────────────────────────────┼──────────────────────────────────────────────────────
+		//                                                         Library
+		//                                                         Statue
+		{ "PuzzleGroupC",      new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 211 * 0x4 + 2)) },
+
+		// Group D Bits
+		//  15     14     13     12     11     10     09     08  |  07     06     05     04     03     02     01     00
+		// ──────────────────────────────────────────────────────┼──────────────────────────────────────────────────────
+		//                                                                       Alchemy
+		// 
+		{ "PuzzleGroupD",      new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 212 * 0x4 + 2)) },
+
+		// Group E Bits
+		//  15     14     13     12     11     10     09     08  |  07     06     05     04     03     02     01     00
+		// ──────────────────────────────────────────────────────┼──────────────────────────────────────────────────────
+		// Work  Master  Jukebox       UFO                         Beth's  Guillotine                         Skull 
+		// shop  mind                                             Body Page                                   Door
+		{ "PuzzleGroupE",      new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 213 * 0x4 + 2)) },
+		
+		// Group F Bits
+		//  15     14     13     12     11     10     09     08  |  07     06     05     04     03     02     01     00
+		// ──────────────────────────────────────────────────────┼──────────────────────────────────────────────────────
+		//       Gallows       Chinese                             Anansi        Clock 
+		//                    Solitaire                                          Chains
+		{ "PuzzleGroupF",      new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 214 * 0x4 + 2)) },
+
+		// Skull Dials
+		{ "SkullDialNest",     new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 328 * 0x4 + 2)) },
+		{ "SkullDialMaze",     new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 329 * 0x4 + 2)) },
+		{ "SkullDialWerewolf", new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 330 * 0x4 + 2)) },
+		{ "SkullDialChina",    new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 331 * 0x4 + 2)) },
+		{ "SkullDialEgypt",    new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 332 * 0x4 + 2)) },
+		{ "SkullDialLyre",     new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 333 * 0x4 + 2)) },
+	};
+#endregion
 }
 
-reset {
-	// TODO
+update {
+	foreach (var watcher in vars.Watchers.Values) {
+		watcher.Update(game);
+	}
+
+	current.room = vars.Watchers["Room"].Current;
+}
+
+start {
+	return (old.room == 1012 && (current.room == 1000 || current.room == 1010));
 }
 
 onStart {
 	vars.completedSplits.Clear();
 }
 
+reset {
+	// Reset on main menu
+	if (current.room == 910 && old.room != 910) {
+		return true;
+	}
+}
+
 split {
 	// Misc. Checkpoints
-	if (settings["Light"] && !vars.completedSplits.Contains("Light") && current.Room == 2340) {
+	if (settings["Light"] && current.room == 2340 && (vars.Watchers["PuzzleGroupA"].Current & (1 << 13)) != 0) {
 		return vars.completedSplits.Add("Light");
 	}
-	if (settings["FirstBlood"] && !vars.completedSplits.Contains("FirstBlood") && current.Life == old.Life - 10) {
+	else if (settings["FirstBlood"] && vars.Watchers["Life"].Current == vars.Watchers["Life"].Old - 10) {
 		return vars.completedSplits.Add("FirstBlood");
 	}
-	if (settings["Office"] && !vars.completedSplits.Contains("Office") && current.Room == 5050) {
+	else if (settings["Office"] && current.room == 5110) {
 		return vars.completedSplits.Add("Office");
 	}
-
+	
 	// Ixupi
-	if (settings["Sand"] && !vars.completedSplits.Contains("Sand") && ((current.CapturedIxupi & (1 << 0)) != 0)) {
+	else if (settings["Sand"] && !vars.completedSplits.Contains("Sand") && (vars.Watchers["Captures"].Current & (1 << 0)) != 0) {
 		return vars.completedSplits.Add("Sand");
 	}
-	if (settings["Crystal"] && !vars.completedSplits.Contains("Crystal") && ((current.CapturedIxupi & (1 << 1)) != 0)) {
+	else if (settings["Crystal"] && !vars.completedSplits.Contains("Crystal") && (vars.Watchers["Captures"].Current & (1 << 1)) != 0) {
 		return vars.completedSplits.Add("Crystal");
 	}
-	if (settings["Metal"] && !vars.completedSplits.Contains("Metal") && ((current.CapturedIxupi & (1 << 2)) != 0)) {
+	else if (settings["Metal"] && !vars.completedSplits.Contains("Metal") && (vars.Watchers["Captures"].Current & (1 << 2)) != 0) {
 		return vars.completedSplits.Add("Metal");
 	}
-	if (settings["Tar"] && !vars.completedSplits.Contains("Tar") && ((current.CapturedIxupi & (1 << 3)) != 0)) {
+	else if (settings["Tar"] && !vars.completedSplits.Contains("Tar") && (vars.Watchers["Captures"].Current & (1 << 3)) != 0) {
 		return vars.completedSplits.Add("Tar");
 	}
-	if (settings["Wood"] && !vars.completedSplits.Contains("Wood") && ((current.CapturedIxupi & (1 << 4)) != 0)) {
+	else if (settings["Wood"] && !vars.completedSplits.Contains("Wood") && (vars.Watchers["Captures"].Current & (1 << 4)) != 0) {
 		return vars.completedSplits.Add("Wood");
 	}
-	if (settings["Lightning"] && !vars.completedSplits.Contains("Lightning") && ((current.CapturedIxupi & (1 << 5)) != 0)) {
+	else if (settings["Lightning"] && !vars.completedSplits.Contains("Lightning") && (vars.Watchers["Captures"].Current & (1 << 5)) != 0) {
 		return vars.completedSplits.Add("Lightning");
 	}
-	if (settings["Ash"] && !vars.completedSplits.Contains("Ash") && ((current.CapturedIxupi & (1 << 6)) != 0)) {
+	else if (settings["Ash"] && !vars.completedSplits.Contains("Ash") && (vars.Watchers["Captures"].Current & (1 << 6)) != 0) {
 		return vars.completedSplits.Add("Ash");
 	}
-	if (settings["Water"] && !vars.completedSplits.Contains("Water") && ((current.CapturedIxupi & (1 << 7)) != 0)) {
+	else if (settings["Water"] && !vars.completedSplits.Contains("Water") && (vars.Watchers["Captures"].Current & (1 << 7)) != 0) {
 		return vars.completedSplits.Add("Water");
 	}
-	if (settings["Cloth"] && !vars.completedSplits.Contains("Cloth") && ((current.CapturedIxupi & (1 << 8)) != 0)) {
+	else if (settings["Cloth"] && !vars.completedSplits.Contains("Cloth") && (vars.Watchers["Captures"].Current & (1 << 8)) != 0) {
 		return vars.completedSplits.Add("Cloth");
 	}
-	if (settings["Wax"] && !vars.completedSplits.Contains("Wax") && ((current.CapturedIxupi & (1 << 9)) != 0)) {
+	else if (settings["Wax"] && !vars.completedSplits.Contains("Wax") && (vars.Watchers["Captures"].Current & (1 << 9)) != 0) {
 		return vars.completedSplits.Add("Wax");
 	}
-
+	
 	// Skull Dials
-	if (settings["SkullDialNest"] && !vars.completedSplits.Contains("SkullDialNest") && current.SkullDialNest == 0) {
+	else if (settings["SkullDialNest"] && !vars.completedSplits.Contains("SkullDialNest") && vars.Watchers["SkullDialNest"].Current == 0) {
 		return vars.completedSplits.Add("SkullDialNest");
 	}
-	if (settings["SkullDialMaze"] && !vars.completedSplits.Contains("SkullDialMaze") && current.SkullDialMaze == 2) {
+	else if (settings["SkullDialMaze"] && !vars.completedSplits.Contains("SkullDialMaze") && vars.Watchers["SkullDialMaze"].Current == 2) {
 		return vars.completedSplits.Add("SkullDialMaze");
 	}
-	if (settings["SkullDialWerewolf"] && !vars.completedSplits.Contains("SkullDialWerewolf") && current.SkullDialWerewolf == 3) {
+	else if (settings["SkullDialWerewolf"] && !vars.completedSplits.Contains("SkullDialWerewolf") && vars.Watchers["SkullDialWerewolf"].Current == 3) {
 		return vars.completedSplits.Add("SkullDialWerewolf");
 	}
-	if (settings["SkullDialChina"] && !vars.completedSplits.Contains("SkullDialChina") && current.SkullDialChina == 0) {
+	else if (settings["SkullDialChina"] && !vars.completedSplits.Contains("SkullDialChina") && vars.Watchers["SkullDialChina"].Current == 0) {
 		return vars.completedSplits.Add("SkullDialChina");
 	}
-	if (settings["SkullDialEgypt"] && !vars.completedSplits.Contains("SkullDialEgypt") && current.SkullDialEgypt == 1) {
+	else if (settings["SkullDialEgypt"] && !vars.completedSplits.Contains("SkullDialEgypt") && vars.Watchers["SkullDialEgypt"].Current == 1) {
 		return vars.completedSplits.Add("SkullDialEgypt");
 	}
-	if (settings["SkullDialLyre"] && !vars.completedSplits.Contains("SkullDialLyre") && current.SkullDialLyre == 3) {
+	else if (settings["SkullDialLyre"] && !vars.completedSplits.Contains("SkullDialLyre") && vars.Watchers["SkullDialLyre"].Current == 3) {
 		return vars.completedSplits.Add("SkullDialLyre");
 	}
-
-	// Puzzles
-	// PuzzleGroupA: Atlantis Globe (5), Organ (6), Theater Curtain (2), Marble Pinball (4)
-	if (settings["AtlantisGlobe"] && !vars.completedSplits.Contains("AtlantisGlobe") && ((current.PuzzleGroupA & (1 << 5)) != 0)) {
+	
+	// Puzzle Group A
+	else if (settings["AtlantisGlobe"] && !vars.completedSplits.Contains("AtlantisGlobe") && (vars.Watchers["PuzzleGroupA"].Current & (1 << 5)) != 0) {
 		return vars.completedSplits.Add("AtlantisGlobe");
 	}
-	if (settings["Organ"] && !vars.completedSplits.Contains("Organ") && ((current.PuzzleGroupA & (1 << 6)) != 0)) {
+	else if (settings["Organ"] && !vars.completedSplits.Contains("Organ") && (vars.Watchers["PuzzleGroupA"].Current & (1 << 6)) != 0) {
 		return vars.completedSplits.Add("Organ");
 	}
-	if (settings["TheaterCurtain"] && !vars.completedSplits.Contains("TheaterCurtain") && ((current.PuzzleGroupA & (1 << 2)) != 0)) {
+	else if (settings["TheaterCurtain"] && !vars.completedSplits.Contains("TheaterCurtain") && (vars.Watchers["PuzzleGroupA"].Current & (1 << 2)) != 0) {
 		return vars.completedSplits.Add("TheaterCurtain");
 	}
-	if (settings["MarblePinball"] && !vars.completedSplits.Contains("MarblePinball") && ((current.PuzzleGroupA & (1 << 4)) != 0)) {
+	else if (settings["MarblePinball"] && !vars.completedSplits.Contains("MarblePinball") && (vars.Watchers["PuzzleGroupA"].Current & (1 << 4)) != 0) {
 		return vars.completedSplits.Add("MarblePinball");
 	}
-	// PuzzleGroupB: Gears (7), Stonehenge (6)
-	if (settings["Gears"] && !vars.completedSplits.Contains("Gears") && ((current.PuzzleGroupB & (1 << 7)) != 0)) {
+	else if (settings["Gears"] && !vars.completedSplits.Contains("Gears") && (vars.Watchers["PuzzleGroupA"].Current & (1 << 15)) != 0) {
 		return vars.completedSplits.Add("Gears");
 	}
-	if (settings["Stonehenge"] && !vars.completedSplits.Contains("Stonehenge") && ((current.PuzzleGroupB & (1 << 6)) != 0)) {
+	else if (settings["Stonehenge"] && !vars.completedSplits.Contains("Stonehenge") && (vars.Watchers["PuzzleGroupA"].Current & (1 << 14)) != 0) {
 		return vars.completedSplits.Add("Stonehenge");
 	}
-	// PuzzleGroupC: Maze Door (0), Theater Door (3), Geoffrey Door (1), Horse Puzzle (5), Red Door (7)
-	if (settings["MazeDoor"] && !vars.completedSplits.Contains("MazeDoor") && ((current.PuzzleGroupC & (1 << 0)) != 0)) {
+	
+	// Puzzle Group B
+	else if (settings["MazeDoor"] && !vars.completedSplits.Contains("MazeDoor") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 0)) != 0) {
 		return vars.completedSplits.Add("MazeDoor");
 	}
-	if (settings["TheaterDoor"] && !vars.completedSplits.Contains("TheaterDoor") && ((current.PuzzleGroupC & (1 << 3)) != 0)) {
+	else if (settings["TheaterDoor"] && !vars.completedSplits.Contains("TheaterDoor") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 3)) != 0) {
 		return vars.completedSplits.Add("TheaterDoor");
 	}
-	if (settings["GeoffreyDoor"] && !vars.completedSplits.Contains("GeoffreyDoor") && ((current.PuzzleGroupC & (1 << 1)) != 0)) {
+	else if (settings["GeoffreyDoor"] && !vars.completedSplits.Contains("GeoffreyDoor") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 1)) != 0) {
 		return vars.completedSplits.Add("GeoffreyDoor");
 	}
-	if (settings["HorsePuzzle"] && !vars.completedSplits.Contains("HorsePuzzle") && ((current.PuzzleGroupC & (1 << 5)) != 0)) {
+	else if (settings["HorsePuzzle"] && !vars.completedSplits.Contains("HorsePuzzle") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 5)) != 0) {
 		return vars.completedSplits.Add("HorsePuzzle");
 	}
-	if (settings["RedDoor"] && !vars.completedSplits.Contains("RedDoor") && ((current.PuzzleGroupC & (1 << 7)) != 0)) {
+	else if (settings["RedDoor"] && !vars.completedSplits.Contains("RedDoor") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 7)) != 0) {
 		return vars.completedSplits.Add("RedDoor");
 	}
-	// PuzzleGroupD: Columns of Ra (6), Burial Door (5), Shaman (1), Lyre (0)
-	if (settings["ColumnsOfRa"] && !vars.completedSplits.Contains("ColumnsOfRa") && ((current.PuzzleGroupD & (1 << 6)) != 0)) {
+	else if (settings["ColumnsOfRa"] && !vars.completedSplits.Contains("ColumnsOfRa") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 14)) != 0) {
 		return vars.completedSplits.Add("ColumnsOfRa");
 	}
-	if (settings["BurialDoor"] && !vars.completedSplits.Contains("BurialDoor") && ((current.PuzzleGroupD & (1 << 5)) != 0)) {
+	else if (settings["BurialDoor"] && !vars.completedSplits.Contains("BurialDoor") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 13)) != 0) {
 		return vars.completedSplits.Add("BurialDoor");
 	}
-	if (settings["Shaman"] && !vars.completedSplits.Contains("Shaman") && ((current.PuzzleGroupD & (1 << 1)) != 0)) {
+	else if (settings["Shaman"] && !vars.completedSplits.Contains("Shaman") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 9)) != 0) {
 		return vars.completedSplits.Add("Shaman");
 	}
-	if (settings["Lyre"] && !vars.completedSplits.Contains("Lyre") && ((current.PuzzleGroupD & (1 << 0)) != 0)) {
+	else if (settings["Lyre"] && !vars.completedSplits.Contains("Lyre") && (vars.Watchers["PuzzleGroupB"].Current & (1 << 8)) != 0) {
 		return vars.completedSplits.Add("Lyre");
 	}
-	// PuzzleGroupE: Library Statue (7)
-	if (settings["LibraryStatue"] && !vars.completedSplits.Contains("LibraryStatue") && ((current.PuzzleGroupE & (1 << 7)) != 0)) {
+
+	// Puzzle Group C
+	else if (settings["LibraryStatue"] && !vars.completedSplits.Contains("LibraryStatue") && (vars.Watchers["PuzzleGroupC"].Current & (1 << 7)) != 0) {
 		return vars.completedSplits.Add("LibraryStatue");
 	}
-	// PuzzleGroupF: Alchemy (5)
-	if (settings["Alchemy"] && !vars.completedSplits.Contains("Alchemy") && ((current.PuzzleGroupF & (1 << 5)) != 0)) {
+
+	// Puzzle Group D
+	else if (settings["Alchemy"] && !vars.completedSplits.Contains("Alchemy") && (vars.Watchers["PuzzleGroupD"].Current & (1 << 5)) != 0) {
 		return vars.completedSplits.Add("Alchemy");
 	}
-	// PuzzleGroupG: Skull Dial Door (1), Beth's Body Page (7), Guillotine (6)
-	if (settings["SkullDialDoor"] && !vars.completedSplits.Contains("SkullDialDoor") && ((current.PuzzleGroupG & (1 << 1)) != 0)) {
+
+	// Puzzle Group E
+	else if (settings["SkullDialDoor"] && !vars.completedSplits.Contains("SkullDialDoor") && (vars.Watchers["PuzzleGroupE"].Current & (1 << 1)) != 0) {
 		return vars.completedSplits.Add("SkullDialDoor");
 	}
-	if (settings["Beth"] && !vars.completedSplits.Contains("Beth") && ((current.PuzzleGroupG & (1 << 7)) != 0)) {
+	else if (settings["Beth"] && !vars.completedSplits.Contains("Beth") && (vars.Watchers["PuzzleGroupE"].Current & (1 << 7)) != 0) {
 		return vars.completedSplits.Add("Beth");
 	}
-	if (settings["Guillotine"] && !vars.completedSplits.Contains("Guillotine") && ((current.PuzzleGroupG & (1 << 6)) != 0)) {
+	else if (settings["Guillotine"] && !vars.completedSplits.Contains("Guillotine") && (vars.Watchers["PuzzleGroupE"].Current & (1 << 6)) != 0) {
 		return vars.completedSplits.Add("Guillotine");
 	}
-	// PuzzleGroupH: Workshop Drawers (7), UFO (3), Jukebox (5), Mastermind (6)
-	if (settings["WorkshopDrawers"] && !vars.completedSplits.Contains("WorkshopDrawers") && ((current.PuzzleGroupH & (1 << 7)) != 0)) {
+	else if (settings["WorkshopDrawers"] && !vars.completedSplits.Contains("WorkshopDrawers") && (vars.Watchers["PuzzleGroupE"].Current & (1 << 15)) != 0) {
 		return vars.completedSplits.Add("WorkshopDrawers");
 	}
-	if (settings["UFO"] && !vars.completedSplits.Contains("UFO") && ((current.PuzzleGroupH & (1 << 3)) != 0)) {
+	else if (settings["UFO"] && !vars.completedSplits.Contains("UFO") && (vars.Watchers["PuzzleGroupE"].Current & (1 << 11)) != 0) {
 		return vars.completedSplits.Add("UFO");
 	}
-	if (settings["Jukebox"] && !vars.completedSplits.Contains("Jukebox") && ((current.PuzzleGroupH & (1 << 5)) != 0)) {
+	else if (settings["Jukebox"] && !vars.completedSplits.Contains("Jukebox") && (vars.Watchers["PuzzleGroupE"].Current & (1 << 13)) != 0) {
 		return vars.completedSplits.Add("Jukebox");
 	}
-	if (settings["Mastermind"] && !vars.completedSplits.Contains("Mastermind") && ((current.PuzzleGroupH & (1 << 6)) != 0)) {
+	else if (settings["Mastermind"] && !vars.completedSplits.Contains("Mastermind") && (vars.Watchers["PuzzleGroupE"].Current & (1 << 14)) != 0) {
 		return vars.completedSplits.Add("Mastermind");
 	}
-	// PuzzleGroupI: Clock Chains (5), Anansi (7)
-	if (settings["ClockChains"] && !vars.completedSplits.Contains("ClockChains") && ((current.PuzzleGroupI & (1 << 5)) != 0)) {
+
+	// Puzzle Group F
+	else if (settings["ClockChains"] && !vars.completedSplits.Contains("ClockChains") && (vars.Watchers["PuzzleGroupF"].Current & (1 << 5)) != 0) {
 		return vars.completedSplits.Add("ClockChains");
 	}
-	if (settings["Anansi"] && !vars.completedSplits.Contains("Anansi") && ((current.PuzzleGroupI & (1 << 7)) != 0)) {
+	else if (settings["Anansi"] && !vars.completedSplits.Contains("Anansi") && (vars.Watchers["PuzzleGroupF"].Current & (1 << 7)) != 0) {
 		return vars.completedSplits.Add("Anansi");
 	}
-	// PuzzleGroupJ: Chinese Solitaire (4), Gallows (6)
-	if (settings["Solitaire"] && !vars.completedSplits.Contains("Solitaire") && ((current.PuzzleGroupJ & (1 << 4)) != 0)) {
+	else if (settings["Solitaire"] && !vars.completedSplits.Contains("Solitaire") && (vars.Watchers["PuzzleGroupF"].Current & (1 << 12)) != 0) {
 		return vars.completedSplits.Add("Solitaire");
 	}
-	if (settings["Gallows"] && !vars.completedSplits.Contains("Gallows") && ((current.PuzzleGroupJ & (1 << 6)) != 0)) {
+	else if (settings["Gallows"] && !vars.completedSplits.Contains("Gallows") && (vars.Watchers["PuzzleGroupF"].Current & (1 << 14)) != 0) {
 		return vars.completedSplits.Add("Gallows");
 	}
 }
