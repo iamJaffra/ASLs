@@ -7,6 +7,7 @@ startup {
 		settings.Add("Office", false, "Reach Office", "Misc");
 		settings.Add("Beth", false, "Beth's Body Page", "Misc");
 		settings.Add("Guillotine", false, "Guillotine", "Misc");
+
 	settings.Add("Ixupi", true, "Split when capturing Ixupi");
 		settings.Add("Sand", true, "Sand", "Ixupi");
 		settings.Add("Crystal", true, "Ash", "Ixupi");
@@ -18,6 +19,7 @@ startup {
 		settings.Add("Water", true, "Water", "Ixupi");
 		settings.Add("Cloth", true, "Cloth", "Ixupi");
 		settings.Add("Wax", true, "Wax", "Ixupi");
+		
 	settings.Add("Puzzles", false, "Puzzles");
 		settings.Add("AtlantisGlobe", false, "Solve Atlantis Globe", "Puzzles");
 		settings.Add("Organ", false, "Solve Organ", "Puzzles");
