@@ -1,50 +1,6 @@
 state("scummvm") {}
-/*
-	// Main variables
-	int Room: 0x017AE444, 0xA4, 0x20, 0x8, 0x4;
-	ushort CapturedIxupi: 0x17AE444, 0x100, 0x88, 0x1A2;
-
-	// Life Essence
-	byte Life: 0x17AE444, 0x100, 0x88, 0x1B6;
-
-	// Skull Dials
-	byte SkullDialNest: 0x17AE444, 0x100, 0x88, 0x522;
-	byte SkullDialMaze: 0x17AE444, 0x100, 0x88, 0x526;
-	byte SkullDialWerewolf: 0x17AE444, 0x100, 0x88, 0x52A;
-	byte SkullDialChina: 0x17AE444, 0x100, 0x88, 0x52E;
-	byte SkullDialEgypt: 0x17AE444, 0x100, 0x88, 0x532;
-	byte SkullDialLyre: 0x17AE444, 0x100, 0x88, 0x536;
-
-	// Puzzle States
-	// Atlantis Globe (5), Organ (6), Theater Curtain (2), Marble Pinball (4)
-	byte PuzzleGroupA: 0x17AE444, 0x100, 0x88, 0x346;
-	// Gears (7), Stonehenge (6)
-	byte PuzzleGroupB: 0x17AE444, 0x100, 0x88, 0x347;
-
-	// Maze Door (0), Theater Door (3), Geoffrey Door (1), Horse Puzzle (5), Red Door (7)
-	byte PuzzleGroupC: 0x17AE444, 0x100, 0x88, 0x34A;
-	// Columns of Ra (6), Burial Door (5), Shaman (1), Lyre (0)
-	byte PuzzleGroupD: 0x17AE444, 0x100, 0x88, 0x34B;
-
-	// Library Statue (7)
-	byte PuzzleGroupE: 0x17AE444, 0x100, 0x88, 0x34E;
-
-	// Alchemy (5)
-	byte PuzzleGroupF: 0x17AE444, 0x100, 0x88, 0x352;
-
-	// Skull Dial Door (1), Beth's Body Page (7), Guillotine (6)
-	byte PuzzleGroupG: 0x17AE444, 0x100, 0x88, 0x356;
-	// Workshop Drawers (7), UFO (3), Jukebox (5), Mastermind (6)
-	byte PuzzleGroupH: 0x17AE444, 0x100, 0x88, 0x357;
-	
-	// Clock Chains (5), Anansi (7)
-	byte PuzzleGroupI: 0x17AE444, 0x100, 0x88, 0x35A;
-	// Chinese Solitaire (4), Gallows (6)
-	byte PuzzleGroupJ: 0x17AE444, 0x100, 0x88, 0x35B;
-*/
 
 startup {
-	// Settings
 	settings.Add("Misc", false, "Miscellaneous checkpoints");
 		settings.Add("Light", false, "Turn on light in Green Tunnel", "Misc");
 		settings.Add("FirstBlood", false, "First Blood", "Misc");
@@ -97,7 +53,6 @@ startup {
 			settings.Add("SkullDialEgypt", false, "Egypt", "SkullDials");
 			settings.Add("SkullDialLyre", false, "Lyre", "SkullDials");
 
-	// Flags
 	vars.completedSplits = new HashSet<string>();
 }
 
