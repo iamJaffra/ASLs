@@ -47,17 +47,17 @@ startup {
 	
 	settings.Add("StartNewGame", true, "Start timer on starting a New Game from the main menu");
 
-	settings.Add("Transitions", true, "Split on transitions");
+	settings.Add("Transitions", false, "Split on transitions");
 	foreach (var transition in vars.splittableTransitions) {
 		settings.Add(transition[0] + " -> " + transition[1], false, transition[2], "Transitions");
 	};
 
-	settings.Add("Items", true, "Split on collecting items");
+	settings.Add("Items", false, "Split on collecting items");
 	foreach (var item in vars.splittableItems) {
 		settings.Add(item.Key, false, item.Value, "Items");
 	};
 
-	settings.Add("Cutscenes", true, "Split on cutscenes");
+	settings.Add("Cutscenes", false, "Split on cutscenes");
 	foreach (var cutscene in vars.splittableCutscenes) {
 		settings.Add(cutscene.Key, false, cutscene.Value, "Cutscenes");
 	};
