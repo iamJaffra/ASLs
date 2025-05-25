@@ -15,13 +15,15 @@ startup {
 
 	vars.splittableItems = new Dictionary<string, string> {
 		// Tower of Repetition
-		{ "DoorPiece_T1F1_001" , "Strange Gem (Black)" },
-		{ "DoorPiece_T1F1_002" , "Strange Gem (Blue)"  },
-		{ "DoorPiece_T1F1_003" , "Strange Gem (Red)"   },
-		{ "DoorPiece_T1F1_004" , "Strange Gem (White)" },
-		{ "key_002"            , "Pantry Key"          },
-		{ "salt_sack"          , "Salt"                },
-		{ "biwa_001"           , "Miso Biwa"           },
+		{ "DoorPiece_T1F1_001"      , "Strange Gem (Black)" },
+		{ "DoorPiece_T1F1_002"      , "Strange Gem (Blue)"  },
+		{ "DoorPiece_T1F1_003"      , "Strange Gem (Red)"   },
+		{ "DoorPiece_T1F1_004"      , "Strange Gem (White)" },
+		{ "Katana_004"              , "Rusty Katana"        },
+		{ "T1F1_ButsudanStatue_001" , "Buddha Statue from butsudan" },
+		{ "key_002"                 , "Pantry Key"          },
+		{ "salt_sack"               , "Salt"                },
+		{ "biwa_001"                , "Miso Biwa"           },
 
 		// Tower of Lamentation
 		{ "water_puzzle_wheel_005"       , "Brown Gem Wheel"      },
@@ -175,7 +177,20 @@ update {
 				}
 			}
 		}
+	}	
+}
+
+ onSplit {
+	int invSize = vars.Watchers["NumberOfItems"].Current;
+
+	for(int i = 0; i < invSize; i++) {
+		var itemFName = game.ReadValue<ulong>((IntPtr)vars.Watchers["Inventory"].Current + i * 0x10);
+		var item = vars.FNameToString(itemFName);
+		print(item);
 	}
+
+	print("Current cutscene = " + Path.GetFileNameWithoutExtension(vars.Watchers["Cutscene"].Current));
+
 }
 
 start {
@@ -221,7 +236,7 @@ split {
 	}
 	
 	// Item splits
-	if (vars.Watchers["NumberOfItems"].Changed) {
+	if (settings["Items"]) {
 		for(int i = 0; i < vars.Watchers["NumberOfItems"].Current; i++) {
 			var itemFName = game.ReadValue<ulong>((IntPtr)vars.Watchers["Inventory"].Current + i * 0x10);
 			var item = vars.FNameToString(itemFName);
