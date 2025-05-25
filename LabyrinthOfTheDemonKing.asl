@@ -236,7 +236,7 @@ split {
 	}
 	
 	// Item splits
-	if (settings["Items"]) {
+	if (settings["Items"] && current.world != "MainMenu") {
 		for(int i = 0; i < vars.Watchers["NumberOfItems"].Current; i++) {
 			var itemFName = game.ReadValue<ulong>((IntPtr)vars.Watchers["Inventory"].Current + i * 0x10);
 			var item = vars.FNameToString(itemFName);
