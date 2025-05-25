@@ -180,19 +180,6 @@ update {
 	}	
 }
 
- onSplit {
-	int invSize = vars.Watchers["NumberOfItems"].Current;
-
-	for(int i = 0; i < invSize; i++) {
-		var itemFName = game.ReadValue<ulong>((IntPtr)vars.Watchers["Inventory"].Current + i * 0x10);
-		var item = vars.FNameToString(itemFName);
-		print(item);
-	}
-
-	print("Current cutscene = " + Path.GetFileNameWithoutExtension(vars.Watchers["Cutscene"].Current));
-
-}
-
 start {
 	// Start timer on starting a new game from the main menu
 	if (settings["StartNewGame"]) {
