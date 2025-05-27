@@ -13,12 +13,10 @@ start {
 }
 
 split {
-	// End
-	if (settings["Bahos"] && current.room == 26901 && current.score == old.score + 2500) {
+	if (settings["End"] && current.room == 26901 && current.score == old.score + 2500) {
 		return true;
 	}
-	// Placing Bahos
-	else if (settings["End"] && current.room == 26600 && current.score == old.score + 7000) {
+	else if (settings["Bahos"] && current.room == 26600 && current.score == old.score + 7000) {
 		return true;
 	}
 }
