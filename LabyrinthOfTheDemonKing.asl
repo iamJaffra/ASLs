@@ -3,16 +3,17 @@ state("Shinigami-Win64-Shipping") {}
 startup {
 #region Splits and Settings
 	vars.splittableTransitions = new List<string[]> {	
-		new string[] { "ForestCave_001"               , "Castle_Exterior_Entrance_001"  , "Arrive at Castle Exterior"        },
-		new string[] { "Castle_Exterior_Entrance_001" , "CastleKeep_T001_F001"          , "Enter Tower Of Repetition"        },
-		new string[] { "CastleKeep_T001_B001"         , "CastleKeep_T001_F001"          , "Revive after collecting Red Gem"  },
-		new string[] { "CastleKeep_T001_F003"         , "CastleKeep_T001_F001"          , "Revive after defeating Ubume"     },
-		new string[] { "CastleKeep_Corridor_T1_T2"    , "Castle_Exterior_Courtyard_001" , "Exit Tower Of Repetition"         },
-		new string[] { "CastleKeep_Corridor_T2_T3"    , "CastleKeep_T002_F001"          , "Enter Tower of Lamentation"       },
-		new string[] { "CastleKeep_T002_WardenRoom"   , "SafeRoom_001"                  , "Teleport to Teahouse after defeating Nuppeppo" },
-		new string[] { "CastleKeep_Corridor_T2_T3"    , "CastleKeep_T003_B001"          , "Enter Tower of Crushing Assembly" },
-		new string[] { "CastleKeep_T003_F001"         , "CastleKeep_Corridor_T3_T4"     , "Exit room after defeating Warden" },
-		new string[] { "CastleKeep_T004_Spiral"       , "CastleKeep_T004_Stage"         , "Enter final boss room"            },
+		new string[] { "ForestCave_001"                , "Castle_Exterior_Entrance_001"  , "Arrive at Castle Exterior"        },
+		new string[] { "Castle_Exterior_Entrance_001"  , "CastleKeep_T001_F001"          , "Enter Tower Of Repetition"        },
+		new string[] { "CastleKeep_T001_B001"          , "CastleKeep_T001_F001"          , "Revive after collecting Red Gem"  },
+		new string[] { "CastleKeep_T001_F003_Exterior" , "CastleKeep_T001_F004"          , "Enter Ubume Arena"                },
+		new string[] { "CastleKeep_T001_F003"          , "CastleKeep_T001_F001"          , "Revive after defeating Ubume"     },
+		new string[] { "CastleKeep_Corridor_T1_T2"     , "Castle_Exterior_Courtyard_001" , "Exit Tower Of Repetition"         },
+		new string[] { "CastleKeep_Corridor_T2_T3"     , "CastleKeep_T002_F001"          , "Enter Tower of Lamentation"       },
+		new string[] { "CastleKeep_T002_WardenRoom"    , "SafeRoom_001"                  , "Teleport to Teahouse after defeating Nuppeppo" },
+		new string[] { "CastleKeep_Corridor_T2_T3"     , "CastleKeep_T003_B001"          , "Enter Tower of Crushing Assembly" },
+		new string[] { "CastleKeep_T003_F001"          , "CastleKeep_Corridor_T3_T4"     , "Exit room after defeating Warden" },
+		new string[] { "CastleKeep_T004_Spiral"        , "CastleKeep_T004_Stage"         , "Enter final boss room"            },
 	};
 
 	vars.splittableItems = new Dictionary<string, string> {
