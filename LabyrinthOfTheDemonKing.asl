@@ -3,14 +3,16 @@ state("Shinigami-Win64-Shipping") {}
 startup {
 #region Splits and Settings
 	vars.splittableTransitions = new List<string[]> {	
-		new string[] { "Castle_Exterior_Entrance_001" , "CastleKeep_T001_F001"      , "Enter Tower Of Repetition"        },
-		new string[] { "CastleKeep_T001_B001"         , "CastleKeep_T001_F001"      , "Revive after collecting Red Gem"  },
-		new string[] { "CastleKeep_T001_F003"         , "CastleKeep_T001_F001"      , "Revive after defeating Ubume"     },
-		new string[] { "CastleKeep_Corridor_T2_T3"    , "CastleKeep_T002_F001"      , "Enter Tower of Lamentation"       },
-		new string[] { "CastleKeep_T002_WardenRoom"   , "SafeRoom_001"              , "Teleport to Teahouse after defeating Nuppeppo" },
-		new string[] { "CastleKeep_Corridor_T2_T3"    , "CastleKeep_T003_B001"      , "Enter Tower of Crushing Assembly" },
-		new string[] { "CastleKeep_T003_F001"         , "CastleKeep_Corridor_T3_T4" , "Exit room after defeating Warden" },
-		new string[] { "CastleKeep_T004_Spiral"       , "CastleKeep_T004_Stage"     , "Enter final boss room"            },
+		new string[] { "ForestCave_001"               , "Castle_Exterior_Entrance_001"  , "Arrive at Castle Exterior"        },
+		new string[] { "Castle_Exterior_Entrance_001" , "CastleKeep_T001_F001"          , "Enter Tower Of Repetition"        },
+		new string[] { "CastleKeep_T001_B001"         , "CastleKeep_T001_F001"          , "Revive after collecting Red Gem"  },
+		new string[] { "CastleKeep_T001_F003"         , "CastleKeep_T001_F001"          , "Revive after defeating Ubume"     },
+		new string[] { "CastleKeep_Corridor_T1_T2"    , "Castle_Exterior_Courtyard_001" , "Exit Tower Of Repetition"         },
+		new string[] { "CastleKeep_Corridor_T2_T3"    , "CastleKeep_T002_F001"          , "Enter Tower of Lamentation"       },
+		new string[] { "CastleKeep_T002_WardenRoom"   , "SafeRoom_001"                  , "Teleport to Teahouse after defeating Nuppeppo" },
+		new string[] { "CastleKeep_Corridor_T2_T3"    , "CastleKeep_T003_B001"          , "Enter Tower of Crushing Assembly" },
+		new string[] { "CastleKeep_T003_F001"         , "CastleKeep_Corridor_T3_T4"     , "Exit room after defeating Warden" },
+		new string[] { "CastleKeep_T004_Spiral"       , "CastleKeep_T004_Stage"         , "Enter final boss room"            },
 	};
 
 	vars.splittableItems = new Dictionary<string, string> {
@@ -23,7 +25,7 @@ startup {
 		{ "T1F1_ButsudanStatue_001" , "Buddha Statue from butsudan" },
 		{ "key_002"                 , "Pantry Key"          },
 		{ "salt_sack"               , "Salt"                },
-		{ "biwa_001"                , "Miso Biwa"           },
+		{ "biwa_001"                , "Biwa"           },
 
 		// Tower of Lamentation
 		{ "water_puzzle_wheel_005"       , "Brown Gem Wheel"      },
@@ -182,7 +184,7 @@ update {
 
 start {
 	// Start timer on starting a new game from the main menu
-	if (settings["StartNewGame"]) {
+	if (settings["StartNewGame"] && vars.foundMainMenu) {
 		vars.fadeFName.Update(game);
 		var fade = vars.FNameToString(vars.fadeFName.Current);
 		if (fade == "StartNewGame_INST") {
@@ -214,7 +216,8 @@ split {
 	if (current.world != old.world) {
 		foreach (var transition in vars.splittableTransitions) {
 			if (old.world == transition[0] && current.world == transition[1]) {
-				if (settings[transition[0] + " -> " + transition[1]]) {
+				var trns = transition[0] + " -> " + transition[1];
+				if (settings.ContainsKey(trns) && settings[trns]) {
 					print("Split due to transition: " + old.world + " -> " + current.world);
 					return true;
 				}
