@@ -1,5 +1,14 @@
 state("Orbyss-Win64-Shipping") {}
 
+startup {
+	settings.Add("Splits"           , true , "Split on...");
+		settings.Add("LevelSplits"      , false , "level transitions"            , "Splits");
+		settings.Add("CheckpointSplits" , false , "checkpoints"                  , "Splits");
+		settings.Add("DemoEndMenu"      , true  , "triggering the demo end menu" , "Splits");
+
+	settings.Add("ResetMainMenu"    , true , "Reset timer on main menu");
+}
+
 init {
 #region Scans
 	var scanner = new SignatureScanner(game, modules[0].BaseAddress, modules[0].ModuleMemorySize);
@@ -95,23 +104,23 @@ start {
 }
 
 reset {
-	if (current.world == "MainMenu" && old.world != "MainMenu") {
+	if (settings["ResetMainMenu"] && current.world == "MainMenu" && old.world != "MainMenu") {
 		return true;
 	}
 }
 
 split {
 	if (vars.Watchers["DemoEndMenu"].Current && !vars.Watchers["DemoEndMenu"].Old) {
-		return true;
+		return settings["DemoEndMenu"];
 	}
-	else if (current.checkpoint == old.checkpoint + 1 && old.checkpoint > 0) {
+	else if (settings["CheckpointSplits"] && current.checkpoint == old.checkpoint + 1 && old.checkpoint > 0) {
 		// Don't split on the last checkpoint of the demo, as it's right before the end screen
 		if (current.world != "Level_03" || current.checkpoint != 4) {
 			print("Split due to reaching new Checkpoint: " + old.checkpoint + " -> " + current.checkpoint);
 			return true;
 		}
 	}
-	else if (current.world != old.world && current.world != "None" && current.world != "MainMenu") {
+	else if (settings["LevelSplits"] && current.world != old.world && current.world != "None" && current.world != "MainMenu") {
 		print("Split due to reaching new level: " + current.world);
 		return true;
 	}
