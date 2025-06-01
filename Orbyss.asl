@@ -1,12 +1,12 @@
 state("Orbyss-Win64-Shipping") {}
 
 startup {
-	settings.Add("Splits"           , true , "Split on...");
+	settings.Add("Splits"        , true , "Split on...");
 		settings.Add("LevelSplits"      , false , "level transitions"            , "Splits");
 		settings.Add("CheckpointSplits" , false , "checkpoints"                  , "Splits");
 		settings.Add("DemoEndMenu"      , true  , "triggering the demo end menu" , "Splits");
 
-	settings.Add("ResetMainMenu"    , true , "Reset timer on main menu");
+	settings.Add("ResetMainMenu" , true , "Reset timer on main menu");
 }
 
 init {
@@ -83,14 +83,6 @@ update {
 	var world = vars.FNameToString(vars.Watchers["GWorldFName"].Current);
 	current.world = world;
 	current.checkpoint = vars.Watchers["Checkpoint"].Current;
-
-	if (current.world != old.world) {
-		print("World transition: " + old.world + " -> " + current.world);
-	}
-
-	if (vars.Watchers["Checkpoint"].Changed) {
-		print("Checkpoint changed: " + vars.Watchers["Checkpoint"].Old + " -> " + vars.Watchers["Checkpoint"].Current);
-	}
 }
 
 start {
