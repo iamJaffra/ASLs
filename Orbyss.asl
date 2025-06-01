@@ -87,8 +87,8 @@ update {
 start {
 	vars.cinematicFName.Update(game);
 	current.cinematic = vars.FNameToString(vars.cinematicFName.Current);
-
-	if (current.world == "Level_01" && current.cinematic == "BP_CinematicTrack2_3" && old.cinematic != "BP_CinematicTrack2_3") {
+	
+	if (current.world == "Level_01" && vars.Watchers["Cinematic"].Current != 0 && vars.Watchers["Cinematic"].Old == 0 && current.cinematic == "BP_CinematicTrack2_3") {
 		timer.IsGameTimePaused = true;
 		return true;
 	}
