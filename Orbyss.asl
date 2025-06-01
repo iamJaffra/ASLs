@@ -80,8 +80,7 @@ update {
 		watcher.Update(game);
 	}
 
-	var world = vars.FNameToString(vars.Watchers["GWorldFName"].Current);
-	current.world = world;
+	current.world      = vars.FNameToString(vars.Watchers["GWorldFName"].Current);
 	current.checkpoint = vars.Watchers["Checkpoint"].Current;
 }
 
