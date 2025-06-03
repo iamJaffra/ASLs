@@ -10,6 +10,7 @@ startup {
 		new string[] { "CastleKeep_T001_F003"          , "CastleKeep_T001_F001"          , "Revive after defeating Ubume"     },
 		new string[] { "CastleKeep_Corridor_T1_T2"     , "Castle_Exterior_Courtyard_001" , "Exit Tower Of Repetition"         },
 		new string[] { "CastleKeep_Corridor_T2_T3"     , "CastleKeep_T002_F001"          , "Enter Tower of Lamentation"       },
+		new string[] { "CastleKeep_T002_F002"          , "CastleKeep_T002_WardenRoom"    , "Enter Nuppeppo Arena"             },
 		new string[] { "CastleKeep_T002_WardenRoom"    , "SafeRoom_001"                  , "Teleport to Teahouse after defeating Nuppeppo" },
 		new string[] { "CastleKeep_Corridor_T2_T3"     , "CastleKeep_T003_B001"          , "Enter Tower of Crushing Assembly" },
 		new string[] { "CastleKeep_T003_F001"          , "CastleKeep_Corridor_T3_T4"     , "Exit room after defeating Warden" },
@@ -26,7 +27,7 @@ startup {
 		{ "T1F1_ButsudanStatue_001" , "Buddha Statue from butsudan" },
 		{ "key_002"                 , "Pantry Key"          },
 		{ "salt_sack"               , "Salt"                },
-		{ "biwa_001"                , "Biwa"           },
+		{ "biwa_001"                , "Biwa"                },
 
 		// Tower of Lamentation
 		{ "water_puzzle_wheel_005"       , "Brown Gem Wheel"      },
@@ -45,7 +46,8 @@ startup {
 		{ "Intro_Nuribotoke_001" , "Nuribotoke appears" },
 		{ "Death_Ubume_001"      , "Ubume dies"         },
 		{ "Death_Nuppeppo_001"   , "Nuppeppo dies"      },
-		{ "Death_Warden_001"     , "Warden dies"        },
+		{ "Intro_Warden_001"     , "Jailer appears"     },
+		{ "Death_Warden_001"     , "Jailer dies"        },
 	};
 	
 	settings.Add("StartNewGame", true, "Start timer on starting a New Game from the main menu");
@@ -180,7 +182,7 @@ update {
 				}
 			}
 		}
-	}	
+	}
 }
 
 start {
@@ -227,7 +229,7 @@ split {
 	}
 	
 	// Item splits
-	if (settings["Items"] && current.world != "MainMenu") {
+	if (settings["Items"] && current.world != "MainMenu" && current.world != "None") {
 		for(int i = 0; i < vars.Watchers["NumberOfItems"].Current; i++) {
 			var itemFName = game.ReadValue<ulong>((IntPtr)vars.Watchers["Inventory"].Current + i * 0x10);
 			var item = vars.FNameToString(itemFName);
