@@ -18,6 +18,7 @@ startup {
 		settings.Add("Typewriter",    true, "Typewriter",             "Richmond");
 		settings.Add("Bathtub",       true, "Bathtub",                "Richmond");
 		settings.Add("Picross",       true, "Picross",                "Richmond");
+		settings.Add("MACHINEBUILT",  true, "Assembled Machine",      "Richmond");
 		settings.Add("Door",          true, "Door in Dutton's Room",  "Richmond");
 
 	settings.Add("Tad", false, "Tad");
@@ -160,6 +161,10 @@ split {
 	}
 	// Picross
 	else if (settings["Picross"] && vars.ChangedState(o, c, 15, 1, 9)) {
+		return true;
+	}
+	// Assembled Machine
+	else if (settings["MACHINEBUILT"] && vars.ChangedState(o, c, 76, 0, 1)) {
 		return true;
 	}
 	// Door (TRIPLETSDUTTON)
