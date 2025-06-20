@@ -42,8 +42,7 @@ startup {
 }
 
 init {
-	vars.Helper.TryLoad = (Func<dynamic, bool>)(mono =>
-	{
+	vars.Helper.TryLoad = (Func<dynamic, bool>)(mono =>	{
 		vars.Helper["controlWord"] = mono.MakeString("ControlWordScript", "ControlWord");
 		
 		return true;
