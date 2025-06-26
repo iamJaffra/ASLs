@@ -89,7 +89,7 @@ reset {
 }
 
 start {
-	if (old.controlWord != current.controlWord) {
+	if (current.activeScene == "IntroChoosePlayer" && old.controlWord != current.controlWord) {
 		var o = old.controlWord;
 		var c = current.controlWord;
 
