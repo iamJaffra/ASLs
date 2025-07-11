@@ -75,8 +75,18 @@ state("Risen", "New Patch") {
 */
 
 startup {
-	settings.Add("Any%", true, "Any% No Annoy");
-		settings.Add("Any%_Chest", false, "Acquire orc dog spell from chest", "Any%");
+	settings.Add("Any%", false, "Any% No Annoying Glitches");
+		settings.Add("City",                        true, "Reach the city",                    "Any%");
+		settings.Add("Scordo_OpenHarborTunnelDoor", true, "Open the harbor tunnel door",       "Any%");
+		settings.Add("Oscar_DonsGoldSwordPieces",   true, "Give Oscar the Gold Sword Pieces",  "Any%");
+		settings.Add("Chapter2",                    true, "Reach Chapter 2",                   "Any%");
+		settings.Add("Eldric_GoToHut_start",        true, "Start Eldric's Go To Hut quest",    "Any%");
+		settings.Add("Eldric_GoToHut_complete",     true, "Complete Eldric's Go To Hut quest", "Any%");
+		settings.Add("Inquisitor_OpenPortal",       true, "The Inquisitor opens the Portal",   "Any%");
+		settings.Add("Chapter3",                    true, "Reach Chapter 3",                   "Any%");
+		settings.Add("Eldric_FixTitanArmor",        true, "Eldric fixes Titan Armor",          "Any%");
+		settings.Add("EnterTitanArena",             true, "Enter the Titan Arena",             "Any%");
+		settings.Add("Credits",                     true, "Reach the credits",                 "Any%");
 }
 
 init {
@@ -95,7 +105,7 @@ init {
 
 	var module = modules.FirstOrDefault(m => m.ModuleName == "Script_Game.dll");
 
-	if (module != null)	{
+	if (module != null) {
 		var ptr = (IntPtr)module.BaseAddress;
 
 		if (version == "New Patch") {
@@ -205,47 +215,47 @@ onStart {
 
 split {
 	// - Credits
-	if (current.cutscene != 0 && old.cutscene == 0) {
+	if (settings["Credits"] && current.cutscene != 0 && old.cutscene == 0) {
 		return true;
 	}
 	// - Reach city
-	else if (((vars.cityX2 - vars.cityX1) * (current.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (current.x - vars.cityX1)) > 0 && vars.completedSplits.Add("CITY")) {
+	else if (settings["City"] && ((vars.cityX2 - vars.cityX1) * (current.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (current.x - vars.cityX1)) > 0 && vars.completedSplits.Add("City")) {
 		return true;
 	}
 	// - Scordo_OpenHarborTunnelDoor
-	else if (current.Scordo_OpenHarborTunnelDoor == 2 && old.Scordo_OpenHarborTunnelDoor != 2) {
+	else if (settings["Scordo_OpenHarborTunnelDoor"] && current.Scordo_OpenHarborTunnelDoor == 2 && old.Scordo_OpenHarborTunnelDoor != 2 && vars.completedSplits.Add("Scordo_OpenHarborTunnelDoor")) {
 		return true;
 	}
 	// - Oscar_DonsGoldSwordPieces
-	else if (current.Oscar_DonsGoldSwordPieces == 2 && old.Oscar_DonsGoldSwordPieces != 2) {
+	else if (settings["Oscar_DonsGoldSwordPieces"] && current.Oscar_DonsGoldSwordPieces == 2 && old.Oscar_DonsGoldSwordPieces != 2 && vars.completedSplits.Add("Oscar_DonsGoldSwordPieces")) {
 		return true;
 	}
 	// - Chapter 2
-	else if (current.chapter == 2 && old.chapter == 1) {
+	else if (settings["Chapter2"] && current.chapter == 2 && old.chapter == 1 && vars.completedSplits.Add("Chapter2")) {
 		return true;
 	}
 	// - Eldric_GoToHut (started)
-	else if (current.Eldric_GoToHut == 1 && old.Eldric_GoToHut != 1) {
+	else if (settings["Eldric_GoToHut_start"] && current.Eldric_GoToHut == 1 && old.Eldric_GoToHut != 1 && vars.completedSplits.Add("Eldric_GoToHut_start")) {
 		return true;
 	}
 	// - Eldric_GoToHut (succeeded)
-	else if (current.Eldric_GoToHut == 2 && old.Eldric_GoToHut != 2) {
+	else if (settings["Eldric_GoToHut_complete"] && current.Eldric_GoToHut == 2 && old.Eldric_GoToHut != 2 && vars.completedSplits.Add("Eldric_GoToHut_complete")) {
 		return true;
 	}
 	// - Inquisitor_OpenPortal
-	else if (current.Inquisitor_OpenPortal == 2 && old.Inquisitor_OpenPortal != 2) {
+	else if (settings["Inquisitor_OpenPortal"] && current.Inquisitor_OpenPortal == 2 && old.Inquisitor_OpenPortal != 2 && vars.completedSplits.Add("Inquisitor_OpenPortal")) {
 		return true;
 	}
 	// - Chapter 3
-	else if (current.chapter == 3 && old.chapter == 2) {
+	else if (settings["Chapter3"] && current.chapter == 3 && old.chapter == 2 && vars.completedSplits.Add("Chapter3")) {
 		return true;
 	}
 	// - Eldric_FixTitanArmor
-	else if (current.Eldric_FixTitanArmor == 2 && old.Eldric_FixTitanArmor != 2) {
+	else if (settings["Eldric_FixTitanArmor"] && current.Eldric_FixTitanArmor == 2 && old.Eldric_FixTitanArmor != 2 && vars.completedSplits.Add("Eldric_FixTitanArmor")) {
 		return true;
 	}
 	// - Enter Titan arena
-	else if (current.titanCounter != old.titanCounter) {
+	else if (settings["EnterTitanArena"] && current.titanCounter != old.titanCounter && vars.completedSplits.Add("EnterTitanArena")) {
 		if (version == "Old Patch") {
 			if (current.titanCounter == vars.initialTitanCounter + 7) {
 				return true;
