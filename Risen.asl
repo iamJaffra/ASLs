@@ -55,22 +55,20 @@ state("Risen", "New Patch") {
 }
 
 /*
-	// This code prints the name of every quest in the game and where to find it
+	// Code to print the name of every quest in the game and where to find it
 	IntPtr questManager = (IntPtr)current.questManager;
 
-	if (version == "Old Patch") {
-		for (int j = 0x24; j < 0x84; j += 0xC) {
-			var arraySize = game.ReadValue<int>(questManager + j + 0x4);
-			for (int i = 0; i < arraySize; i++) {
-				var questName = new DeepPointer(questManager + j, i * 0x4, 0x8, 0x0).DerefString(game, 100);
-				if (questName.Contains("Inquisitor")) {
-					var offset = i * 0x4;
-					//print("Array " + j.ToString("X") + " : " + "[" + i + "]" + " (" + offset.ToString("X") + ")" + " = " + questName);
-					print("0x" + j.ToString("X") + ", 0x" + offset.ToString("X") + " = " + questName);
-				}	
-			}
-			print("-------------------");
+	for (int j = 0x48; j < 0x114; j += 0x18) {
+		var arraySize = game.ReadValue<int>(questManager + j + 0x8);
+		for (int i = 0; i < arraySize; i++) {
+			var questName = new DeepPointer(questManager + j, i * 0x8, 0x10, 0x0).DerefString(game, 100);
+			if (questName.Contains("Inquisitor")) {
+				var offset = i * 0x8;
+				//print("Array " + j.ToString("X") + " : " + "[" + i + "]" + " (" + offset.ToString("X") + ")" + " = " + questName);
+				print("0x" + j.ToString("X") + ", 0x" + offset.ToString("X") + " = " + questName);
+			}	
 		}
+		print("-------------------");
 	}
 */
 
@@ -204,7 +202,6 @@ start {
 }
 
 onStart {
-	vars.initialTitanCounter = current.titanCounter;
 	vars.completedSplits.Clear();
 }
 
