@@ -211,7 +211,10 @@ split {
 		return true;
 	}
 	// - Reach city
-	else if (settings["City"] && ((vars.cityX2 - vars.cityX1) * (current.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (current.x - vars.cityX1)) > 0 && vars.completedSplits.Add("City")) {
+	else if (settings["City"] 
+	 && ((vars.cityX2 - vars.cityX1) * (current.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (current.x - vars.cityX1)) > 0
+	 && ((vars.cityX2 - vars.cityX1) * (    old.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (    old.x - vars.cityX1)) < 0
+	 && vars.completedSplits.Add("City")) {
 		return true;
 	}
 	// - Scordo_OpenHarborTunnelDoor
