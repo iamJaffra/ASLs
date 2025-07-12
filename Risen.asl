@@ -84,6 +84,7 @@ startup {
 		settings.Add("Eldric_GoToHut_complete",     true, "Complete Eldric's Go To Hut quest", "Any%");
 		settings.Add("Inquisitor_OpenPortal",       true, "The Inquisitor opens the Portal",   "Any%");
 		settings.Add("Chapter3",                    true, "Reach Chapter 3",                   "Any%");
+		settings.Add("Chapter4",                    true, "Reach Chapter 4",                   "Any%");
 		settings.Add("Eldric_FixTitanArmor",        true, "Eldric fixes Titan Armor",          "Any%");
 		settings.Add("EnterTitanArena",             true, "Enter the Titan Arena",             "Any%");
 		settings.Add("Credits",                     true, "Reach the credits",                 "Any%");
@@ -242,6 +243,10 @@ split {
 	}
 	// - Chapter 3
 	else if (settings["Chapter3"] && current.chapter == 3 && old.chapter == 2 && vars.completedSplits.Add("Chapter3")) {
+		return true;
+	}
+	// - Chapter 4
+	else if (settings["Chapter4"] && current.chapter == 4 && old.chapter == 3 && vars.completedSplits.Add("Chapter4")) {
 		return true;
 	}
 	// - Eldric_FixTitanArmor
