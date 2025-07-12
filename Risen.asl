@@ -109,55 +109,55 @@ init {
 		var ptr = (IntPtr)module.BaseAddress;
 
 		if (version == "New Patch") {
-			// E9 4C 8F 05 00
+			// E9 94 86 05 00 90
 			byte[] jmp = new byte[]	{
-				0xE9, 0x4C, 0x8F, 0x05, 0x00        // jmp Script_Game.dll.text+1F6A31 (RIP: 0x58F4C)
+				0xE9, 0x94, 0x86, 0x05, 0x00,       // jmp Script_Game.dll.text+1F6A31
+				0x90                                // nop
 			};
 
-			// 40 55 53 56 57 FE 05 C4 C5 0D 00 E9 A4 70 FA FF
+			// FF 15 71 B2 00 00 FE 05 C3 C5 0D 00 E9 5B 79 FA FF
 			byte[] codecave = new byte[] {
-				0x40, 0x55,                         // push rbp
-				0x53,                               // push rbx
-				0x56,                               // push rsi
-				0x57,                               // push rdi
-				0xFE, 0x05, 0xC4, 0xC5, 0x0D, 0x00, // inc byte ptr [Script_Game.dll+2D4000]
-				0xE9, 0xA4, 0x70, 0xFA, 0xFF        // jmp Script_Game.PS_Titan_Begin+5
+				0xFF, 0x15, 0x71, 0xB2, 0x00, 0x00, // call qword ptr [Script_Game.dll.rdata+CA8]
+				0xFE, 0x05, 0xC3, 0xC5, 0x0D, 0x00, // inc byte ptr [Script_Game.dll+2D4000]
+				0xE9, 0x5B, 0x79, 0xFA, 0xFF        // jmp Script_Game.PS_Titan_Begin+8BD
 			};
 
-			game.WriteBytes(ptr + 0x19EAE0, jmp);
+			game.WriteBytes(ptr + 0x19EAE0+0x8B8, jmp);
 			game.WriteBytes(ptr + 0x1F7A31, codecave);
 		}
 		else if (version == "Old Patch") {
-			// E9 BB 1B 00 00
+			// E9 2A 14 00 00 90
 			byte[] jmp = new byte[]	{
-				0xE9, 0xBB, 0x1B, 0x00, 0x00   // jmp Script_Game.dll.text+99EA0
+				0xE9, 0x2A, 0x14, 0x00, 0x00, 0x90   // jmp Script_Game.dll.text+99EA0
 			};
 
-			// 83 EC 44 53 55 50 B8 00 37 AA 2A FE 00 58 E9 32 E4 FF FF
+			// FF 15 50 44 D2 34 50 B8 00 37 D2 34 FE 00 58 E9 C2 EB FF FF
 			byte[] codecave = new byte[] {
-				0x83, 0xEC, 0x44,              // sub esp,44
-				0x53,                          // push ebx
-				0x55,                          // push ebp
-				0x50,                          // push eax
-				0xB8, 0x00, 0x00, 0x00, 0x00,  // mov eax,________
-				0xFE, 0x00,                    // inc byte ptr [eax]
-				0x58,                          // pop eax
-				0xE9, 0x32, 0xE4, 0xFF, 0xFF   // jmp Script_Game.dll.text+982E5
+				0xFF, 0x15, 0x00, 0x00, 0x00, 0x00, // call dword ptr ________
+				0x50,                               // push eax
+				0xB8, 0x00, 0x00, 0x00, 0x00,       // mov eax, ________
+				0xFE, 0x00,                         // inc byte ptr [eax]
+				0x58,                               // pop eax
+				0xE9, 0xC2, 0xEB, 0xFF, 0xFF        // jmp Script_Game.dll.text+98A76
 			};
 
-			// Get the absolute address of the counter
-			var counterAddr = (int)ptr + 0x9AEA0 + 0x7 + 0x178859;
-			print("Counter at: " + counterAddr.ToString("X"));
+			// Get absolute addresses
+			var counterAddr  = (int)ptr + 0x213700;
+			var setStateAddr = (int)ptr + 0x214450; // [Script_Game.dll.idata+2450]
 
 			byte[] bytes = BitConverter.GetBytes(counterAddr);
-			codecave[7]  = bytes[0];
-			codecave[8]  = bytes[1];
-			codecave[9]  = bytes[2];
-			codecave[10] = bytes[3];
+			codecave[8]  = bytes[0];
+			codecave[9]  = bytes[1];
+			codecave[10] = bytes[2];
+			codecave[11] = bytes[3];
 
-			print("Final bytes: " + string.Join(" ", codecave.Select(b => "0x" + b.ToString("X2"))));
+			bytes = BitConverter.GetBytes(setStateAddr);
+			codecave[2] = bytes[0];
+			codecave[3] = bytes[1];
+			codecave[4] = bytes[2];
+			codecave[5] = bytes[3];
 
-			game.WriteBytes(ptr + 0x992E0, jmp);
+			game.WriteBytes(ptr + 0x992E0+0x791, jmp);
 			game.WriteBytes(ptr + 0x9AEA0, codecave);
 		}
 	}
@@ -177,25 +177,19 @@ init {
 	vars.cityZ2 = -14063.06000;
 
 	vars.completedSplits = new HashSet<string>();
-
-	vars.initialTitanCounter = 0;
 }
 
 update {
-	if (version == "Unkown") {
+	if (version == "Unknown") {
 		print("Deactivating ASL due to unknown game version.");
 		return false;
 	}
-	
+
 	/*
 	if (current.x != old.x || current.y != old.y || current.z != old.z) {
 		print("Current pos = (" + current.x.ToString("0.00000") + ", " + current.y.ToString("0.00000") + ", " + current.z.ToString("0.00000") + ")");
 	}
 	*/
-
-	if (current.isLoading != old.isLoading) {
-		vars.initialTitanCounter = current.titanCounter;
-	}
 }
 
 start {
@@ -255,17 +249,8 @@ split {
 		return true;
 	}
 	// - Enter Titan arena
-	else if (settings["EnterTitanArena"] && current.titanCounter != old.titanCounter && vars.completedSplits.Add("EnterTitanArena")) {
-		if (version == "Old Patch") {
-			if (current.titanCounter == vars.initialTitanCounter + 7) {
-				return true;
-			}
-		}
-		else if (version == "New Patch") {
-			if (current.titanCounter == vars.initialTitanCounter + 5) {
-				return true;
-			}
-		}
+	else if (settings["EnterTitanArena"] && current.titanCounter == old.titanCounter + 1 && vars.completedSplits.Add("EnterTitanArena")) {
+		return true;
 	}
 }
 
