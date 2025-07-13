@@ -127,7 +127,8 @@ init {
 		else if (version == "Old Patch") {
 			// E9 2A 14 00 00 90
 			byte[] jmp = new byte[]	{
-				0xE9, 0x2A, 0x14, 0x00, 0x00, 0x90   // jmp Script_Game.dll.text+99EA0
+				0xE9, 0x2A, 0x14, 0x00, 0x00,       // jmp Script_Game.dll.text+99EA0
+				0x90                                // nop
 			};
 
 			// FF 15 50 44 D2 34 50 B8 00 37 D2 34 FE 00 58 E9 C2 EB FF FF
@@ -179,8 +180,8 @@ init {
 }
 
 update {
+	// Deactivate ASL if unknown game version
 	if (version == "Unknown") {
-		print("Deactivating ASL due to unknown game version.");
 		return false;
 	}
 
