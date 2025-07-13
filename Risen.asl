@@ -23,6 +23,9 @@ state("Risen", "Old Patch") {
 	int Inquisitor_OpenPortal:       "Game.dll", 0x00FDC188, 0x30, 0x1AC, 0x78;
 	int Eldric_FixTitanArmor:        "Game.dll", 0x00FDC188, 0x24,  0x10, 0x78;
 
+	// Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
+	int strength: "Script.dll", 0x0030F8D4, 0x1C, 0x3C, 0x2C;
+
 	// COUNTER FOR ScriptGame.PS_Titan_Begin
 	int titanCounter: "Script_Game.dll", 0x00213700;
 }
@@ -50,6 +53,9 @@ state("Risen", "New Patch") {
 	int Inquisitor_OpenPortal:       "Game.dll", 0x0126E7C8, 0x60, 0x358, 0xC8;
 	int Eldric_FixTitanArmor:        "Game.dll", 0x0126E7C8, 0x48,  0x20, 0xC8;
 
+	// Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
+	int strength: "Script.dll", 0x00472570, 0x40, 0x78, 0x3C;
+
 	// COUNTER FOR ScriptGame.PS_Titan_Begin
 	int titanCounter: "Script_Game.dll", 0x002D4000;
 }
@@ -73,19 +79,22 @@ state("Risen", "New Patch") {
 */
 
 startup {
-	settings.Add("Any%", false, "Any% No Annoying Glitches");
-		settings.Add("City",                        true, "Reach the city",                    "Any%");
-		settings.Add("Scordo_OpenHarborTunnelDoor", true, "Open the harbor tunnel door",       "Any%");
-		settings.Add("Oscar_DonsGoldSwordPieces",   true, "Give Oscar the Gold Sword Pieces",  "Any%");
-		settings.Add("Chapter2",                    true, "Reach Chapter 2",                   "Any%");
-		settings.Add("Eldric_GoToHut_start",        true, "Start Eldric's Go To Hut quest",    "Any%");
-		settings.Add("Eldric_GoToHut_complete",     true, "Complete Eldric's Go To Hut quest", "Any%");
-		settings.Add("Inquisitor_OpenPortal",       true, "The Inquisitor opens the Portal",   "Any%");
-		settings.Add("Chapter3",                    true, "Reach Chapter 3",                   "Any%");
-		settings.Add("Chapter4",                    true, "Reach Chapter 4",                   "Any%");
-		settings.Add("Eldric_FixTitanArmor",        true, "Eldric fixes Titan Armor",          "Any%");
-		settings.Add("EnterTitanArena",             true, "Enter the Titan Arena",             "Any%");
-		settings.Add("Credits",                     true, "Reach the credits",                 "Any%");
+	settings.Add("Any%", false, "Any% / No Annoying Glitches");
+		settings.Add("City",                        true, "Reach the city",                       "Any%");
+		settings.Add("Scordo_OpenHarborTunnelDoor", true, "Open the harbor tunnel door",          "Any%");
+		settings.Add("Oscar_DonsGoldSwordPieces",   true, "Give Oscar the Gold Sword Pieces",     "Any%");
+		settings.Add("Chapter2",                    true, "Reach Chapter 2",                      "Any%");
+		settings.Add("Eldric_GoToHut_start",        true, "Start Eldric's Go To Hut quest",       "Any%");
+		settings.Add("Eldric_GoToHut_complete",     true, "Complete Eldric's Go To Hut quest",    "Any%");
+		settings.Add("Inquisitor_OpenPortal",       true, "The Inquisitor opens the Portal",      "Any%");
+		settings.Add("Chapter3",                    true, "Reach Chapter 3",                      "Any%");
+		settings.Add("Chapter4",                    true, "Reach Chapter 4",                      "Any%");
+		settings.Add("Eldric_FixTitanArmor",        true, "Eldric fixes Titan Armor",             "Any%");
+		settings.Add("EnterTitanArena",             true, "Enter the Titan Arena",                "Any%");
+		settings.Add("Credits",                     true, "Reach the credits",                    "Any%");
+
+	settings.Add("Extra", false, "Extra splits");
+		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");	
 }
 
 init {
@@ -224,6 +233,10 @@ split {
 	}
 	// - Oscar_DonsGoldSwordPieces
 	else if (settings["Oscar_DonsGoldSwordPieces"] && current.Oscar_DonsGoldSwordPieces == 2 && old.Oscar_DonsGoldSwordPieces != 2 && vars.completedSplits.Add("Oscar_DonsGoldSwordPieces")) {
+		return true;
+	}
+	// - Gain 5 Strength (repeatable)
+	else if (settings["5Str"] && current.strength == old.strength + 5) {
 		return true;
 	}
 	// - Chapter 2
