@@ -23,8 +23,8 @@ state("Risen", "Old Patch") {
 	int Inquisitor_OpenPortal:       "Game.dll", 0x00FDC188, 0x30, 0x1AC, 0x78;
 	int Eldric_FixTitanArmor:        "Game.dll", 0x00FDC188, 0x24,  0x10, 0x78;
 
-	// Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
-	int strength: "Script.dll", 0x0030F8D4, 0x1C, 0x3C, 0x2C;
+	// PNavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
+	int strength: "Game.dll", 0x00FA4644, 0x198, 0x1C, 0x3C, 0x2C;
 
 	// COUNTER FOR ScriptGame.PS_Titan_Begin
 	int titanCounter: "Script_Game.dll", 0x00213700;
@@ -53,8 +53,8 @@ state("Risen", "New Patch") {
 	int Inquisitor_OpenPortal:       "Game.dll", 0x0126E7C8, 0x60, 0x358, 0xC8;
 	int Eldric_FixTitanArmor:        "Game.dll", 0x0126E7C8, 0x48,  0x20, 0xC8;
 
-	// Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
-	int strength: "Script.dll", 0x00472570, 0x40, 0x78, 0x3C;
+	// NavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
+	int strength: "Game.dll", 0x01194858, 0x2C0, 0x40, 0x78, 0x3C;
 
 	// COUNTER FOR ScriptGame.PS_Titan_Begin
 	int titanCounter: "Script_Game.dll", 0x002D4000;
@@ -185,6 +185,11 @@ init {
 	vars.cityX2 = -14541.90000;
 	vars.cityZ2 = -14063.06000;
 
+	vars.landX1 = -11254.49023;
+	vars.landZ1 = -22477.13086;
+	vars.landX2 = -11354.64551;
+	vars.landZ2 = -22771.71094;
+
 	vars.completedSplits = new HashSet<string>();
 }
 
@@ -221,14 +226,26 @@ split {
 		return true;
 	}
 	// - Reach city
-	else if (settings["City"] 
-	 && ((vars.cityX2 - vars.cityX1) * (current.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (current.x - vars.cityX1)) > 0
-	 && ((vars.cityX2 - vars.cityX1) * (    old.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (    old.x - vars.cityX1)) < 0
-	 && vars.completedSplits.Add("City")) {
-		return true;
+	if (settings["City"] && !vars.completedSplits.Contains("City")) {
+		// Old Patch route
+		if (Math.Sqrt(Math.Pow(-14137.02539 - current.x, 2) + Math.Pow(-13714.83887 - current.z, 2)) < 1000) {
+			if (((vars.cityX2 - vars.cityX1) * (current.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (current.x - vars.cityX1)) > 0
+			 && ((vars.cityX2 - vars.cityX1) * (    old.z - vars.cityZ1) - (vars.cityZ2 - vars.cityZ1) * (    old.x - vars.cityX1)) < 0) {
+				vars.completedSplits.Add("City");
+				return true;
+			}
+		}
+		// C-Airwalk route
+		else if (Math.Sqrt(Math.Pow(-11247.63184 - current.x, 2) + Math.Pow(-22480.66992 - current.z, 2)) < 1000) { 
+			if (((vars.landX2 - vars.landX1) * (current.z - vars.landZ1) - (vars.landZ2 - vars.landZ1) * (current.x - vars.landX1)) > 0
+			 && ((vars.landX2 - vars.landX1) * (    old.z - vars.landZ1) - (vars.landZ2 - vars.landZ1) * (    old.x - vars.landX1)) < 0) {
+				vars.completedSplits.Add("City");
+				return true;
+			}
+		}
 	}
 	// - Scordo_OpenHarborTunnelDoor
-	else if (settings["Scordo_OpenHarborTunnelDoor"] && current.Scordo_OpenHarborTunnelDoor == 2 && old.Scordo_OpenHarborTunnelDoor != 2 && vars.completedSplits.Add("Scordo_OpenHarborTunnelDoor")) {
+	if (settings["Scordo_OpenHarborTunnelDoor"] && current.Scordo_OpenHarborTunnelDoor == 2 && old.Scordo_OpenHarborTunnelDoor != 2 && vars.completedSplits.Add("Scordo_OpenHarborTunnelDoor")) {
 		return true;
 	}
 	// - Oscar_DonsGoldSwordPieces
