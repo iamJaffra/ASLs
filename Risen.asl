@@ -68,7 +68,7 @@ state("Risen", "New Patch") {
 		var arraySize = game.ReadValue<int>(questManager + j + 0x8);
 		for (int i = 0; i < arraySize; i++) {
 			var questName = new DeepPointer(questManager + j, i * 0x8, 0x10, 0x0).DerefString(game, 100);
-			if (questName.Contains("Inquisitor")) {
+			if (questName.Contains("...")) {
 				var offset = i * 0x8;
 				//print("Array " + j.ToString("X") + " : " + "[" + i + "]" + " (" + offset.ToString("X") + ")" + " = " + questName);
 				print("0x" + j.ToString("X") + ", 0x" + offset.ToString("X") + " = " + questName);
@@ -80,18 +80,18 @@ state("Risen", "New Patch") {
 
 startup {
 	settings.Add("Any%", false, "Any% / No Annoying Glitches");
-		settings.Add("City",                        true, "Reach the city",                       "Any%");
-		settings.Add("Scordo_OpenHarborTunnelDoor", true, "Open the harbor tunnel door",          "Any%");
-		settings.Add("Oscar_DonsGoldSwordPieces",   true, "Give Oscar the Gold Sword Pieces",     "Any%");
-		settings.Add("Chapter2",                    true, "Reach Chapter 2",                      "Any%");
-		settings.Add("Eldric_GoToHut_start",        true, "Start Eldric's Go To Hut quest",       "Any%");
-		settings.Add("Eldric_GoToHut_complete",     true, "Complete Eldric's Go To Hut quest",    "Any%");
-		settings.Add("Inquisitor_OpenPortal",       true, "The Inquisitor opens the Portal",      "Any%");
-		settings.Add("Chapter3",                    true, "Reach Chapter 3",                      "Any%");
-		settings.Add("Chapter4",                    true, "Reach Chapter 4",                      "Any%");
-		settings.Add("Eldric_FixTitanArmor",        true, "Eldric fixes Titan Armor",             "Any%");
-		settings.Add("EnterTitanArena",             true, "Enter the Titan Arena",                "Any%");
-		settings.Add("Credits",                     true, "Reach the credits",                    "Any%");
+		settings.Add("City",                        true, "Reach the city",                    "Any%");
+		settings.Add("Scordo_OpenHarborTunnelDoor", true, "Open the harbor tunnel door",       "Any%");
+		settings.Add("Oscar_DonsGoldSwordPieces",   true, "Give Oscar the Gold Sword Pieces",  "Any%");
+		settings.Add("Chapter2",                    true, "Reach Chapter 2",                   "Any%");
+		settings.Add("Eldric_GoToHut_start",        true, "Start Eldric's Go To Hut quest",    "Any%");
+		settings.Add("Eldric_GoToHut_complete",     true, "Complete Eldric's Go To Hut quest", "Any%");
+		settings.Add("Inquisitor_OpenPortal",       true, "The Inquisitor opens the Portal",   "Any%");
+		settings.Add("Chapter3",                    true, "Reach Chapter 3",                   "Any%");
+		settings.Add("Chapter4",                    true, "Reach Chapter 4",                   "Any%");
+		settings.Add("Eldric_FixTitanArmor",        true, "Eldric fixes Titan Armor",          "Any%");
+		settings.Add("EnterTitanArena",             true, "Enter the Titan Arena",             "Any%");
+		settings.Add("Credits",                     true, "Reach the credits",                 "Any%");
 
 	settings.Add("Extra", false, "Extra splits");
 		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");	
@@ -198,12 +198,6 @@ update {
 	if (version == "Unknown") {
 		return false;
 	}
-
-	/*
-	if (current.x != old.x || current.y != old.y || current.z != old.z) {
-		print("Current pos = (" + current.x.ToString("0.00000") + ", " + current.y.ToString("0.00000") + ", " + current.z.ToString("0.00000") + ")");
-	}
-	*/
 }
 
 start {
