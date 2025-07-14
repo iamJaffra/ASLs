@@ -23,7 +23,7 @@ state("Risen", "Old Patch") {
 	int Inquisitor_OpenPortal:       "Game.dll", 0x00FDC188, 0x30, 0x1AC, 0x78;
 	int Eldric_FixTitanArmor:        "Game.dll", 0x00FDC188, 0x24,  0x10, 0x78;
 
-	// PNavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
+	// NavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
 	int strength: "Game.dll", 0x00FA4644, 0x198, 0x1C, 0x3C, 0x2C;
 
 	// COUNTER FOR ScriptGame.PS_Titan_Begin
