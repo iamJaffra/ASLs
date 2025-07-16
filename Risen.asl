@@ -10,6 +10,9 @@ state("Risen", "Old Patch") {
 	bool isLoading: "Game.dll",    0xFEA66C;
 	ulong cutscene: "binkw32.dll", 0x02F054;
 
+	// eCSceneAdmin.gCClock_PS.secondsPlayed
+	float playtime: "Game.dll",    0xFA63A0, 0x48, 0x24;
+
 	// QUESTS
 	// Quests are sorted into a bunch of different arrays depending on their type.
 	// We only need two of the possible quest status values (1 = started, 2 = completed), stored at
@@ -26,8 +29,11 @@ state("Risen", "Old Patch") {
 	// NavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
 	int strength: "Game.dll", 0x00FA4644, 0x198, 0x1C, 0x3C, 0x2C;
 
-	// COUNTER FOR ScriptGame.PS_Titan_Begin
+	// COUNTER FOR ScriptGame.PS_Titan_Begin()
 	int titanCounter: "Script_Game.dll", 0x00213700;
+
+	// eCWeatherAdmin.weatherStates.thunderProbability
+	float thunderProbability: "Engine.dll", 0xA92B58, 0x328, 0x48;
 }
 
 state("Risen", "New Patch") {
@@ -39,6 +45,9 @@ state("Risen", "New Patch") {
 	// LOADING & CUTSCENE
 	bool isLoading: "Game.dll",    0x12AA0C8;
 	ulong cutscene: "binkw64.dll", 0x003AE25;
+
+	// eCSceneAdmin.gCClock_PS.secondsPlayed
+	float playtime: "Game.dll",    0x01194880, 0x88, 0x34;
 
 	// QUESTS
 	// Quests are sorted into a bunch of different arrays depending on their type.
@@ -58,6 +67,9 @@ state("Risen", "New Patch") {
 
 	// COUNTER FOR ScriptGame.PS_Titan_Begin
 	int titanCounter: "Script_Game.dll", 0x002D4000;
+
+	// eCWeatherAdmin.weatherStates.thunderProbability
+	float thunderProbability: "Engine.dll", 0xC6B880, 0x4C8, 0x54;
 }
 
 /*
@@ -94,7 +106,9 @@ startup {
 		settings.Add("Credits",                     true, "Reach the credits",                 "Any%");
 
 	settings.Add("Extra", false, "Extra splits");
-		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");	
+		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");
+	
+	settings.Add("DisableLightning", false, "Disable lightning effect");
 }
 
 init {
@@ -198,6 +212,18 @@ update {
 	if (version == "Unknown") {
 		return false;
 	}
+
+	// Disable annoying lightning effect
+	if (settings["DisableLightning"] && current.thunderProbability != 0) {
+		if (version == "New Patch") {
+			var ptr = new DeepPointer("Engine.dll", 0xC6B880, 0x4C8).Deref<ulong>(game);
+			game.WriteBytes((IntPtr)ptr + 0x54, new byte[] { 0, 0, 0, 0 });
+		}
+		if (version == "Old Patch") {
+			var ptr = new DeepPointer("Engine.dll", 0xA92B58, 0x328).Deref<int>(game);
+			game.WriteBytes((IntPtr)ptr + 0x48, new byte[] { 0, 0, 0, 0 });
+		}
+	}
 }
 
 start {
@@ -212,6 +238,10 @@ start {
 
 onStart {
 	vars.completedSplits.Clear();
+}
+
+reset {
+	return 0 < current.playtime && current.playtime < 3.0;
 }
 
 split {
