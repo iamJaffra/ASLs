@@ -216,10 +216,10 @@ update {
 	// Disable annoying lightning effect
 	if (settings["DisableLightning"] && current.thunderProbability != 0) {
 		if (version == "New Patch") {
-			var ptr = new DeepPointer("Engine.dll", 0xC6B880, 0x4C8).Deref<ulong>(game);
+			var ptr = new DeepPointer("Engine.dll", 0xC6B880, 0x4C8).Deref<long>(game);
 			game.WriteBytes((IntPtr)ptr + 0x54, new byte[] { 0, 0, 0, 0 });
 		}
-		if (version == "Old Patch") {
+		else if (version == "Old Patch") {
 			var ptr = new DeepPointer("Engine.dll", 0xA92B58, 0x328).Deref<int>(game);
 			game.WriteBytes((IntPtr)ptr + 0x48, new byte[] { 0, 0, 0, 0 });
 		}
