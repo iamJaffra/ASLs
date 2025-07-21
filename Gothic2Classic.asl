@@ -274,13 +274,16 @@ split {
 				return vars.completedSplits.Add("EnterValley");
 			}
 		}
-		if (settings["Any%_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")) {
+		if (settings["Any%_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
+				&& Math.Sqrt(Math.Pow(27444.02148 - current.playerX, 2) + Math.Pow(-333.9581604 - current.playerY, 2)) < 1000) {
 			return vars.completedSplits.Add("CollectTeleportToPass");
 		}
-		if (settings["Any%_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && vars.PlayerHasItem("ITRU_TELEPORTOC")) {
+		if (settings["Any%_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && vars.PlayerHasItem("ITRU_TELEPORTOC")
+				&& Math.Sqrt(Math.Pow(-3099.234131 - current.playerX, 2) + Math.Pow(1561.480957 - current.playerY, 2)) < 1000) {
 			return vars.completedSplits.Add("CollectTeleportToCastle");
 		}
-		if (settings["Any%_CollectFirerain"] && !vars.completedSplits.Contains("CollectFirerain") && vars.PlayerHasItem("ITSC_FIRERAIN")) {
+		if (settings["Any%_CollectFirerain"] && !vars.completedSplits.Contains("CollectFirerain") && vars.PlayerHasItem("ITSC_FIRERAIN")
+				&& Math.Sqrt(Math.Pow(-13257.24512 - current.playerX, 2) + Math.Pow(-3468.070312 - current.playerY, 2)) < 1000) {
 			return vars.completedSplits.Add("CollectFirerain");
 		}
 		if (settings["Any%_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
@@ -294,7 +297,8 @@ split {
 		if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && current.chapter == 5) {
 			return vars.completedSplits.Add("Chapter5");
 		}
-		if (settings["Any%_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")) {
+		if (settings["Any%_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")
+				&& Math.Sqrt(Math.Pow(19408.43555 - current.playerX, 2) + Math.Pow(51082.89062 - current.playerY, 2)) < 1000) {
 			return vars.completedSplits.Add("CollectMap");
 		}
 		if (settings["Any%_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && current.world == 1 
