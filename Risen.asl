@@ -109,6 +109,8 @@ startup {
 		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");
 	
 	settings.Add("DisableLightning", false, "Disable lightning effect");
+
+	vars.isTimerPaused = false;
 }
 
 init {
@@ -224,6 +226,11 @@ update {
 			game.WriteBytes((IntPtr)ptr + 0x48, new byte[] { 0, 0, 0, 0 });
 		}
 	}
+
+	// Handle timer during crashes and game restarts
+	if (vars.isTimerPaused && current.cutscene != 0 && old.cutscene == 0) {
+		vars.isTimerPaused = false;
+	}
 }
 
 start {
@@ -246,7 +253,7 @@ reset {
 
 split {
 	// - Credits
-	if (settings["Credits"] && current.cutscene != 0 && old.cutscene == 0) {
+	if (settings["Credits"] && current.cutscene != 0 && old.cutscene == 0 && current.x != 0 && current.y != 0 && current.z != 0) {
 		return true;
 	}
 	// - Reach city
@@ -315,5 +322,10 @@ split {
 }
 
 isLoading {
-	return current.isLoading;
+	return current.isLoading || vars.isTimerPaused;
+}
+
+exit {
+	timer.IsGameTimePaused = true;
+	vars.isTimerPaused = true;
 }
