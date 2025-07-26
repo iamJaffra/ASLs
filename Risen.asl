@@ -20,14 +20,18 @@ state("Risen", "Old Patch") {
 	ulong questManager: "Game.dll", 0x00FDC188;
 	int chapter:        "Game.dll", 0x00FDC188, 0xCC;
 	
-	int Scordo_OpenHarborTunnelDoor: "Game.dll", 0x00FDC188, 0x30, 0x12C, 0x78;
-	int Oscar_DonsGoldSwordPieces:   "Game.dll", 0x00FDC188, 0x24,  0x4C, 0x78;
-	int Eldric_GoToHut:              "Game.dll", 0x00FDC188, 0x78,  0x78, 0x78;
-	int Inquisitor_OpenPortal:       "Game.dll", 0x00FDC188, 0x30, 0x1AC, 0x78;
-	int Eldric_FixTitanArmor:        "Game.dll", 0x00FDC188, 0x24,  0x10, 0x78;
+	int Scordo_OpenHarborTunnelDoor:  "Game.dll", 0x00FDC188, 0x30, 0x12C, 0x78;
+	int Oscar_DonsGoldSwordPieces:    "Game.dll", 0x00FDC188, 0x24,  0x4C, 0x78;
+	int Eldric_GoToHut:               "Game.dll", 0x00FDC188, 0x78,  0x78, 0x78;
+	int Inquisitor_OpenPortal:        "Game.dll", 0x00FDC188, 0x30, 0x1AC, 0x78;
+	int Eldric_FixTitanArmor:         "Game.dll", 0x00FDC188, 0x24,  0x10, 0x78;
+
+	int Player_FindAllTeleportstones: "Game.dll", 0x00FDC188, 0x24,  0xE0, 0x78;
+	int Ursegor_Freedom:              "Game.dll", 0x00FDC188, 0x30,  0xFC, 0x78; 
 
 	// NavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
 	int strength: "Game.dll", 0x00FA4644, 0x198, 0x1C, 0x3C, 0x2C;
+	int health:   "Game.dll", 0x00FA4644, 0x198, 0x1C, 0x3C, 0x10;
 
 	// COUNTER FOR ScriptGame.PS_Titan_Begin()
 	int titanCounter: "Script_Game.dll", 0x00213700;
@@ -56,14 +60,19 @@ state("Risen", "New Patch") {
 	ulong questManager: "Game.dll", 0x0126E7C8;
 	int chapter:        "Game.dll", 0x0126E7C8, 0x190;
 	
-	int Scordo_OpenHarborTunnelDoor: "Game.dll", 0x0126E7C8, 0x60, 0x258, 0xC8;
-	int Oscar_DonsGoldSwordPieces:   "Game.dll", 0x0126E7C8, 0x48,  0x98, 0xC8;
-	int Eldric_GoToHut:              "Game.dll", 0x0126E7C8, 0xF0,  0xF0, 0xC8;
-	int Inquisitor_OpenPortal:       "Game.dll", 0x0126E7C8, 0x60, 0x358, 0xC8;
-	int Eldric_FixTitanArmor:        "Game.dll", 0x0126E7C8, 0x48,  0x20, 0xC8;
+	int Scordo_OpenHarborTunnelDoor:  "Game.dll", 0x0126E7C8, 0x60, 0x258, 0xC8;
+	int Oscar_DonsGoldSwordPieces:    "Game.dll", 0x0126E7C8, 0x48,  0x98, 0xC8;
+	int Eldric_GoToHut:               "Game.dll", 0x0126E7C8, 0xF0,  0xF0, 0xC8;
+	int Inquisitor_OpenPortal:        "Game.dll", 0x0126E7C8, 0x60, 0x358, 0xC8;
+	int Eldric_FixTitanArmor:         "Game.dll", 0x0126E7C8, 0x48,  0x20, 0xC8;
+
+	int Player_FindAllTeleportstones: "Game.dll", 0x0126E7C8, 0x48, 0x1C0, 0xC8;
+	int Ursegor_Freedom:              "Game.dll", 0x0126E7C8, 0x60, 0x1F8, 0xC8; 
+
 
 	// NavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
 	int strength: "Game.dll", 0x01194858, 0x2C0, 0x40, 0x78, 0x3C;
+	int health:   "Game.dll", 0x01194858, 0x2C0, 0x40, 0x78, 0x20;
 
 	// COUNTER FOR ScriptGame.PS_Titan_Begin
 	int titanCounter: "Script_Game.dll", 0x002D4000;
@@ -80,7 +89,7 @@ state("Risen", "New Patch") {
 		var arraySize = game.ReadValue<int>(questManager + j + 0x8);
 		for (int i = 0; i < arraySize; i++) {
 			var questName = new DeepPointer(questManager + j, i * 0x8, 0x10, 0x0).DerefString(game, 100);
-			if (questName.Contains("...")) {
+			if (questName.Contains("Ursegor")) {
 				var offset = i * 0x8;
 				//print("Array " + j.ToString("X") + " : " + "[" + i + "]" + " (" + offset.ToString("X") + ")" + " = " + questName);
 				print("0x" + j.ToString("X") + ", 0x" + offset.ToString("X") + " = " + questName);
@@ -107,6 +116,14 @@ startup {
 
 	settings.Add("Extra", false, "Extra splits");
 		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");
+
+	settings.Add("NG+",   false, "NG+");
+		settings.Add("NG+_Jail",                         true, "Be put in jail",                            "NG+");
+		settings.Add("NG+_Player_FindAllTeleportstones", true, "Get Teleport Stones quest from Inquisitor", "NG+");
+		settings.Add("NG+_Ursegor_Freedom_start",        true, "Start quest: Ursegor's ",                   "NG+");
+		settings.Add("NG+_Ursegor_Freedom_complete",     true, "Complete quest: Ursegor's ",                "NG+");
+		settings.Add("NG+_EnterTitanArena",              true, "Enter the Titan Arena",                     "NG+");
+		settings.Add("NG+_Credits",                      true, "Reach the credits",                         "NG+");
 	
 	settings.Add("DisableLightning", false, "Disable lightning effect");
 
@@ -148,6 +165,8 @@ init {
 
 			game.WriteBytes(ptr + 0x19EAE0+0x8B8, jmp);
 			game.WriteBytes(ptr + 0x1F7A31, codecave);
+
+			print("Patched Script_Game.dll (New Patch)");
 		}
 		else if (version == "Old Patch") {
 			// E9 2A 14 00 00 90
@@ -184,13 +203,13 @@ init {
 
 			game.WriteBytes(ptr + 0x992E0+0x791, jmp);
 			game.WriteBytes(ptr + 0x9AEA0, codecave);
+
+			print("Patched Script_Game.dll (Old Patch)");
 		}
 	}
 	else {
 		throw new InvalidOperationException("Script_Game.dll not found. Trying again...");
 	}
-
-	print("Patched Script_Game.dll");
 
 	vars.startX = -38558.72000;
 	vars.startY =    -46.57122;
@@ -252,10 +271,6 @@ reset {
 }
 
 split {
-	// - Credits
-	if (settings["Credits"] && current.cutscene != 0 && old.cutscene == 0 && current.x != 0 && current.y != 0 && current.z != 0) {
-		return true;
-	}
 	// - Reach city
 	if (settings["City"] && !vars.completedSplits.Contains("City")) {
 		// Old Patch route
@@ -316,7 +331,27 @@ split {
 		return true;
 	}
 	// - Enter Titan arena
-	else if (settings["EnterTitanArena"] && current.titanCounter == old.titanCounter + 1 && vars.completedSplits.Add("EnterTitanArena")) {
+	else if ((settings["EnterTitanArena"] || settings["NG+_EnterTitanArena"]) 
+	       && current.titanCounter == old.titanCounter + 1 && vars.completedSplits.Add("EnterTitanArena")) {
+		return true;
+	}
+	// - Credits
+	else if ((settings["Credits"] || settings["NG+_Credits"])
+	      && current.cutscene != 0 && old.cutscene == 0 && current.x != 0 && current.y != 0 && current.z != 0) {
+		return true;
+	}
+
+	// ------------ NG+ ------------
+	// - Recover after being knocked out (get teleported to monastery jail)
+	else if (settings["NG+_Jail"] && current.health == 80 && old.health != 80 && old.health > 50 && vars.completedSplits.Add("NG+_Jail")) {
+		return true;
+	}
+	// - Player_FindAllTeleportstones (started)
+	else if (settings["Player_FindAllTeleportstones_start"] && current.Player_FindAllTeleportstones == 1 && old.Player_FindAllTeleportstones != 1 && vars.completedSplits.Add("Player_FindAllTeleportstones_start")) {
+		return true;
+	}
+	// - EPlayer_FindAllTeleportstones (succeeded)
+	else if (settings["Player_FindAllTeleportstones_complete"] && current.Player_FindAllTeleportstones == 2 && old.Player_FindAllTeleportstones != 2 && vars.completedSplits.Add("Player_FindAllTeleportstones_complete")) {
 		return true;
 	}
 }
