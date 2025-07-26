@@ -118,7 +118,7 @@ startup {
 		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");
 
 	settings.Add("NG+",   false, "NG+");
-		settings.Add("NG+_Jail",                         true, "Be put in jail",                            "NG+");
+		settings.Add("NG+_Jail",                         true, "Be sent to monastery",                      "NG+");
 		settings.Add("NG+_Player_FindAllTeleportstones", true, "Get Teleport Stones quest from Inquisitor", "NG+");
 		settings.Add("NG+_Ursegor_Freedom_start",        true, "Start quest: Ursegor's ",                   "NG+");
 		settings.Add("NG+_Ursegor_Freedom_complete",     true, "Complete quest: Ursegor's ",                "NG+");
