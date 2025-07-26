@@ -118,12 +118,12 @@ startup {
 		settings.Add("5Str",                        true, "Split every time you gain 5 Strength (Any%)", "Extra");
 
 	settings.Add("NG+",   false, "NG+");
-		settings.Add("NG+_Jail",                         true, "Be sent to monastery",                      "NG+");
-		settings.Add("NG+_Player_FindAllTeleportstones", true, "Get Teleport Stones quest from Inquisitor", "NG+");
-		settings.Add("NG+_Ursegor_Freedom_start",        true, "Start quest: Ursegor's Freedom",            "NG+");
-		settings.Add("NG+_Ursegor_Freedom_complete",     true, "Complete quest: Ursegor's Freedom",         "NG+");
-		settings.Add("NG+_EnterTitanArena",              true, "Enter the Titan Arena",                     "NG+");
-		settings.Add("NG+_Credits",                      true, "Reach the credits",                         "NG+");
+		settings.Add("Jail",                         true, "Be sent to monastery",                      "NG+");
+		settings.Add("Player_FindAllTeleportstones", true, "Get Teleport Stones quest from Inquisitor", "NG+");
+		settings.Add("Ursegor_Freedom_start",        true, "Start quest: Ursegor's Freedom",            "NG+");
+		settings.Add("Ursegor_Freedom_complete",     true, "Complete quest: Ursegor's Freedom",         "NG+");
+		settings.Add("NG+_EnterTitanArena",          true, "Enter the Titan Arena",                     "NG+");
+		settings.Add("NG+_Credits",                  true, "Reach the credits",                         "NG+");
 	
 	settings.Add("DisableLightning", false, "Disable lightning effect");
 
@@ -343,7 +343,7 @@ split {
 
 	// ------------ NG+ ------------
 	// - Recover after being knocked out (get teleported to monastery jail)
-	else if (settings["NG+_Jail"] && current.health == 80 && old.health != 80 && old.health > 50 && vars.completedSplits.Add("NG+_Jail")) {
+	else if (settings["Jail"] && current.health == 80 && old.health != 80 && old.health > 50 && vars.completedSplits.Add("Jail")) {
 		return true;
 	}
 	// - Player_FindAllTeleportstones (started)
