@@ -347,11 +347,15 @@ split {
 		return true;
 	}
 	// - Player_FindAllTeleportstones (started)
-	else if (settings["Player_FindAllTeleportstones_start"] && current.Player_FindAllTeleportstones == 1 && old.Player_FindAllTeleportstones != 1 && vars.completedSplits.Add("Player_FindAllTeleportstones_start")) {
+	else if (settings["Player_FindAllTeleportstones"] && current.Player_FindAllTeleportstones == 1 && old.Player_FindAllTeleportstones != 1 && vars.completedSplits.Add("Player_FindAllTeleportstones")) {
 		return true;
 	}
-	// - EPlayer_FindAllTeleportstones (succeeded)
-	else if (settings["Player_FindAllTeleportstones_complete"] && current.Player_FindAllTeleportstones == 2 && old.Player_FindAllTeleportstones != 2 && vars.completedSplits.Add("Player_FindAllTeleportstones_complete")) {
+	// - Ursegor_Freedom (started)
+	else if (settings["Ursegor_Freedom_start"] && current.Ursegor_Freedom == 1 && old.Ursegor_Freedom != 1 && vars.completedSplits.Add("Ursegor_Freedom_start")) {
+		return true;
+	}
+	// - Ursegor_Freedom (succeeded)
+	else if (settings["Ursegor_Freedom_complete"] && current.Ursegor_Freedom == 2 && old.Ursegor_Freedom != 2 && vars.completedSplits.Add("Ursegor_Freedom_complete")) {
 		return true;
 	}
 }
