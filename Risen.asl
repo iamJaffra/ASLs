@@ -120,8 +120,8 @@ startup {
 	settings.Add("NG+",   false, "NG+");
 		settings.Add("NG+_Jail",                         true, "Be sent to monastery",                      "NG+");
 		settings.Add("NG+_Player_FindAllTeleportstones", true, "Get Teleport Stones quest from Inquisitor", "NG+");
-		settings.Add("NG+_Ursegor_Freedom_start",        true, "Start quest: Ursegor's ",                   "NG+");
-		settings.Add("NG+_Ursegor_Freedom_complete",     true, "Complete quest: Ursegor's ",                "NG+");
+		settings.Add("NG+_Ursegor_Freedom_start",        true, "Start quest: Ursegor's Freedom",            "NG+");
+		settings.Add("NG+_Ursegor_Freedom_complete",     true, "Complete quest: Ursegor's Freedom",         "NG+");
 		settings.Add("NG+_EnterTitanArena",              true, "Enter the Titan Arena",                     "NG+");
 		settings.Add("NG+_Credits",                      true, "Reach the credits",                         "NG+");
 	
