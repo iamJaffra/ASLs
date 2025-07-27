@@ -15,9 +15,18 @@ state("Risen", "Old Patch") {
 
 	// QUESTS
 	// Quests are sorted into a bunch of different arrays depending on their type.
-	// We only need two of the possible quest status values (1 = started, 2 = completed), stored at
+	// A quest's status is stored at
 	// gCQuestManager.<array>[i].questStatus
-	ulong questManager: "Game.dll", 0x00FDC188;
+	//
+	// Possible values:
+	// open      = 0
+	// started   = 1
+	// succeeded = 2
+	// failed    = 3
+	// closed    = 4
+	// canceled  = 5
+	
+	// ulong questManager: "Game.dll", 0x00FDC188;
 	int chapter:        "Game.dll", 0x00FDC188, 0xCC;
 	
 	int Scordo_OpenHarborTunnelDoor:  "Game.dll", 0x00FDC188, 0x30, 0x12C, 0x78;
@@ -55,9 +64,18 @@ state("Risen", "New Patch") {
 
 	// QUESTS
 	// Quests are sorted into a bunch of different arrays depending on their type.
-	// We only need two of the possible quest status values (1 = started, 2 = completed), stored at
+	// A quest's status is stored at
 	// gCQuestManager.<array>[i].questStatus
-	ulong questManager: "Game.dll", 0x0126E7C8;
+	//
+	// Possible values:
+	// open      = 0
+	// started   = 1
+	// succeeded = 2
+	// failed    = 3
+	// closed    = 4
+	// canceled  = 5
+
+	// ulong questManager: "Game.dll", 0x0126E7C8;
 	int chapter:        "Game.dll", 0x0126E7C8, 0x190;
 	
 	int Scordo_OpenHarborTunnelDoor:  "Game.dll", 0x0126E7C8, 0x60, 0x258, 0xC8;
@@ -68,7 +86,6 @@ state("Risen", "New Patch") {
 
 	int Player_FindAllTeleportstones: "Game.dll", 0x0126E7C8, 0x48, 0x1C0, 0xC8;
 	int Ursegor_Freedom:              "Game.dll", 0x0126E7C8, 0x60, 0x1F8, 0xC8; 
-
 
 	// NavigationAdmin.Player.PropertySets[15].Strength  (15 = Skills (gCSkills_PS))
 	int strength: "Game.dll", 0x01194858, 0x2C0, 0x40, 0x78, 0x3C;
@@ -208,6 +225,7 @@ init {
 		}
 	}
 	else {
+		Thread.Sleep(1000);
 		throw new InvalidOperationException("Script_Game.dll not found. Trying again...");
 	}
 
@@ -343,7 +361,7 @@ split {
 
 	// ------------ NG+ ------------
 	// - Recover after being knocked out (get teleported to monastery jail)
-	else if (settings["Jail"] && current.health == 80 && old.health != 80 && old.health > 50 && vars.completedSplits.Add("Jail")) {
+	else if (settings["Jail"] && current.health == 80 && old.health != 80 && old.health > 1 && vars.completedSplits.Add("Jail")) {
 		return true;
 	}
 	// - Player_FindAllTeleportstones (started)
