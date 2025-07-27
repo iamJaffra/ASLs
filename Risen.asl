@@ -14,8 +14,9 @@ state("Risen", "Old Patch") {
 	float playtime: "Game.dll",    0xFA63A0, 0x48, 0x24;
 
 	// QUESTS
-	// Quests are sorted into a bunch of different arrays depending on their type.
-	// A quest's status is stored at
+	// Quests are sorted into a bunch of different arrays depending on their category 
+	// (e.g. Item quests, Kill quests, Escort quests, etc).
+	// The quest status is stored at
 	// gCQuestManager.<array>[i].questStatus
 	//
 	// Possible values:
@@ -63,8 +64,9 @@ state("Risen", "New Patch") {
 	float playtime: "Game.dll",    0x01194880, 0x88, 0x34;
 
 	// QUESTS
-	// Quests are sorted into a bunch of different arrays depending on their type.
-	// A quest's status is stored at
+	// Quests are sorted into a bunch of different arrays depending on their category 
+	// (e.g. Item quests, Kill quests, Escort quests, etc).
+	// The quest status is stored at
 	// gCQuestManager.<array>[i].questStatus
 	//
 	// Possible values:
