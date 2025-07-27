@@ -287,7 +287,7 @@ onStart {
 }
 
 reset {
-	return 0 < current.playtime && current.playtime < 3.0;
+	return 0 < current.playtime && current.playtime < 1.0;
 }
 
 split {
@@ -357,7 +357,7 @@ split {
 	}
 	// - Credits
 	else if ((settings["Credits"] || settings["NG+_Credits"])
-	      && current.cutscene != 0 && old.cutscene == 0 && current.x != 0 && current.y != 0 && current.z != 0) {
+	      && current.cutscene != 0 && old.cutscene == 0 && current.x != 0 && current.y != 0 && current.z != 0 && !current.isLoading) {
 		return true;
 	}
 
