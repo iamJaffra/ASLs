@@ -233,6 +233,10 @@ update {
 	if (!vars.canReset && current.igt > 500000) {
 		vars.canReset = true;
 	}
+
+	if (old.load != current.load) {
+		vars.CreateNPCAddrMap();
+	}
 }
 
 split {
