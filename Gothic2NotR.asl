@@ -176,6 +176,8 @@ init {
 
 	vars.snapperWeed = 0;
 	vars.canReset = true;
+
+	vars.lastTime = 0;
 }
 
 start {
@@ -234,8 +236,10 @@ update {
 		vars.canReset = true;
 	}
 
-	if (old.load != current.load) {
+	if ((old.load == 1 && current.load == 0) || current.igt > vars.lastTime + 2000000) {
 		vars.CreateNPCAddrMap();
+		vars.lastTime = current.igt;
+		print("lastTime == " + vars.lastTime);
 	}
 }
 
