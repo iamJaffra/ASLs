@@ -1,17 +1,19 @@
 state("Gothic2") {
 	long igt:           "ZSPEEDRUNTIMER.DLL", 0x19F70;
-	int world:          "Gothic2.exe", 0x004C0664, 0xB8, 0x91C;
-	int chapter:        "Gothic2.exe", 0x00584C20, 0x2700, 0x9B4;
-	byte inCutscene:    "Gothic2.exe", 0x004C38B8;
-	float playerX:      "Gothic2.exe", 0x004C0894;
-	float playerY:      "Gothic2.exe", 0x004C088C;
-	int exp:            "Gothic2.exe", 0x004C0664, 0x3A0;
-	int guild:          "Gothic2.exe", 0x004C0664, 0x21C;
-	int firstItem:      "Gothic2.exe", 0x005831DC, 0x5E0, 0x8;
-	int firstNPC:       "Gothic2.exe", 0x005813DC, 0x8, 0x6280, 0x8;
-	int playerAddr:     "Gothic2.exe", 0x004C0664;
-	int inventoryOpen:  "Gothic2.exe", 0x0057DCA8;
-	int inDialogue:     "Gothic2.exe", 0x004C0664, 0x284;
+	int world:          "Gothic2.exe", 0x4C0664, 0xB8, 0x91C;
+	int chapter:        "Gothic2.exe", 0x584C20, 0x2700, 0x9B4;
+	byte inCutscene:    "Gothic2.exe", 0x4C38B8;
+	float playerX:      "Gothic2.exe", 0x4C0894;
+	float playerY:      "Gothic2.exe", 0x4C088C;
+	int exp:            "Gothic2.exe", 0x4C0664, 0x3A0;
+	int guild:          "Gothic2.exe", 0x4C0664, 0x21C;
+	int firstItem:      "Gothic2.exe", 0x5831DC, 0x5E0, 0x8;
+	int firstNPC:       "Gothic2.exe", 0x5813DC, 0x8, 0x6280, 0x8;
+	int playerAddr:     "Gothic2.exe", 0x4C0664;
+	int inventoryOpen:  "Gothic2.exe", 0x57DCA8;
+	int inDialogue:     "Gothic2.exe", 0x4C0664, 0x284;
+	int inMenu:         "Gothic2.exe", 0x4C37E0;
+	int inSaveLoad:     "Gothic2.exe", 0x55C80C;
 }
 
 startup {
@@ -106,6 +108,8 @@ startup {
 
 	// Variable to save IGT in case the game crashes
 	vars.timeKeeper = new TimeSpan();
+
+	
 }
 
 
@@ -226,11 +230,19 @@ init {
 	});
 
 	vars.canReset = true;
+
+	vars.lastTime = 0;
 }
 
 update {
 	if (!vars.canReset && current.igt > 500000) {
 		vars.canReset = true;
+	}
+
+	if ((old.inSaveLoad == 1 && current.inSaveLoad == 0) || current.igt > vars.lastTime + 2000000) {
+		vars.CreateNPCAddrMap();
+		vars.lastTime = current.igt;
+		print("lastTime == " + vars.lastTime);
 	}
 }
 
@@ -271,47 +283,64 @@ split {
 		}
 		if (settings["Any%_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
 			if ((settings["Any%_EnterValleyWithFieldraider"] && vars.completedSplits.Contains("CollectedFieldraider")) || !settings["Any%_EnterValleyWithFieldraider"]) {
+				print("Split: EnterValley");
 				return vars.completedSplits.Add("EnterValley");
 			}
 		}
-		if (settings["Any%_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
+		if (settings["Any%_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
 				&& Math.Sqrt(Math.Pow(27444.02148 - current.playerX, 2) + Math.Pow(-333.9581604 - current.playerY, 2)) < 1000) {
+			print("Split: CollectTeleportToPass");
 			return vars.completedSplits.Add("CollectTeleportToPass");
 		}
-		if (settings["Any%_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && vars.PlayerHasItem("ITRU_TELEPORTOC")
+		if (settings["Any%_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC")
 				&& Math.Sqrt(Math.Pow(-3099.234131 - current.playerX, 2) + Math.Pow(1561.480957 - current.playerY, 2)) < 1000) {
+			print("Split: CollectTeleportToCastle");
 			return vars.completedSplits.Add("CollectTeleportToCastle");
 		}
-		if (settings["Any%_CollectFirerain"] && !vars.completedSplits.Contains("CollectFirerain") && vars.PlayerHasItem("ITSC_FIRERAIN")
+		if (settings["Any%_CollectFirerain"] && !vars.completedSplits.Contains("CollectFirerain") && current.world == 2 && vars.PlayerHasItem("ITSC_FIRERAIN")
 				&& Math.Sqrt(Math.Pow(-13257.24512 - current.playerX, 2) + Math.Pow(-3468.070312 - current.playerY, 2)) < 1000) {
+			print("Split: CollectFirerain");
 			return vars.completedSplits.Add("CollectFirerain");
 		}
 		if (settings["Any%_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
 				&& Math.Sqrt(Math.Pow(-3140 - current.playerX, 2) + Math.Pow(1012 - current.playerY, 2)) < 200 
 				&& Math.Sqrt(Math.Pow(-3140 - old.playerX, 2) + Math.Pow(1012 - old.playerY, 2)) > 1000) {
+			print("Split: TeleportToCastle");
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
+		if (settings["Any%_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
+				&& Math.Sqrt(Math.Pow(1962 - current.playerX, 2) + Math.Pow(-2644 - current.playerY, 2)) < 200) {
+			print("Split: OpenGate");
+			return vars.completedSplits.Add("OpenGate");
+		}
 		if (settings["Any%_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && vars.IsDead(9148)) {
+			print("Split: RockDragon");
 			return vars.completedSplits.Add("RockDragon");
 		}
 		if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && current.chapter == 5) {
+			print("Split: Chapter5");
 			return vars.completedSplits.Add("Chapter5");
 		}
-		if (settings["Any%_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")
+		if (settings["Any%_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && current.world == 1 && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")
 				&& Math.Sqrt(Math.Pow(19408.43555 - current.playerX, 2) + Math.Pow(51082.89062 - current.playerY, 2)) < 1000) {
+			print("Split: CollectMap");
 			return vars.completedSplits.Add("CollectMap");
 		}
 		if (settings["Any%_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && current.world == 1 
 				&& vars.IsInDialogue(801) && current.exp == old.exp + 2000) {
+			print("Split: RecruitTorlof");
 			return vars.completedSplits.Add("RecruitTorlof");
 		}
 		if (settings["Any%_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
+			print("Split: Irdorath");
 			return vars.completedSplits.Add("Irdorath");
 		}
 		if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && vars.IsDead(9154)) {
+			print("Split: UndeadDragon");
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 		if (settings["Any%_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
+			print("Split: End");
 			return vars.completedSplits.Add("End");
 		}
 	}
@@ -333,7 +362,7 @@ split {
 				&& Math.Sqrt(Math.Pow(-3140 - old.playerX, 2) + Math.Pow(1012 - old.playerY, 2)) > 1000) {
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
-		if (settings["Any%NoFlying_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene == 1 && current.world == 2
+		if (settings["Any%NoFlying_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
 				&& Math.Sqrt(Math.Pow(1962 - current.playerX, 2) + Math.Pow(-2644 - current.playerY, 2)) < 200) {
 			return vars.completedSplits.Add("OpenGate");
 		}
@@ -379,7 +408,7 @@ split {
 		if (settings["AllChapters_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
 			return vars.completedSplits.Add("EnterValley");
 		}
-		if (settings["AllChapters_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene == 1 && current.world == 2
+		if (settings["AllChapters_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
 				&& Math.Sqrt(Math.Pow(1962 - current.playerX, 2) + Math.Pow(-2644 - current.playerY, 2)) < 200) {
 			return vars.completedSplits.Add("OpenGate");
 		}
@@ -503,6 +532,8 @@ split {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 	}
+
+	
 }
 
 isLoading {
