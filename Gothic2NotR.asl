@@ -15,7 +15,7 @@ state("Gothic2") {
 	string10 worldname: "Gothic2.exe", 0x006B0884, 0x8, 0x6274, 0x0;
 	int inDialogue:     "Gothic2.exe", 0x006B629C, 0x1C, 0x298;
 	int inventoryOpen:  "Gothic2.exe", 0x005A43F0;
-	int load:           "Gothic2.exe", 0x005A37FC;
+	int load:           "Gothic2.exe", 0x005A3434;
 }
 
 startup {
