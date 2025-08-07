@@ -83,8 +83,13 @@ onStart {
 	vars.completedSplits.Clear();
 }
 
+
+reset {
+	return current.video == 0x1C02 && old.video != 0x1C02;
+}
+
 split {
-	if (settings[""] && !old.cake && current.cake) {
+	if (settings["Cake"] && !old.cake && current.cake) {
 		vars.LogPuzzle("Cake");
 		return vars.completedSplits.Add("Cake");
 	}
@@ -154,7 +159,7 @@ split {
 		vars.LogPuzzle("Chapel");
 		return vars.completedSplits.Add("Chapel");
 	}
-	else if (settings["Microscope"] && current.video == 0x3006 && old.video == 0x50A0) {
+	else if (settings["Microscope"] && current.room == 7 && current.video == 0x3006 && old.video == 0x50A0) {
 		vars.LogPuzzle("Microscope");
 		return vars.completedSplits.Add("Microscope");
 	}
