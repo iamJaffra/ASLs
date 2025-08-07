@@ -79,6 +79,10 @@ start {
 	}
 }
 
+onStart {
+	vars.completedSplits.Clear();
+}
+
 split {
 	if (settings[""] && !old.cake && current.cake) {
 		vars.LogPuzzle("Cake");
