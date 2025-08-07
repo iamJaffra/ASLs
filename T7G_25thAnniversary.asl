@@ -1,6 +1,6 @@
 // ASL by Jaffra
 
-state("t7g") {
+state("t7g", "GOG") {
 	// The 25th anniversary edition runs on a modified version of ScummVM
 	// and was given a new interface using HTML Renderer. 
 
@@ -32,6 +32,32 @@ state("t7g") {
 	short video: 0x004486D4, 0x58, 0x784;
 }
 
+state("t7g", "Steam") {
+	// GroovieEngine.Script._variables[i]  (0x1A4 + i)
+	bool cake:       0x0044731C, 0x58, 0x27A;
+	bool cans:       0x0044731C, 0x58, 0x262; 
+	bool grate:      0x0044731C, 0x58, 0x2A6; 
+	bool queens:     0x0044731C, 0x58, 0x274; 
+	bool bed:        0x0044731C, 0x58, 0x250; 
+	bool spiders:    0x0044731C, 0x58, 0x287;
+	bool telescope:  0x0044731C, 0x58, 0x266;
+	bool dollroom:   0x0044731C, 0x58, 0x241;
+	bool blocks:     0x0044731C, 0x58, 0x253;
+	bool knights:    0x0044731C, 0x58, 0x268;
+	bool heartmaze:  0x0044731C, 0x58, 0x25E;
+	bool cards:      0x0044731C, 0x58, 0x23E;
+	bool coins:      0x0044731C, 0x58, 0x278;
+	bool piano:      0x0044731C, 0x58, 0x271;
+	
+	// The room variable only keeps track of which room the player is currently in, 
+	// but not the position within that room.
+	byte room: 0x0044731C, 0x58, 0x231;
+	
+	// We also monitor the memory address that stores the reference "id" of the current video
+	// GroovieEngine.Script._videoRef
+	short video: 0x0044731C, 0x58, 0x784;
+}
+
 startup {
 	settings.Add("Puzzles",             false, "Puzzle splits");
 		settings.Add("Cake",            false, "Cake",            "Puzzles");
@@ -60,11 +86,35 @@ startup {
 }
 
 init {
+	string hash;
+
+	using (var md5 = System.Security.Cryptography.MD5.Create())
+	using (var fs = File.OpenRead(modules.First().FileName))
+		hash = string.Concat(md5.ComputeHash(fs).Select(b => b.ToString("X2")));
+
+	print(hash);
+	
+	if (hash == "9131097EC35B25831061C8CBB84AC2AF") {
+		version = "GOG";
+	} 
+	else if (hash == "00FA6418CE08F55B5B54296C54D98F7A") {
+		version = "Steam";
+	} 
+	else {
+		version = "Unknown";
+	}
+
 	vars.LogPuzzle = (Action<string>)((puzzle) => {
 		print("[T7G ASL] Split due to completing the " + puzzle + " Puzzle.");
 	});
 
 	vars.completedSplits = new HashSet<string>();
+}
+
+update {
+	if (version == "Unknown") {
+		return false;
+	}
 }
 
 start {
@@ -82,7 +132,6 @@ start {
 onStart {
 	vars.completedSplits.Clear();
 }
-
 
 reset {
 	return current.video == 0x1C02 && old.video != 0x1C02;
