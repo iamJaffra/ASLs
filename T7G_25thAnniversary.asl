@@ -152,7 +152,7 @@ split {
 		vars.LogPuzzle("Grate");
 		return vars.completedSplits.Add("Grate");
 	}
-	else if (settings["Maze"] && current.video == 0x5039 && old.video != 0x5039) {
+	else if (settings["Maze"] && current.room == 6 && old.room == 5) {
 		vars.LogPuzzle("Maze");
 		return vars.completedSplits.Add("Maze");
 	}
