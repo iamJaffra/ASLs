@@ -109,6 +109,8 @@ init {
 	});
 
 	vars.completedSplits = new HashSet<string>();
+
+	refreshRate = 100;
 }
 
 update {
