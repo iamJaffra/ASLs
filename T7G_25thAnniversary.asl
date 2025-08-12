@@ -15,6 +15,7 @@ state("t7g", "GOG") {
 	bool queens:     0x004486D4, 0x58, 0x274; 
 	bool bed:        0x004486D4, 0x58, 0x250; 
 	bool spiders:    0x004486D4, 0x58, 0x287;
+	byte bishops:    0x004486D4, 0x58, 0x295;
 	bool telescope:  0x004486D4, 0x58, 0x266;
 	bool dollroom:   0x004486D4, 0x58, 0x241;
 	bool blocks:     0x004486D4, 0x58, 0x253;
@@ -42,6 +43,7 @@ state("t7g", "Steam") {
 	bool queens:     0x0044731C, 0x58, 0x274; 
 	bool bed:        0x0044731C, 0x58, 0x250; 
 	bool spiders:    0x0044731C, 0x58, 0x287;
+	byte bishops:    0x0044731C, 0x58, 0x295;
 	bool telescope:  0x0044731C, 0x58, 0x266;
 	bool dollroom:   0x0044731C, 0x58, 0x241;
 	bool blocks:     0x0044731C, 0x58, 0x253;
@@ -168,7 +170,7 @@ split {
 		vars.LogPuzzle("Queens");
 		return vars.completedSplits.Add("Queens");
 	}
-	else if (settings["Bishops"] && current.video == 0x2885 && old.video != 0x2885) {
+	else if (settings["Bishops"] && current.bishops == 49 && old.bishops != 49) {
 		vars.LogPuzzle("Bishops");
 		return vars.completedSplits.Add("Bishops");
 	}
