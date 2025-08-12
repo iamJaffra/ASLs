@@ -11,6 +11,7 @@ state("t7g", "GOG") {
 	bool cake:       0x004486D4, 0x58, 0x27A;
 	bool cans:       0x004486D4, 0x58, 0x262; 
 	bool grate:      0x004486D4, 0x58, 0x2A6; 
+	bool coffins:    0x004486D4, 0x58, 0x24E; 
 	bool queens:     0x004486D4, 0x58, 0x274; 
 	bool bed:        0x004486D4, 0x58, 0x250; 
 	bool spiders:    0x004486D4, 0x58, 0x287;
@@ -37,6 +38,7 @@ state("t7g", "Steam") {
 	bool cake:       0x0044731C, 0x58, 0x27A;
 	bool cans:       0x0044731C, 0x58, 0x262; 
 	bool grate:      0x0044731C, 0x58, 0x2A6; 
+	bool coffins:    0x0044731C, 0x58, 0x24E; 
 	bool queens:     0x0044731C, 0x58, 0x274; 
 	bool bed:        0x0044731C, 0x58, 0x250; 
 	bool spiders:    0x0044731C, 0x58, 0x287;
@@ -82,7 +84,7 @@ startup {
 		settings.Add("Piano",           false, "Piano",           "Puzzles");
 		settings.Add("Knives",          false, "Knives",          "Puzzles");
 		settings.Add("Attic",           false, "Attic",           "Puzzles");
-	settings.Add("End", false, "Split on turning left at the mirror in the attic (Final input)");
+	settings.Add("End", true, "Split on turning left at the mirror in the attic (Final input)");
 }
 
 init {
@@ -158,7 +160,7 @@ split {
 		vars.LogPuzzle("Maze");
 		return vars.completedSplits.Add("Maze");
 	}
-	else if (settings["Coffins"] && current.video == 0x3C6C && old.video != 0x3C6C) {
+	else if (settings["Coffins"] && current.coffins && !old.coffins) {
 		vars.LogPuzzle("Coffins");
 		return vars.completedSplits.Add("Coffins");
 	}
