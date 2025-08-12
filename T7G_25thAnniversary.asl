@@ -33,6 +33,8 @@ state("t7g", "GOG") {
 	// We also monitor the memory address that stores the reference "id" of the current video
 	// GroovieEngine.Script._videoRef
 	short video: 0x004486D4, 0x58, 0x784;
+
+	byte instruction: 0x004486D4, 0x58, 0x19B;
 }
 
 state("t7g", "Steam") {
@@ -62,6 +64,8 @@ state("t7g", "Steam") {
 	// We also monitor the memory address that stores the reference "id" of the current video
 	// GroovieEngine.Script._videoRef
 	short video: 0x0044731C, 0x58, 0x784;
+
+	byte instruction: 0x0044731C, 0x58, 0x19B;
 }
 
 startup {
@@ -231,8 +235,8 @@ split {
 		vars.LogPuzzle("Knives");
 		return true;
 	}
-	else if (settings["End"] && current.room == 1 && current.video == 0x0007 && old.video != 0x0007) {
-		// The final input has occured; the run is over.
+	else if (settings["End"] && current.room == 1 && current.video == 0x0007 && current.instruction != 0x37 && vars.completedSplits.Add("End")) {
+		print("[T7G ASL] Split on final input -- The run is over.");
 		return true;
 	}
 }
