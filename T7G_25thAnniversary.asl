@@ -158,9 +158,9 @@ split {
 		vars.LogPuzzle("Grate");
 		return vars.completedSplits.Add("Grate");
 	}
-	else if (settings["Maze"] && current.room == 6 && old.room == 5) {
+	else if (current.room == 6 && old.room == 5 && vars.completedSplits.Add("Maze")) {
 		vars.LogPuzzle("Maze");
-		return vars.completedSplits.Add("Maze");
+		return settings["Maze"];
 	}
 	else if (settings["Coffins"] && current.coffins && !old.coffins) {
 		vars.LogPuzzle("Coffins");
