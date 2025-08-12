@@ -226,7 +226,7 @@ split {
 		vars.LogPuzzle("Piano");
 		return vars.completedSplits.Add("Piano");
 	}
-	else if (settings["Knives"] && current.video == 0x14AD && old.video != 0x14AD) {
+	else if (settings["Knives"] && current.room == 2 && current.video == 0x14AD && old.video != 0x14AD) {
 		vars.LogPuzzle("Knives");
 		return vars.completedSplits.Add("Knives");
 	}
