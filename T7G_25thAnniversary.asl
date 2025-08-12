@@ -23,6 +23,7 @@ state("t7g", "GOG") {
 	bool heartmaze:  0x004486D4, 0x58, 0x25E;
 	bool cards:      0x004486D4, 0x58, 0x23E;
 	bool coins:      0x004486D4, 0x58, 0x278;
+	byte chapel:     0x004486D4, 0x58, 0x297;
 	bool piano:      0x004486D4, 0x58, 0x271;
 	
 	// The room variable only keeps track of which room the player is currently in, 
@@ -51,6 +52,7 @@ state("t7g", "Steam") {
 	bool heartmaze:  0x0044731C, 0x58, 0x25E;
 	bool cards:      0x0044731C, 0x58, 0x23E;
 	bool coins:      0x0044731C, 0x58, 0x278;
+	bool chapel:     0x0044731C, 0x58, 0x297;
 	bool piano:      0x0044731C, 0x58, 0x271;
 	
 	// The room variable only keeps track of which room the player is currently in, 
@@ -85,7 +87,6 @@ startup {
 		settings.Add("Gallery",         false, "Gallery",         "Puzzles");
 		settings.Add("Piano",           false, "Piano",           "Puzzles");
 		settings.Add("Knives",          false, "Knives",          "Puzzles");
-		settings.Add("Attic",           false, "Attic",           "Puzzles");
 	settings.Add("End", true, "Split on turning left at the mirror in the attic (Final input)");
 }
 
@@ -114,7 +115,7 @@ init {
 
 	vars.completedSplits = new HashSet<string>();
 
-	refreshRate = 100;
+	refreshRate = 120;
 }
 
 update {
@@ -144,95 +145,91 @@ reset {
 }
 
 split {
-	if (settings["Cake"] && !old.cake && current.cake) {
+	if (settings["Cake"] && !old.cake && current.cake && vars.completedSplits.Add("Cake")) {
 		vars.LogPuzzle("Cake");
-		return vars.completedSplits.Add("Cake");
+		return true;
 	}
-	else if (settings["Cans"] && !old.cans && current.cans) {
+	else if (settings["Cans"] && !old.cans && current.cans && vars.completedSplits.Add("Cans")) {
 		vars.LogPuzzle("Cans");
-		return vars.completedSplits.Add("Cans");
+		return true;
 	}
-	else if (settings["Grate"] && current.room == 5 && !old.grate && current.grate) { 
+	else if (settings["Grate"] && current.room == 5 && !old.grate && current.grate && vars.completedSplits.Add("Grate")) { 
 		// The "grate variable" is also used for other things, so we 
 		// additionally check whether the player is currently in the maze (5)
 		vars.LogPuzzle("Grate");
-		return vars.completedSplits.Add("Grate");
+		return true;
 	}
-	else if (current.room == 6 && old.room == 5 && vars.completedSplits.Add("Maze")) {
+	else if (current.room == 6 && old.room == 5 && vars.completedSplits.Add("Maze") && settings["Maze"]) {
 		vars.LogPuzzle("Maze");
-		return settings["Maze"];
+		return true;
 	}
-	else if (settings["Coffins"] && current.coffins && !old.coffins) {
+	else if (settings["Coffins"] && current.coffins && !old.coffins && vars.completedSplits.Add("Coffins")) {
 		vars.LogPuzzle("Coffins");
-		return vars.completedSplits.Add("Coffins");
+		return true;
 	}
-	else if (settings["Queens"] && !old.queens && current.queens) {
+	else if (settings["Queens"] && !old.queens && current.queens && vars.completedSplits.Add("Queens")) {
 		vars.LogPuzzle("Queens");
-		return vars.completedSplits.Add("Queens");
+		return true;
 	}
-	else if (settings["Bishops"] && current.bishops == 49 && old.bishops != 49) {
+	else if (settings["Bishops"] && current.bishops == 49 && old.bishops != 49 && vars.completedSplits.Add("Bishops")) {
 		vars.LogPuzzle("Bishops");
-		return vars.completedSplits.Add("Bishops");
+		return true;
 	}
-	else if (settings["Bed"] && !old.bed && current.bed) {
+	else if (settings["Bed"] && !old.bed && current.bed && vars.completedSplits.Add("Bed")) {
 		vars.LogPuzzle("Martine's Bed");
-		return vars.completedSplits.Add("Bed");
+		return true;
 	}
-	else if (settings["Spiders"] && !old.spiders && current.spiders) {
+	else if (settings["Spiders"] && !old.spiders && current.spiders && vars.completedSplits.Add("Spiders")) {
 		vars.LogPuzzle("Spiders");
-		return vars.completedSplits.Add("Spiders");
+		return true;
 	}
-	else if (settings["Telescope"] && !old.telescope && current.telescope) {
+	else if (settings["Telescope"] && !old.telescope && current.telescope && vars.completedSplits.Add("Telescope")) {
 		vars.LogPuzzle("Telescope");
-		return vars.completedSplits.Add("Telescope");
+		return true;
 	}
-	else if (settings["Doll Room"] && !old.dollroom && current.dollroom) {
+	else if (settings["Doll Room"] && !old.dollroom && current.dollroom && vars.completedSplits.Add("Doll Room")) {
 		vars.LogPuzzle("Doll Room");
-		return vars.completedSplits.Add("Doll Room");
+		return true;
 	}
-	else if (settings["Spelling Blocks"] && !old.blocks && current.blocks) {
+	else if (settings["Spelling Blocks"] && !old.blocks && current.blocks && vars.completedSplits.Add("Spelling Blocks")) {
 		vars.LogPuzzle("Spelling Blocks");
-		return vars.completedSplits.Add("Spelling Blocks");
+		return true;
 	}
-	else if (settings["Knights"] && !old.knights && current.knights) {
+	else if (settings["Knights"] && !old.knights && current.knights && vars.completedSplits.Add("Knights")) {
 		vars.LogPuzzle("Knights");
-		return vars.completedSplits.Add("Knights");
+		return true;
 	}
-	else if (settings["Heart Maze"] && !old.heartmaze && current.heartmaze) {
+	else if (settings["Heart Maze"] && !old.heartmaze && current.heartmaze && vars.completedSplits.Add("Heart Maze")) {
 		vars.LogPuzzle("Heart Maze");
-		return vars.completedSplits.Add("Heart Maze");
+		return true;
 	}
-	else if (settings["Cards"] && !old.cards && current.cards) {
+	else if (settings["Cards"] && !old.cards && current.cards && vars.completedSplits.Add("Cards")) {
 		vars.LogPuzzle("Cards");
-		return vars.completedSplits.Add("Cards");
+		return true;
 	}
-	else if (settings["Coins"] && !old.coins && current.coins) {
+	else if (settings["Coins"] && !old.coins && current.coins && vars.completedSplits.Add("Coins")) {
 		vars.LogPuzzle("Coins");
-		return vars.completedSplits.Add("Coins");
+		return true;
 	}
-	else if (settings["Chapel"] && current.video == 0x0811 && old.video != 0x0811) {
+	else if (settings["Chapel"] && current.chapel == 49 && old.chapel != 49 && vars.completedSplits.Add("Chapel")) {
 		vars.LogPuzzle("Chapel");
-		return vars.completedSplits.Add("Chapel");
+		return true;
 	}
-	else if (settings["Microscope"] && current.room == 7 && current.video == 0x3006 && old.video == 0x50A0) {
+	else if (settings["Microscope"] && current.room == 7 && current.video == 0x3006 && old.video == 0x50A0 && vars.completedSplits.Add("Microscope")) {
 		vars.LogPuzzle("Microscope");
-		return vars.completedSplits.Add("Microscope");
+		return true;
 	}
-	else if (settings["Gallery"] && current.video == 0x4829 && old.video != 0x4829) {
+	else if (settings["Gallery"] && current.video == 0x4829 && old.video != 0x4829 && vars.completedSplits.Add("Gallery")) {
 		vars.LogPuzzle("Gallery Portrait");
-		return vars.completedSplits.Add("Gallery");
+		return true;
 	}
-	else if (settings["Piano"] && !old.piano && current.piano) {
+	else if (settings["Piano"] && !old.piano && current.piano && vars.completedSplits.Add("Piano")) {
 		vars.LogPuzzle("Piano");
-		return vars.completedSplits.Add("Piano");
+		return true;
 	}
-	else if (settings["Knives"] && current.room == 2 && current.video == 0x14AD && old.video != 0x14AD) {
+	else if (settings["Knives"] && current.room == 2 && current.video == 0x14AD && old.video != 0x14AD && vars.completedSplits.Add("Knives")) {
 		vars.LogPuzzle("Knives");
-		return vars.completedSplits.Add("Knives");
-	}
-	else if (settings["Attic"] && current.room == 1 && current.video == 0x50A0 && old.video != 0x50A0) {
-		vars.LogPuzzle("Attic");
-		return vars.completedSplits.Add("Attic");
+		return true;
 	}
 	else if (settings["End"] && current.room == 1 && current.video == 0x0007 && old.video != 0x0007) {
 		// The final input has occured; the run is over.
