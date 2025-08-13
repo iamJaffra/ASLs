@@ -24,6 +24,7 @@ state("t7g", "GOG") {
 	bool cards:      0x004486D4, 0x58, 0x23E;
 	bool coins:      0x004486D4, 0x58, 0x278;
 	byte chapel:     0x004486D4, 0x58, 0x297;
+	byte knives:     0x004486D4, 0x58, 0x296;
 	bool piano:      0x004486D4, 0x58, 0x271;
 	
 	// The room variable only keeps track of which room the player is currently in, 
@@ -55,6 +56,7 @@ state("t7g", "Steam") {
 	bool cards:      0x0044731C, 0x58, 0x23E;
 	bool coins:      0x0044731C, 0x58, 0x278;
 	bool chapel:     0x0044731C, 0x58, 0x297;
+	byte knives:     0x0044731C, 0x58, 0x296;
 	bool piano:      0x0044731C, 0x58, 0x271;
 	
 	// The room variable only keeps track of which room the player is currently in, 
@@ -231,7 +233,7 @@ split {
 		vars.LogPuzzle("Piano");
 		return true;
 	}
-	else if (settings["Knives"] && current.room == 2 && current.video == 0x14AD && old.video != 0x14AD && vars.completedSplits.Add("Knives")) {
+	else if (settings["Knives"] && current.room == 2 && current.knives == 49 && old.knives != 49 && vars.completedSplits.Add("Knives")) {
 		vars.LogPuzzle("Knives");
 		return true;
 	}
@@ -239,5 +241,4 @@ split {
 		print("[T7G ASL] Split on final input -- The run is over.");
 		return true;
 	}
-
 }
