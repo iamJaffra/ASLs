@@ -178,6 +178,8 @@ init {
 	vars.canReset = true;
 
 	vars.lastTime = 0;
+
+	vars.symtabReady = false;
 }
 
 start {
@@ -210,6 +212,27 @@ reset {
 }
 
 update {
+	if (!vars.symtabReady) {
+		int symtab = new DeepPointer("Gothic2.exe", 0x6B6428, 0x8).Deref<int>(game);
+		int size = new DeepPointer("Gothic2.exe", 0x6B6428, 0x8 + 0x4).Deref<int>(game);
+		
+		for (int i = 0; i < size; i++) {
+			var symbol = new DeepPointer((IntPtr)symtab + i * 0x4).Deref<int>(game); 
+			string name = new DeepPointer((IntPtr)symbol + 0x8, 0x0).DerefString(game, 100); 
+			int address = symbol + 0x18;
+
+			if (name == "KAPITEL") {
+				print("KAPITEL = table[" + i + "] at 0x" + address.ToString("X"));
+				vars.chapter = new MemoryWatcher<int>(new DeepPointer((IntPtr)address));
+
+				vars.symtabReady = true;
+				break;
+			}	
+		}
+	}
+	
+	vars.chapter.Update(game);
+
 	if (settings["AllChapters_SnapperWeed"] && (vars.snapperWeed == 0 || vars.snapperWeed == 1)) {
 		IntPtr item = (IntPtr)current.firstItem;
 
@@ -266,7 +289,7 @@ split {
 		if (settings["Any%_IceDragon"] && !vars.completedSplits.Contains("IceDragon") && current.iceDragon == 1) {
 			return vars.completedSplits.Add("IceDragon");
 		}
-		if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && current.chapter == 5) {
+		if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
 			return vars.completedSplits.Add("Chapter5");
 		}
 		if (settings["Any%_Map"] && !vars.completedSplits.Contains("Map") && current.world == 1 && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")) {
@@ -290,7 +313,7 @@ split {
 		if (settings["AllChapters_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.world == 1 && vars.IsInDialogue(409)) {
 			return vars.completedSplits.Add("Zuris");
 		}
-		if (settings["AllChapters_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && current.chapter == 2) {
+		if (settings["AllChapters_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.chapter.Current == 2) {
 			return vars.completedSplits.Add("Chapter2");
 		}
 		if (settings["AllChapters_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
@@ -305,7 +328,7 @@ split {
 		if (settings["AllChapters_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.rockDragon == 1) {
 			return vars.completedSplits.Add("RockDragon");
 		}
-		if (settings["AllChapters_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && current.chapter == 3) {
+		if (settings["AllChapters_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.chapter.Current == 3) {
 			return vars.completedSplits.Add("Chapter3");
 		}
 		if (settings["AllChapters_EnterJharkendar"] && !vars.completedSplits.Contains("EnterJharkendar") && current.worldname == "ADDONWORLD") {
@@ -326,13 +349,13 @@ split {
 		if (settings["AllChapters_OnarRune"] && !vars.completedSplits.Contains("OnarRune") && current.world == 1 && vars.PlayerHasItem("ITRU_TELEPORTFARM")) {
 			return vars.completedSplits.Add("OnarRune");
 		}
-		if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && current.chapter == 4) {
+		if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.chapter.Current == 4) {
 			return vars.completedSplits.Add("Chapter4");
 		}
 		if (settings["AllChapters_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.swampDragon == 1) {
 			return vars.completedSplits.Add("SwampDragon");
 		}
-		if (settings["AllChapters_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && current.chapter == 5) {
+		if (settings["AllChapters_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
 			return vars.completedSplits.Add("Chapter5");
 		}
 		if (settings["AllChapters_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
