@@ -6,7 +6,6 @@ state("Gothic2") {
 	float playerY:      "Gothic2.exe", 0x4C088C;
 	int exp:            "Gothic2.exe", 0x4C0664, 0x3A0;
 	int guild:          "Gothic2.exe", 0x4C0664, 0x21C;
-	int firstItem:      "Gothic2.exe", 0x5831DC, 0x5E0, 0x8;
 	int firstNPC:       "Gothic2.exe", 0x5813DC, 0x8, 0x6280, 0x8;
 	int playerAddr:     "Gothic2.exe", 0x4C0664;
 	int inventoryOpen:  "Gothic2.exe", 0x57DCA8;
@@ -20,7 +19,7 @@ startup {
 		settings.Add("Any%_EnterValley", true, "Enter valley of mines", "Any%");
 			settings.Add("Any%_EnterValleyWithFieldraider", true, "... with fieldraider in inventory", "Any%_EnterValley");
 		settings.Add("Any%_CollectTeleportToPass", true, "Collect teleport rune to pass", "Any%");
-		settings.Add("Any%_CollectTeleportToCastle", true, "Collecting teleport rune to castle", "Any%");
+		settings.Add("Any%_CollectTeleportToCastle", true, "Collect teleport rune to castle", "Any%");
 		settings.Add("Any%_TeleportToCastle", true, "Teleport to castle", "Any%");
 		settings.Add("Any%_CollectFirerain", true, "Collect firerain", "Any%");
 		settings.Add("Any%_OpenGate", true, "Open gate in castle", "Any%");
@@ -167,8 +166,9 @@ init {
 	});
 
 	vars.PlayerHasItem = (Func<string, bool>)(TargetItemName => {
-		IntPtr item = (IntPtr)current.firstItem;
-		
+		// player.inventory2.contents
+		IntPtr item = (IntPtr) new DeepPointer("Gothic2.exe", 0x5831DC, 0x5E0, 0x8).Deref<int>(game);    
+
 		while (item != IntPtr.Zero) {
 			var itemData = game.ReadPointer(item + 0x4);
 	

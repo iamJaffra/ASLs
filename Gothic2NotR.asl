@@ -13,8 +13,6 @@ state("Gothic2") {
 	int guild:          "Gothic2.exe", 0x006B2684, 0x230;
 	int exp:            "Gothic2.exe", 0x006B2684, 0x42C;
 	int inDialogue:     "Gothic2.exe", 0x006B2684, 0x298;
-	// player.inventory2.contents
-	int firstItem:      "Gothic2.exe", 0x006B2684, 0x66C, 0x8;
 	// player.visual.activeAniList.protoAni.aniName
 	string20 ani:       "Gothic2.exe", 0x006B2684, 0xC8, 0x50, 0x0, 0x2C, 0x0;
 
@@ -131,7 +129,8 @@ init {
 	});
 
 	vars.PlayerHasItem = (Func<string, bool>)(TargetItemName => {
-		IntPtr item = (IntPtr)current.firstItem;
+		// player.inventory2.contents
+		IntPtr item = (IntPtr) new DeepPointer("Gothic2.exe", 0x006B2684, 0x66C, 0x8).Deref<int>(game);
 		
 		while (item != IntPtr.Zero) {
 			var itemData = game.ReadPointer(item + 0x4);
