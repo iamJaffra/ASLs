@@ -1,7 +1,6 @@
 state("Gothic2") {
 	long igt:           "ZSPEEDRUNTIMER.DLL", 0x19F70;
 	int world:          "Gothic2.exe", 0x4C0664, 0xB8, 0x91C;
-	int chapter:        "Gothic2.exe", 0x584C20, 0x2700, 0x9B4;
 	byte inCutscene:    "Gothic2.exe", 0x4C38B8;
 	float playerX:      "Gothic2.exe", 0x4C0894;
 	float playerY:      "Gothic2.exe", 0x4C088C;
@@ -13,7 +12,6 @@ state("Gothic2") {
 	int inventoryOpen:  "Gothic2.exe", 0x57DCA8;
 	int inDialogue:     "Gothic2.exe", 0x4C0664, 0x284;
 	int inMenu:         "Gothic2.exe", 0x4C37E0;
-	int inSaveLoad:     "Gothic2.exe", 0x55C80C;
 }
 
 startup {
@@ -108,10 +106,7 @@ startup {
 
 	// Variable to save IGT in case the game crashes
 	vars.timeKeeper = new TimeSpan();
-
-	
 }
-
 
 init {
 	// Starting coordinates
@@ -119,97 +114,56 @@ init {
 	vars.startY =  29912.93750;
 
 	// NPC IDs	
-	vars.importantNPCs = new HashSet<int> {
-		100,  // Xardas
-		409,  // Zuris
-		439,  // Vatras
-		498,  // Ignaz
-		500,  // Pyrokar
-		801,  // Torlof
-		9148, // Rock Dragon
-		9151, // Swamp Dragon
-		9141, // Fire Dragon
-		9145, // Ice Dragon
-		9154  // Undead Dragon
-	};
+	vars.XARDAS = 100;
+	vars.ZURIS = 409;
+	vars.VATRAS = 439;
+	vars.IGNAZ = 498;
+	vars.PYROKAR = 500;
+	vars.TORLOF = 801;
+	vars.ROCK_DRAGON = 9148;
+	vars.SWAMP_DRAGON = 9151;
+	vars.FIRE_DRAGON = 9141;
+	vars.ICE_DRAGON = 9145;
+	vars.UNDEAD_DRAGON = 9154;
 
 	// Functions
 
-	vars.NPCAddrMap = new Dictionary<int, IntPtr>();
+	vars.IsDead = (Func<int, bool>)((npcID) => {
+		// ogame.world.voblist_npc.data
+		IntPtr npc = (IntPtr) new DeepPointer("Gothic2.exe", 0x5813DC, 0x8, 0x6280, 0x8).Deref<int>(game);
 
-	vars.CreateNPCAddrMap = (Action)(() => {
-		print("Rebuilding NPC Map");
-		vars.NPCAddrMap.Clear();
-
-		IntPtr npc = (IntPtr)current.firstNPC;
 		while (npc != IntPtr.Zero) {
 			var npcData = game.ReadPointer(npc + 0x4);
-			var npcId = game.ReadValue<int>(npcData + 0x120);
+			var id = game.ReadValue<int>(npcData + 0x120);
+			var hp = game.ReadValue<int>(npcData + 0x1A4);
 			
-			if (vars.importantNPCs.Contains(npcId)) {
-				vars.NPCAddrMap[npcId] = npcData;
+			if (id == npcID && hp == 0) {
+				return true;
 			}
 	
 			npc = game.ReadPointer(npc + 0x8);
 		}
-	});
 
-	vars.IsDead = (Func<int, bool>)((npcID) => {
-		IntPtr npcPtr;
-		if (!vars.NPCAddrMap.TryGetValue(npcID, out npcPtr)) {
-			print("IsDead() - TryGetValue failed");
-			vars.CreateNPCAddrMap();
-			return false;
-		}
-
-		if (npcPtr == IntPtr.Zero) {
-			print("IsDead() - Ptr is Zero");
-			vars.CreateNPCAddrMap();
-			return false;
-		}
-
-		// Double check that the address is still valid
-		var id = game.ReadValue<int>(npcPtr + 0x120);
-
-		if (id == npcID) {
-			var hp = game.ReadValue<int>(npcPtr + 0x1A4);
-			
-			return hp == 0;
-		}
-		else {
-			print("IsDead() - id does not match");
-			vars.CreateNPCAddrMap();
-			return false;
-		}
+		return false;
 	});
 	
 	vars.IsInDialogue = (Func<int, bool>)((npcID) => {
-		IntPtr npcPtr;
-		if (!vars.NPCAddrMap.TryGetValue(npcID, out npcPtr)) {
-			print("IsInDialogue() - TryGetValue failed");
-			vars.CreateNPCAddrMap();
-			return false;
+		// ogame.world.voblist_npc.data
+		IntPtr npc = (IntPtr) new DeepPointer("Gothic2.exe", 0x5813DC, 0x8, 0x6280, 0x8).Deref<int>(game);
+
+		while (npc != IntPtr.Zero) {
+			var npcData = game.ReadPointer(npc + 0x4);
+			var id = game.ReadValue<int>(npcData + 0x120);
+			var inDialogue = game.ReadValue<int>(npcData + 0x284);
+
+			if (id == npcID && inDialogue == 1) {
+				return true;
+			}
+	
+			npc = game.ReadPointer(npc + 0x8);
 		}
 
-		if (npcPtr == IntPtr.Zero) {
-			print("IsInDialogue() - Ptr is Zero");
-			vars.CreateNPCAddrMap();
-			return false;
-		}
-
-		// Double check that the address is still valid
-		var id = game.ReadValue<int>(npcPtr + 0x120);
-
-		if (id == npcID) {
-			var inDialogue = game.ReadValue<int>(npcPtr + 0x284);
-			
-			return inDialogue == 1;
-		}
-		else {
-			vars.CreateNPCAddrMap();
-			print("IsInDialogue() - id does not match");
-			return false;
-		}
+		return false;
 	});
 
 	vars.PlayerHasItem = (Func<string, bool>)(TargetItemName => {
@@ -231,20 +185,12 @@ init {
 
 	vars.canReset = true;
 
-	vars.lastTime = 0;
-
 	vars.symtabReady = false;
 }
 
 update {
 	if (!vars.canReset && current.igt > 500000) {
 		vars.canReset = true;
-	}
-
-	if ((old.inSaveLoad == 1 && current.inSaveLoad == 0) || current.igt > vars.lastTime + 2000000) {
-		vars.CreateNPCAddrMap();
-		vars.lastTime = current.igt;
-		print("lastTime == " + vars.lastTime);
 	}
 
 	if (!vars.symtabReady) {
@@ -336,7 +282,7 @@ split {
 			print("Split: OpenGate");
 			return vars.completedSplits.Add("OpenGate");
 		}
-		if (settings["Any%_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && vars.IsDead(9148)) {
+		if (settings["Any%_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
 			print("Split: RockDragon");
 			return vars.completedSplits.Add("RockDragon");
 		}
@@ -358,7 +304,7 @@ split {
 			print("Split: Irdorath");
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && vars.IsDead(9154)) {
+		if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
 			print("Split: UndeadDragon");
 			return vars.completedSplits.Add("UndeadDragon");
 		}
@@ -389,13 +335,13 @@ split {
 				&& Math.Sqrt(Math.Pow(1962 - current.playerX, 2) + Math.Pow(-2644 - current.playerY, 2)) < 200) {
 			return vars.completedSplits.Add("OpenGate");
 		}
-		if (settings["Any%NoFlying_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && vars.IsDead(9151)) {
+		if (settings["Any%NoFlying_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
 			return vars.completedSplits.Add("SwampDragon");
 		}
-		if (settings["Any%NoFlying_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && vars.IsDead(9141)) {
+		if (settings["Any%NoFlying_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
 			return vars.completedSplits.Add("FireDragon");
 		}
-		if (settings["Any%NoFlying_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && vars.IsDead(9148)) {
+		if (settings["Any%NoFlying_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
 			return vars.completedSplits.Add("RockDragon");
 		}
 		if (settings["Any%NoFlying_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
@@ -414,7 +360,7 @@ split {
 		if (settings["Any%NoFlying_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["Any%NoFlying_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && vars.IsDead(9154)) {
+		if (settings["Any%NoFlying_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 		if (settings["Any%NoFlying_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
@@ -442,7 +388,7 @@ split {
 			print("Split chapter 3");
 			return vars.completedSplits.Add("Chapter3");
 		}
-		if (settings["AllChapters_ZurisDead"] && !vars.completedSplits.Contains("ZurisDead") && current.world == 1 && vars.IsDead(409)) {
+		if (settings["AllChapters_ZurisDead"] && !vars.completedSplits.Contains("ZurisDead") && current.world == 1 && current.exp > old.exp && vars.IsDead(vars.ZURIS)) {
 			print("Split zuris dead");
 			return vars.completedSplits.Add("ZurisDead");
 		}
@@ -454,15 +400,15 @@ split {
 			print("Split paladin");
 			return vars.completedSplits.Add("Paladin");
 		}
-		if (settings["AllChapters_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.chapter.Current == 3 && vars.IsInDialogue(439)) {
+		if (settings["AllChapters_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
 			print("Split vatras");
 			return vars.completedSplits.Add("Vatras");
 		}
-		if (settings["AllChapters_Pyrokar"] && !vars.completedSplits.Contains("Pyrokar") && current.world == 1 && vars.chapter.Current == 3 && vars.IsInDialogue(500)) {
+		if (settings["AllChapters_Pyrokar"] && !vars.completedSplits.Contains("Pyrokar") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.PYROKAR)) {
 			print("Split pyrokar");
 			return vars.completedSplits.Add("Pyrokar");
 		}
-		if (settings["AllChapters_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.chapter.Current == 3 && vars.IsInDialogue(100)) {
+		if (settings["AllChapters_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
 			print("Split xardas");
 			return vars.completedSplits.Add("Xardas");
 		}
@@ -481,7 +427,7 @@ split {
 		if (settings["AllChapters_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && vars.IsDead(9154)) {
+		if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 		if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
@@ -492,7 +438,7 @@ split {
 	// Glitch-Restricted
 
 	if (settings["GlitchRestricted"]) {
-		if (settings["GlitchRestricted_Ignaz"] && !vars.completedSplits.Contains("Ignaz") && current.world == 1 && vars.IsInDialogue(498)) {
+		if (settings["GlitchRestricted_Ignaz"] && !vars.completedSplits.Contains("Ignaz") && current.world == 1 && current.inDialogue == 1 && vars.IsInDialogue(vars.IGNAZ)) {
 			return vars.completedSplits.Add("Ignaz");
 		}
 		if (settings["GlitchRestricted_Militia"] && !vars.completedSplits.Contains("Militia") && current.guild == 2) {
@@ -521,10 +467,10 @@ split {
 		if (settings["GlitchRestricted_Paladin"] && !vars.completedSplits.Contains("Paladin") && current.guild == 1) {
 			return vars.completedSplits.Add("Paladin");
 		}
-		if (settings["GlitchRestricted_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.chapter.Current == 3 && vars.IsInDialogue(439)) {
+		if (settings["GlitchRestricted_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
 			return vars.completedSplits.Add("Vatras");
 		}
-		if (settings["GlitchRestricted_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.chapter.Current == 3 && vars.IsInDialogue(100)) {
+		if (settings["GlitchRestricted_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
 			return vars.completedSplits.Add("Xardas");
 		}
 		if (settings["GlitchRestricted_Lee"] && !vars.completedSplits.Contains("Lee") && vars.PlayerHasItem("ITRU_TELEPORTFARM")) {
@@ -533,16 +479,16 @@ split {
 		if (settings["GlitchRestricted_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.chapter.Current == 4) {
 			return vars.completedSplits.Add("Chapter4");
 		}
-		if (settings["GlitchRestricted_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && vars.IsDead(9141)) {
+		if (settings["GlitchRestricted_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.FIRE_DRAGON)) {
 			return vars.completedSplits.Add("FireDragon");
 		}
-		if (settings["GlitchRestricted_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && vars.IsDead(9148)) {
+		if (settings["GlitchRestricted_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
 			return vars.completedSplits.Add("RockDragon");
 		}
-		if (settings["GlitchRestricted_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && vars.IsDead(9151)) {
+		if (settings["GlitchRestricted_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
 			return vars.completedSplits.Add("SwampDragon");
 		}
-		if (settings["GlitchRestricted_IceDragon"] && !vars.completedSplits.Contains("IceDragon") && current.world == 2 && vars.IsDead(9145)) {
+		if (settings["GlitchRestricted_IceDragon"] && !vars.completedSplits.Contains("IceDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ICE_DRAGON)) {
 			return vars.completedSplits.Add("IceDragon");
 		}
 		if (settings["GlitchRestricted_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
@@ -551,7 +497,7 @@ split {
 		if (settings["GlitchRestricted_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["GlitchRestricted_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && vars.IsDead(9154)) {
+		if (settings["GlitchRestricted_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 		if (settings["GlitchRestricted_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
@@ -564,7 +510,7 @@ split {
 		if (settings["UndeadDragonKill_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["UndeadDragonKill_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && vars.IsDead(9154)) {
+		if (settings["UndeadDragonKill_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 	}
