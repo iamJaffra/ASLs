@@ -108,6 +108,36 @@ startup {
 }
 
 init {
+	// Find global variables
+	vars.globals = new Dictionary<string, MemoryWatcher>();
+
+	var globalsDict = new Dictionary<string, string> {
+		{ "KAPITEL",         "chapter"     }
+	};
+
+	int symtab = new DeepPointer("Gothic2.exe", 0x585F70, 0x8).Deref<int>(game);
+	int size = new DeepPointer("Gothic2.exe", 0x585F70, 0x8 + 0x4).Deref<int>(game);
+	
+	for (int i = 0; i < size; i++) {
+		var symbol = new DeepPointer((IntPtr)symtab + i * 0x4).Deref<int>(game); 
+		string name = new DeepPointer((IntPtr)symbol + 0x8, 0x0).DerefString(game, 100); 
+		int address = symbol + 0x18;
+
+		foreach (var global in globalsDict) {
+			if (name == global.Key) {
+				print(name + " = table[" + i + "] at 0x" + address.ToString("X"));
+
+				vars.globals[global.Value] = new MemoryWatcher<int>(new DeepPointer((IntPtr)address));
+			}
+		} 
+	}
+
+	foreach (var global in globalsDict) {
+		if (!vars.globals.ContainsKey(global.Value)) {
+			throw new InvalidOperationException("Not all globals found. Trying again.");
+		}
+	}
+
 	// Starting coordinates
 	vars.startX = -15710.02637; 
 	vars.startY =  29912.93750;
@@ -184,8 +214,6 @@ init {
 	});
 
 	vars.canReset = true;
-
-	vars.symtabReady = false;
 }
 
 update {
@@ -193,26 +221,9 @@ update {
 		vars.canReset = true;
 	}
 
-	if (!vars.symtabReady) {
-		int symtab = new DeepPointer("Gothic2.exe", 0x585F70, 0x8).Deref<int>(game); 
-		int size = new DeepPointer("Gothic2.exe", 0x585F70, 0x8 + 0x4).Deref<int>(game);
-		
-		for (int i = 0; i < size; i++) {
-			var symbol = new DeepPointer((IntPtr)symtab + i * 0x4).Deref<int>(game); 
-			string name = new DeepPointer((IntPtr)symbol + 0x8, 0x0).DerefString(game, 100); 
-			int address = symbol + 0x18;
-
-			if (name == "KAPITEL") {
-				print("KAPITEL = table[" + i + "] at 0x" + address.ToString("X"));
-				vars.chapter = new MemoryWatcher<int>(new DeepPointer((IntPtr)address));
-
-				vars.symtabReady = true;
-				break;
-			}	
-		}
+	foreach (var watcher in vars.globals.Values) {
+		watcher.Update(game);
 	}
-	
-	vars.chapter.Update(game);
 }
 
 start {
@@ -286,7 +297,7 @@ split {
 			print("Split: RockDragon");
 			return vars.completedSplits.Add("RockDragon");
 		}
-		if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
+		if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
 			print("Split: Chapter5");
 			return vars.completedSplits.Add("Chapter5");
 		}
@@ -344,7 +355,7 @@ split {
 		if (settings["Any%NoFlying_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
 			return vars.completedSplits.Add("RockDragon");
 		}
-		if (settings["Any%NoFlying_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
+		if (settings["Any%NoFlying_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
 			return vars.completedSplits.Add("Chapter5");
 		}
 		if (settings["Any%NoFlying_CollectTeleportToTavern"] && !vars.completedSplits.Contains("CollectTeleportToTavern") && vars.PlayerHasItem("ITRU_TELEPORTTAVERNE")) {
@@ -371,7 +382,7 @@ split {
 	// All Chapters
 	
 	if (settings["AllChapters"]) {
-		if (settings["AllChapters_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.chapter.Current == 2) {
+		if (settings["AllChapters_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.globals["chapter"].Current == 2) {
 			print("Split chapter 2");
 			return vars.completedSplits.Add("Chapter2");
 		}
@@ -384,7 +395,7 @@ split {
 			print("Split open gate");
 			return vars.completedSplits.Add("OpenGate");
 		}
-		if (settings["AllChapters_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.chapter.Current == 3) {
+		if (settings["AllChapters_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.globals["chapter"].Current == 3) {
 			print("Split chapter 3");
 			return vars.completedSplits.Add("Chapter3");
 		}
@@ -400,15 +411,15 @@ split {
 			print("Split paladin");
 			return vars.completedSplits.Add("Paladin");
 		}
-		if (settings["AllChapters_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
+		if (settings["AllChapters_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
 			print("Split vatras");
 			return vars.completedSplits.Add("Vatras");
 		}
-		if (settings["AllChapters_Pyrokar"] && !vars.completedSplits.Contains("Pyrokar") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.PYROKAR)) {
+		if (settings["AllChapters_Pyrokar"] && !vars.completedSplits.Contains("Pyrokar") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.PYROKAR)) {
 			print("Split pyrokar");
 			return vars.completedSplits.Add("Pyrokar");
 		}
-		if (settings["AllChapters_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
+		if (settings["AllChapters_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
 			print("Split xardas");
 			return vars.completedSplits.Add("Xardas");
 		}
@@ -416,11 +427,11 @@ split {
 			print("Split lee");
 			return vars.completedSplits.Add("Lee");
 		}
-		if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.chapter.Current == 4) {
+		if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.globals["chapter"].Current == 4) {
 			print("Split chapter 4");
 			return vars.completedSplits.Add("Chapter4");
 		}
-		if (settings["AllChapters_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
+		if (settings["AllChapters_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
 			print("Split chapter 5");
 			return vars.completedSplits.Add("Chapter5");
 		}
@@ -444,7 +455,7 @@ split {
 		if (settings["GlitchRestricted_Militia"] && !vars.completedSplits.Contains("Militia") && current.guild == 2) {
 			return vars.completedSplits.Add("Militia");
 		}
-		if (settings["GlitchRestricted_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.chapter.Current == 2) {
+		if (settings["GlitchRestricted_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.globals["chapter"].Current == 2) {
 			return vars.completedSplits.Add("Chapter2");
 		}
 		if (settings["GlitchRestricted_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
@@ -461,22 +472,22 @@ split {
 				&& Math.Sqrt(Math.Pow(-3140 - old.playerX, 2) + Math.Pow(1012 - old.playerY, 2)) > 1000) {
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
-		if (settings["GlitchRestricted_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.chapter.Current == 3) {
+		if (settings["GlitchRestricted_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.globals["chapter"].Current == 3) {
 			return vars.completedSplits.Add("Chapter3");
 		}		
 		if (settings["GlitchRestricted_Paladin"] && !vars.completedSplits.Contains("Paladin") && current.guild == 1) {
 			return vars.completedSplits.Add("Paladin");
 		}
-		if (settings["GlitchRestricted_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
+		if (settings["GlitchRestricted_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
 			return vars.completedSplits.Add("Vatras");
 		}
-		if (settings["GlitchRestricted_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.chapter.Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
+		if (settings["GlitchRestricted_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
 			return vars.completedSplits.Add("Xardas");
 		}
 		if (settings["GlitchRestricted_Lee"] && !vars.completedSplits.Contains("Lee") && vars.PlayerHasItem("ITRU_TELEPORTFARM")) {
 			return vars.completedSplits.Add("Lee");
 		}
-		if (settings["GlitchRestricted_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.chapter.Current == 4) {
+		if (settings["GlitchRestricted_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.globals["chapter"].Current == 4) {
 			return vars.completedSplits.Add("Chapter4");
 		}
 		if (settings["GlitchRestricted_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.FIRE_DRAGON)) {
@@ -491,7 +502,7 @@ split {
 		if (settings["GlitchRestricted_IceDragon"] && !vars.completedSplits.Contains("IceDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ICE_DRAGON)) {
 			return vars.completedSplits.Add("IceDragon");
 		}
-		if (settings["GlitchRestricted_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.chapter.Current == 5) {
+		if (settings["GlitchRestricted_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
 			return vars.completedSplits.Add("Chapter5");
 		}
 		if (settings["GlitchRestricted_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
