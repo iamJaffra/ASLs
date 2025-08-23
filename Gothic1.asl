@@ -22,9 +22,6 @@ state("GothicMod", "v1.30") {
 	int inDialogue:     "GothicMod.exe", 0x0046C648;
 	int inMenu:         "GothicMod.exe", 0x46D3B0;
 	int cutscene:       "binkw32.dll",   0x6522C;
-	
-	// GLOBAL
-	int enteredSleeperTemple: "GothicMod.exe", 0x004D7840;
 }
 
 startup {
