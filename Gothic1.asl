@@ -1,22 +1,30 @@
 state("GothicMod", "v1.30") {
+	// TIMER
 	long igt:           "ZSPEEDRUNTIMER.DLL", 0x1A048;
 	byte manualReset:   "ZSPEEDRUNTIMER.DLL", 0x1A024;
-	int enteredSleeperTemple: "GothicMod.exe", 0x004D7840;
-	string20 world:     "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x625C, 0x0;
-	int firstNPC:       "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x626C, 0x8;
-	int firstVob:       "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0x6268, 0x8;
-	int firstWeapon:    "GothicMod.exe", 0x0046A3DC, 0x604;
-	int firstMagicItem: "GothicMod.exe", 0x0046A3DC, 0x61C;
-	int firstMiscItem:  "GothicMod.exe", 0x0046A3DC, 0x658;
-	int exp:            "GothicMod.exe", 0x0046A3DC, 0x31C;
-	int guild:          "GothicMod.exe", 0x0046A3DC, 0x1E8;
-	int inDialogue:     "GothicMod.exe", 0x0046C648;
+
+	// POS VECTOR
+	float x:       "GothicMod.exe", 0x0046A5FC;
+	float y:       "GothicMod.exe", 0x0046A604;
+	
+	// WORLD
+	// ogame.world.worldName
+	string20 world:     "GothicMod.exe", 0x4DA6BC, 0x8, 0x625C, 0x0;
+	// ogame.world.numVobsInWorld
+	int vobs:           "GothicMod.exe", 0x4DA6BC, 0x8, 0xBC;
+
+	// PLAYER
+	int exp:            "GothicMod.exe", 0x4DBBB0, 0x31C;
+	int guild:          "GothicMod.exe", 0x4DBBB0, 0x1E8;
+
+	// MISC
 	int camera:         "GothicMod.exe", 0x0046C800;
-	float xCoord:       "GothicMod.exe", 0x0046A5FC;
-	float yCoord:       "GothicMod.exe", 0x0046A604;
-	int vobs:           "GothicMod.exe", 0x004D8464, 0x124, 0x48, 0xA8, 0x60, 0x8, 0xBC;
-	int cutscene:       "binkw32.dll", 0x6522C;
+	int inDialogue:     "GothicMod.exe", 0x0046C648;
 	int inMenu:         "GothicMod.exe", 0x46D3B0;
+	int cutscene:       "binkw32.dll",   0x6522C;
+	
+	// GLOBAL
+	int enteredSleeperTemple: "GothicMod.exe", 0x004D7840;
 }
 
 startup {
@@ -57,7 +65,8 @@ startup {
 		settings.Add("AllChapters_Lares", true, "Become a rogue", "AllChapters");
 		settings.Add("AllChapters_EnterOrcGraveyard", true, "Enter orc graveyard", "AllChapters");
 		settings.Add("AllChapters_LeaveOrcGraveyard", true, "Leave orc graveyard", "AllChapters");
-		settings.Add("AllChapters_Ritual", true, "Trigger the ritual (start chapter 3)", "AllChapters");
+		settings.Add("AllChapters_Chapter3", true, "Reach chapter 3", "AllChapters");
+		settings.Add("AllChapters_Chapter4", true, "Reach chapter 4", "AllChapters");
 		settings.Add("AllChapters_Temple2", true, "Enter Sleeper temple for the second time", "AllChapters");
 		settings.Add("AllChapters_Priest1", true, "Loot priest 1 (Varrag Hashor)", "AllChapters");
 		settings.Add("AllChapters_Priest5", true, "Loot priest 5 (Vrash Harrag Arushnat)", "AllChapters");
@@ -71,20 +80,54 @@ startup {
 }
 
 init {
+	// Find global variables
+	vars.globals = new Dictionary<string, MemoryWatcher>();
+
+	var globalsDict = new Dictionary<string, string> {
+		{ "KAPITEL",            "chapter"      },
+	};
+
+	// cur_table.table
+	int symtab = new DeepPointer("GothicMod.exe", 0x4DE174, 0x8).Deref<int>(game);
+	int size = new DeepPointer("GothicMod.exe", 0x4DE174, 0x8 + 0x4).Deref<int>(game);
+	
+	for (int i = 0; i < size; i++) {
+		var symbol = new DeepPointer((IntPtr)symtab + i * 0x4).Deref<int>(game); 
+		string name = new DeepPointer((IntPtr)symbol + 0x8, 0x0).DerefString(game, 100); 
+		int address = symbol + 0x18;
+
+		foreach (var global in globalsDict) {
+			if (name == global.Key) {
+				print(name + " = table[" + i + "] at 0x" + address.ToString("X"));
+
+				vars.globals[global.Value] = new MemoryWatcher<int>(new DeepPointer((IntPtr)address));
+			}
+		} 
+	}
+
+	foreach (var global in globalsDict) {
+		if (!vars.globals.ContainsKey(global.Value)) {
+			throw new InvalidOperationException("Not all globals found. Trying again.");
+		}
+	}
+
 	// Important Coordinates
 	vars.startX = 5547.608887; 
 	vars.startY = 36488.625;
 
+	// Grate
 	vars.g1X = 2858.224854;
 	vars.g1Y = -1903.604614;
 	vars.g2X = 2663.101807;
 	vars.g2Y = -1470.245605;
 
+	// 
 	vars.d1X = 19640.20508;
 	vars.d1Y = 36921.04688;
 	vars.d2X = 20025.33398;
 	vars.d2Y = 36941.64062;
 
+	//  
 	vars.s1X = 14235.77246;
 	vars.s1Y = 40537.76953;
 	vars.s2X = 13863.95215;
@@ -93,7 +136,8 @@ init {
 	// Functions
 
 	vars.PlayerHasMiscItem = (Func<string, bool>)(TargetItemName => {
-		IntPtr item = (IntPtr)current.firstMiscItem;
+		// player.inventory2.inventory[8].next
+		IntPtr item = (IntPtr) new DeepPointer("GothicMod.exe", 0x4DBBB0, 0x550 + 0xA0 + 8 * 0xC + 0x8).Deref<int>(game);
 		
 		while (item != IntPtr.Zero) {
 			var itemData = game.ReadPointer(item + 0x4);
@@ -109,7 +153,8 @@ init {
 	});
 
 	vars.PlayerHasMagicItem = (Func<string, bool>)(TargetItemName => {
-		IntPtr item = (IntPtr)current.firstMagicItem;
+		// player.inventory2.inventory[3].next
+		IntPtr item = (IntPtr) new DeepPointer("GothicMod.exe", 0x4DBBB0, 0x550 + 0xA0 + 3 * 0xC + 0x8).Deref<int>(game);
 		
 		while (item != IntPtr.Zero) {
 			var itemData = game.ReadPointer(item + 0x4);
@@ -125,7 +170,8 @@ init {
 	});
 
 	vars.PlayerHasWeapon = (Func<string, bool>)(TargetItemName => {
-		IntPtr item = (IntPtr)current.firstWeapon;
+		// player.inventory2.inventory[1].next
+		IntPtr item = (IntPtr) new DeepPointer("GothicMod.exe", 0x4DBBB0, 0x550 + 0xA0 + 1 * 0xC + 0x8).Deref<int>(game);
 		
 		while (item != IntPtr.Zero) {
 			var itemData = game.ReadPointer(item + 0x4);
@@ -150,6 +196,10 @@ update {
 	}
 	if (!string.IsNullOrEmpty(old.world)) {
 		vars.oldWorld = old.world;
+	}
+
+	foreach (var watcher in vars.globals.Values) {
+		watcher.Update(game);
 	}
 
 	if (settings["manualReset"] && current.world == "ORCTEMPEL" && !vars.eggsDuped) {
@@ -189,8 +239,8 @@ gameTime {
 start {
 	if (settings["resetNewGame"]) {
 		if (current.igt < 500000
-				&& Math.Abs(current.xCoord - vars.startX) < 0.0001
-				&& Math.Abs(current.yCoord - vars.startY) < 0.0001) {
+				&& Math.Abs(current.x - vars.startX) < 0.0001
+				&& Math.Abs(current.y - vars.startY) < 0.0001) {
 
 			vars.canReset = false;
 			return true;
@@ -207,8 +257,8 @@ onStart {
 reset {
 	if (settings["resetNewGame"]) {
 		if (current.igt < 500000 && vars.canReset
-				&& Math.Abs(current.xCoord - vars.startX) < 0.0001
-				&& Math.Abs(current.yCoord - vars.startY) < 0.0001) {
+				&& Math.Abs(current.x - vars.startX) < 0.0001
+				&& Math.Abs(current.y - vars.startY) < 0.0001) {
 
 			return true;
 		}
@@ -226,7 +276,7 @@ split {
 			return vars.completedSplits.Add("Temple");
 		}
 		if (settings["Any%_Grate"] && !vars.completedSplits.Contains("Grate") && current.world == "ORCTEMPEL") {
-			if (((vars.g2X - vars.g1X) * (current.yCoord - vars.g1Y) - (vars.g2Y - vars.g1Y) * (current.xCoord - vars.g1X)) < 0) {
+			if (((vars.g2X - vars.g1X) * (current.y - vars.g1Y) - (vars.g2Y - vars.g1Y) * (current.x - vars.g1X)) < 0) {
 				return vars.completedSplits.Add("Grate");
 			}
 		}
@@ -246,11 +296,11 @@ split {
 			return vars.completedSplits.Add("Priest5");
 		}
 		if (settings["Any%_XardasTemple"] && !vars.completedSplits.Contains("XardasTemple") && current.world == "ORCTEMPEL" && current.camera == 1 
-				&& Math.Sqrt(Math.Pow(12130 - current.xCoord, 2) + Math.Pow(32027 - current.yCoord, 2)) < 500) {
+				&& Math.Sqrt(Math.Pow(12130 - current.x, 2) + Math.Pow(32027 - current.y, 2)) < 500) {
 			return vars.completedSplits.Add("XardasTemple");
 		}
 		if (settings["Any%_Descent"] && !vars.completedSplits.Contains("Descent") && current.world == "ORCTEMPEL") {
-			if (((vars.d2X - vars.d1X) * (current.yCoord - vars.d1Y) - (vars.d2Y - vars.d1Y) * (current.xCoord - vars.d1X)) > 0) {
+			if (((vars.d2X - vars.d1X) * (current.y - vars.d1Y) - (vars.d2Y - vars.d1Y) * (current.x - vars.d1X)) > 0) {
 				return vars.completedSplits.Add("Descent");
 			}
 		}
@@ -266,15 +316,15 @@ split {
 			return vars.completedSplits.Add("Bow");
 		}
 		if (settings["NMG_Riddle1"] && !vars.completedSplits.Contains("Riddle1") && current.world == "ORCTEMPEL" 
-				&& current.camera == 1 && Math.Sqrt(Math.Pow(1871 - current.xCoord, 2) + Math.Pow(2498 - current.yCoord, 2)) < 200) {
+				&& current.camera == 1 && Math.Sqrt(Math.Pow(1871 - current.x, 2) + Math.Pow(2498 - current.y, 2)) < 200) {
 			return vars.completedSplits.Add("Riddle1");
 		}
 		if (settings["NMG_Riddle2"] && !vars.completedSplits.Contains("Riddle2") && current.world == "ORCTEMPEL" 
-				&& current.camera == 1 && Math.Sqrt(Math.Pow(14805 - current.xCoord, 2) + Math.Pow(-1733 - current.yCoord, 2)) < 1500) {
+				&& current.camera == 1 && Math.Sqrt(Math.Pow(14805 - current.x, 2) + Math.Pow(-1733 - current.y, 2)) < 1500) {
 			return vars.completedSplits.Add("Riddle2");
 		}
 		if (settings["NMG_Riddle3"] && !vars.completedSplits.Contains("Riddle3") && current.world == "ORCTEMPEL" && 
-				current.camera == 1 && Math.Sqrt(Math.Pow(4880 - current.xCoord, 2) + Math.Pow(9179 - current.yCoord, 2)) < 500) {
+				current.camera == 1 && Math.Sqrt(Math.Pow(4880 - current.x, 2) + Math.Pow(9179 - current.y, 2)) < 500) {
 			return vars.completedSplits.Add("Riddle3");
 		}
 	}
@@ -286,7 +336,7 @@ split {
 			return vars.completedSplits.Add("Temple");
 		}
 		if (settings["AllChapters_LeaveTemple"] && !vars.completedSplits.Contains("LeaveTemple") && current.world == "WORLD" && current.enteredSleeperTemple == 1 
-				&& Math.Sqrt(Math.Pow(-37301 - current.xCoord, 2) + Math.Pow(-28734 - current.yCoord, 2)) < 200) {
+				&& Math.Sqrt(Math.Pow(-37301 - current.x, 2) + Math.Pow(-28734 - current.y, 2)) < 200) {
 			return vars.completedSplits.Add("LeaveTemple");
 		}
 		if (settings["AllChapters_EnterFreeMine"] && current.world == "FREEMINE" && vars.oldWorld == "WORLD") {
@@ -299,15 +349,15 @@ split {
 			return vars.completedSplits.Add("DeliveredWeed");
 		}
 		if (settings["AllChapters_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == "WORLD" && current.inDialogue == 1
-				&& Math.Sqrt(Math.Pow(-12000 - current.xCoord, 2) + Math.Pow(-34300 - current.yCoord, 2)) < 1000) {
+				&& Math.Sqrt(Math.Pow(-12000 - current.x, 2) + Math.Pow(-34300 - current.y, 2)) < 1000) {
 			return vars.completedSplits.Add("Xardas");
 		}
 		if (settings["AllChapters_TeleportToOldCamp"] && !vars.completedSplits.Contains("TeleportToOldCamp")
-				&& Math.Sqrt(Math.Pow(998 - current.xCoord, 2) + Math.Pow(-3146 - current.yCoord, 2)) < 200) {
+				&& Math.Sqrt(Math.Pow(998 - current.x, 2) + Math.Pow(-3146 - current.y, 2)) < 200) {
 			return vars.completedSplits.Add("TeleportToOldCamp");
 		}
 		if (settings["AllChapters_FocusRuinedMonastery"] && !vars.completedSplits.Contains("FocusRuinedMonastery") && current.world == "WORLD" && vars.PlayerHasMiscItem("FOCUS_4")
-				&& Math.Sqrt(Math.Pow(998 - current.xCoord, 2) + Math.Pow(-3146 - current.yCoord, 2)) < 200) {
+				&& Math.Sqrt(Math.Pow(998 - current.x, 2) + Math.Pow(-3146 - current.y, 2)) < 200) {
 			return vars.completedSplits.Add("FocusRuinedMonastery");
 		}
 		if (settings["AllChapters_TrollTeeth"] && !vars.completedSplits.Contains("TrollTeeth") && current.world == "WORLD" && vars.PlayerHasMiscItem("ITAT_TROLL_02")) {
@@ -322,8 +372,11 @@ split {
 		if (settings["AllChapters_LeaveOrcGraveyard"] && current.world == "WORLD" && vars.oldWorld == "ORCGRAVEYARD") {
 			return true;
 		}
-		if (settings["AllChapters_Ritual"] && !vars.completedSplits.Contains("Ritual") && current.world == "WORLD" && current.inDialogue == 1 && current.cutscene > 0) {
-			return vars.completedSplits.Add("Ritual");
+		if (settings["AllChapters_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.globals["chapter"].Current == 3) {
+			return vars.completedSplits.Add("Chapter3");
+		}
+		if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.globals["chapter"].Current == 4) {
+			return vars.completedSplits.Add("Chapter4");
 		}
 		if (settings["AllChapters_Temple2"] && !vars.completedSplits.Contains("Temple2") && current.world == "ORCTEMPEL" && vars.PlayerHasWeapon("MYTHRILKLINGE02")) {
 			return vars.completedSplits.Add("Temple2");
