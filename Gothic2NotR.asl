@@ -226,11 +226,11 @@ update {
 split {
 	// ANY%
 
-	if (settings["Any%_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.world == 1 &&  vars.IsInDialogue(vars.ZURIS)) {
+	if (settings["Any%_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.inDialogue == 1 && vars.IsInDialogue(vars.ZURIS)) {
 		print("Split: Zuris");
 		return vars.completedSplits.Add("Zuris");
 	}
-	else if (settings["Any%_Ignaz"] && !vars.completedSplits.Contains("Ignaz") && current.world == 1 && current.inDialogue == 1 && vars.IsInDialogue(vars.IGNAZ)) {
+	else if (settings["Any%_Ignaz"] && !vars.completedSplits.Contains("Ignaz") && current.inDialogue == 1 && vars.IsInDialogue(vars.IGNAZ)) {
 		print("Split: Ignaz");
 		return vars.completedSplits.Add("Ignaz");
 	}
@@ -287,7 +287,7 @@ split {
 	else if (settings["AllChapters_Ore"] && !vars.completedSplits.Contains("Ore") && current.world == 1 && vars.PlayerHasItem("ITMI_ZEITSPALT_ADDON") && current.inventoryOpen == 0) {
 		return vars.completedSplits.Add("Ore");
 	}
-	else if (settings["AllChapters_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.world == 1 && current.inDialogue == 1 && vars.IsInDialogue(vars.ZURIS)) {
+	else if (settings["AllChapters_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.inDialogue == 1 && vars.IsInDialogue(vars.ZURIS)) {
 		return vars.completedSplits.Add("Zuris");
 	}
 	else if (settings["AllChapters_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.globals["chapter"].Current == 2) {
