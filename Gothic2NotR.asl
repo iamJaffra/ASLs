@@ -2,25 +2,25 @@ state("Gothic2") {
 	long igt:           "ZSPEEDRUNTIMER.DLL", 0x19FE0;
 
 	// POS VECTOR
-	float x:            "Gothic2.exe", 0x004CEF4C;
-	float y:            "Gothic2.exe", 0x004CEF44;
+	float x:            "Gothic2.exe", 0x4CEF4C;
+	float y:            "Gothic2.exe", 0x4CEF44;
 
 	// WORLD
-	int world:          "Gothic2.exe", 0x004CECC0, 0x920;
-	string10 worldname: "Gothic2.exe", 0x006B0884, 0x8, 0x6274, 0x0;
+	int world:          "Gothic2.exe", 0x4CECC0, 0x920;
+	string10 worldname: "Gothic2.exe", 0x6B0884, 0x8, 0x6274, 0x0;
 
 	// PLAYER
-	int guild:          "Gothic2.exe", 0x006B2684, 0x230;
-	int exp:            "Gothic2.exe", 0x006B2684, 0x42C;
-	int inDialogue:     "Gothic2.exe", 0x006B2684, 0x298;
+	int guild:          "Gothic2.exe", 0x6B2684, 0x230;
+	int exp:            "Gothic2.exe", 0x6B2684, 0x42C;
+	int inDialogue:     "Gothic2.exe", 0x6B2684, 0x298;
 	// player.visual.activeAniList.protoAni.aniName
-	string20 ani:       "Gothic2.exe", 0x006B2684, 0xC8, 0x50, 0x0, 0x2C, 0x0;
+	string20 ani:       "Gothic2.exe", 0x6B2684, 0xC8, 0x50, 0x0, 0x2C, 0x0;
 	// player.timedOverlays[0].mdsOverlayName
-	string20 overlay:   "Gothic2.exe", 0x006B2684, 0x564, 0x0, 0x8, 0x0;
+	string20 overlay:   "Gothic2.exe", 0x6B2684, 0x564, 0x0, 0x8, 0x0;
 	
 	// MISC
-	int inCutscene:     "Gothic2.exe", 0x004D1F18;
-	int inventoryOpen:  "Gothic2.exe", 0x005A43F0;
+	int inCutscene:     "Gothic2.exe", 0x4D1F18;
+	int inventoryOpen:  "Gothic2.exe", 0x5A43F0;
 }
 
 startup {
@@ -78,11 +78,13 @@ init {
 	vars.globals = new Dictionary<string, MemoryWatcher>();
 
 	var globalsDict = new Dictionary<string, string> {
-		{ "KAPITEL",         "chapter"     },
-		{ "RCKDRAGNISDEAD",  "rockDragon"  },
-		{ "FREDRAGNISDEAD",  "fireDragon"  },
-		{ "SWAPDRAGNISDEAD", "swampDragon" },
-		{ "ICDRAGNISDEAD",   "iceDragon"   } 
+		{ "KAPITEL",            "chapter"      },
+		{ "RCKDRAGNISDEAD",     "rockDragon"   },
+		{ "FREDRAGNISDEAD",     "fireDragon"   },
+		{ "SWAPDRAGNISDEAD",    "swampDragon"  },
+		{ "ICDRAGNISDEAD",      "iceDragon"    },
+		{ "UNDEADDRAGONISDEAD", "undeadDragon" },
+		{ "RAVENISDEAD",        "Raven"        },
 	};
 
 	int symtab = new DeepPointer("Gothic2.exe", 0x6B6428, 0x8).Deref<int>(game);
@@ -256,11 +258,11 @@ split {
 		print("Split: Chapter5");
 		return vars.completedSplits.Add("Chapter5");
 	}
-	else if (settings["Any%_Map"] && !vars.completedSplits.Contains("Map") && current.world == 1 && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")) {
+	else if (settings["Any%_Map"] && !vars.completedSplits.Contains("Map") && current.world == 1 && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH") && current.inventoryOpen == 0) {
 		print("Split: Map");
 		return vars.completedSplits.Add("Map");
 	}
-	else if (settings["Any%_LighthouseBed"] && !vars.completedSplits.Contains("LighthouseBed") && current.ani == "T_BEDHIGH_BACK_S0_2_" && vars.globals["chapter"].Current == 5) {
+	else if (settings["Any%_LighthouseBed"] && !vars.completedSplits.Contains("LighthouseBed") && vars.globals["chapter"].Current == 5 && current.ani == "T_BEDHIGH_BACK_S0_2_") {
 		print("Split: LighthouseBed");
 		return vars.completedSplits.Add("LighthouseBed");
 	}
@@ -268,7 +270,7 @@ split {
 		print("Split: Irdorath");
 		return vars.completedSplits.Add("Irdorath");
 	}
-	else if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
+	else if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 		print("Split: UndeadDragon");
 		return vars.completedSplits.Add("UndeadDragon");
 	}
@@ -282,7 +284,7 @@ split {
 	if (settings["AllChapters_SnapperWeed"] && !vars.completedSplits.Contains("SnapperWeed") && current.overlay == "HUMANS_SPRINT.MDS") {
 		return vars.completedSplits.Add("SnapperWeed");
 	}
-	else if (settings["AllChapters_Ore"] && !vars.completedSplits.Contains("Ore") && current.world == 1 && vars.PlayerHasItem("ITMI_ZEITSPALT_ADDON")) {
+	else if (settings["AllChapters_Ore"] && !vars.completedSplits.Contains("Ore") && current.world == 1 && vars.PlayerHasItem("ITMI_ZEITSPALT_ADDON") && current.inventoryOpen == 0) {
 		return vars.completedSplits.Add("Ore");
 	}
 	else if (settings["AllChapters_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.world == 1 && current.inDialogue == 1 && vars.IsInDialogue(vars.ZURIS)) {
@@ -294,7 +296,7 @@ split {
 	else if (settings["AllChapters_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
 		return vars.completedSplits.Add("EnterValley");
 	}
-	else if (settings["AllChapters_CastleRune"] && !vars.completedSplits.Contains("CastleRune") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC")) {
+	else if (settings["AllChapters_CastleRune"] && !vars.completedSplits.Contains("CastleRune") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC") && current.inventoryOpen == 0) {
 		return vars.completedSplits.Add("CastleRune");
 	}
 	else if (settings["AllChapters_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && vars.globals["fireDragon"].Current == 1) {
@@ -309,7 +311,7 @@ split {
 	else if (settings["AllChapters_EnterJharkendar"] && !vars.completedSplits.Contains("EnterJharkendar") && current.worldname == "ADDONWORLD") {
 		return vars.completedSplits.Add("EnterJharkendar");
 	}
-	else if (settings["AllChapters_Raven"] && !vars.completedSplits.Contains("Raven") && current.worldname == "ADDONWORLD" && current.exp > old.exp && vars.IsDead(vars.RAVEN)) {
+	else if (settings["AllChapters_Raven"] && !vars.completedSplits.Contains("Raven") && vars.globals["Raven"].Current == 1) {
 		return vars.completedSplits.Add("Raven");
 	}
 	else if (settings["AllChapters_LeaveJharkendar"] && !vars.completedSplits.Contains("LeaveJharkendar") && old.worldname == "ADDONWORLD" && current.worldname == "NEWWORLD") {
@@ -318,10 +320,10 @@ split {
 	else if (settings["AllChapters_JoinMilitia"] && !vars.completedSplits.Contains("JoinMilitia") && current.guild == 2) {
 		return vars.completedSplits.Add("JoinMilitia");
 	}
-	else if (settings["AllChapters_Eye"] && !vars.completedSplits.Contains("Eye") && current.world == 1 && vars.PlayerHasItem("ITMI_INNOSEYE_BROKEN")) {
+	else if (settings["AllChapters_Eye"] && !vars.completedSplits.Contains("Eye") && current.world == 1 && vars.PlayerHasItem("ITMI_INNOSEYE_BROKEN") && current.inventoryOpen == 0) {
 		return vars.completedSplits.Add("Eye");
 	}
-	else if (settings["AllChapters_OnarRune"] && !vars.completedSplits.Contains("OnarRune") && current.world == 1 && vars.PlayerHasItem("ITRU_TELEPORTFARM")) {
+	else if (settings["AllChapters_OnarRune"] && !vars.completedSplits.Contains("OnarRune") && current.world == 1 && vars.PlayerHasItem("ITRU_TELEPORTFARM") && current.inventoryOpen == 0) {
 		return vars.completedSplits.Add("OnarRune");
 	}
 	else if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.globals["chapter"].Current == 4) {
@@ -336,7 +338,7 @@ split {
 	else if (settings["AllChapters_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 		return vars.completedSplits.Add("Irdorath");
 	}
-	else if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && vars.IsDead(vars.UNDEAD_DRAGON)) {
+	else if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 		return vars.completedSplits.Add("UndeadDragon");
 	}
 	else if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {

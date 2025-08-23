@@ -1,16 +1,21 @@
 state("Gothic2") {
-	long igt:           "ZSPEEDRUNTIMER.DLL", 0x19F70;
-	int world:          "Gothic2.exe", 0x4C0664, 0xB8, 0x91C;
-	byte inCutscene:    "Gothic2.exe", 0x4C38B8;
-	float playerX:      "Gothic2.exe", 0x4C0894;
-	float playerY:      "Gothic2.exe", 0x4C088C;
-	int exp:            "Gothic2.exe", 0x4C0664, 0x3A0;
-	int guild:          "Gothic2.exe", 0x4C0664, 0x21C;
-	int firstNPC:       "Gothic2.exe", 0x5813DC, 0x8, 0x6280, 0x8;
-	int playerAddr:     "Gothic2.exe", 0x4C0664;
-	int inventoryOpen:  "Gothic2.exe", 0x57DCA8;
-	int inDialogue:     "Gothic2.exe", 0x4C0664, 0x284;
-	int inMenu:         "Gothic2.exe", 0x4C37E0;
+	long igt:          "ZSPEEDRUNTIMER.DLL", 0x19F70;
+	
+	// POS VECTOR
+	float x:           "Gothic2.exe", 0x4C0894;
+	float y:           "Gothic2.exe", 0x4C088C;
+
+	// WORLD
+	int world:         "Gothic2.exe", 0x4C0664, 0xB8, 0x91C;
+	
+	// PLAYER
+	int guild:         "Gothic2.exe", 0x5831DC, 0x21C;
+	int exp:           "Gothic2.exe", 0x5831DC, 0x3A0;
+	int inDialogue:    "Gothic2.exe", 0x5831DC, 0x284;
+
+	// MISC
+	byte inCutscene:   "Gothic2.exe", 0x4C38B8;
+	//int inventoryOpen: "Gothic2.exe", 0x57DCA8;
 }
 
 startup {
@@ -112,7 +117,10 @@ init {
 	vars.globals = new Dictionary<string, MemoryWatcher>();
 
 	var globalsDict = new Dictionary<string, string> {
-		{ "KAPITEL",         "chapter"     }
+		{ "KAPITEL",            "chapter"      },
+		{ "UNDEADDRAGONISDEAD", "undeadDragon" },
+		{ "TORLOFISCAPTAIN",    "Torlof"       },
+		//{ "PLAYER_ISAPPRENTICE", "apprentice" }
 	};
 
 	int symtab = new DeepPointer("Gothic2.exe", 0x585F70, 0x8).Deref<int>(game);
@@ -229,8 +237,8 @@ update {
 start {
 	if (settings["NewGame"]) {
 		if (current.igt < 500000
-				&& Math.Abs(current.playerX - vars.startX) < 0.0001
-				&& Math.Abs(current.playerY - vars.startY) < 0.0001) {
+				&& Math.Abs(current.x - vars.startX) < 0.0001
+				&& Math.Abs(current.y - vars.startY) < 0.0001) {
 			
 			vars.canReset = false;
 			return true;
@@ -246,8 +254,8 @@ onStart {
 reset {
 	if (settings["NewGame"]) {
 		if (current.igt < 500000 && vars.canReset
-				&& Math.Abs(current.playerX - vars.startX) < 0.0001
-				&& Math.Abs(current.playerY - vars.startY) < 0.0001) {
+				&& Math.Abs(current.x - vars.startX) < 0.0001
+				&& Math.Abs(current.y - vars.startY) < 0.0001) {
 
 			return true;
 		}
@@ -268,28 +276,28 @@ split {
 			}
 		}
 		if (settings["Any%_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
-				&& Math.Sqrt(Math.Pow(27444.02148 - current.playerX, 2) + Math.Pow(-333.9581604 - current.playerY, 2)) < 1000) {
+				&& Math.Sqrt(Math.Pow(27444.02148 - current.x, 2) + Math.Pow(-333.9581604 - current.y, 2)) < 1000) {
 			print("Split: CollectTeleportToPass");
 			return vars.completedSplits.Add("CollectTeleportToPass");
 		}
 		if (settings["Any%_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC")
-				&& Math.Sqrt(Math.Pow(-3099.234131 - current.playerX, 2) + Math.Pow(1561.480957 - current.playerY, 2)) < 1000) {
+				&& Math.Sqrt(Math.Pow(-3099.234131 - current.x, 2) + Math.Pow(1561.480957 - current.y, 2)) < 1000) {
 			print("Split: CollectTeleportToCastle");
 			return vars.completedSplits.Add("CollectTeleportToCastle");
 		}
 		if (settings["Any%_CollectFirerain"] && !vars.completedSplits.Contains("CollectFirerain") && current.world == 2 && vars.PlayerHasItem("ITSC_FIRERAIN")
-				&& Math.Sqrt(Math.Pow(-13257.24512 - current.playerX, 2) + Math.Pow(-3468.070312 - current.playerY, 2)) < 1000) {
+				&& Math.Sqrt(Math.Pow(-13257.24512 - current.x, 2) + Math.Pow(-3468.070312 - current.y, 2)) < 1000) {
 			print("Split: CollectFirerain");
 			return vars.completedSplits.Add("CollectFirerain");
 		}
 		if (settings["Any%_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
-				&& Math.Sqrt(Math.Pow(-3140 - current.playerX, 2) + Math.Pow(1012 - current.playerY, 2)) < 200 
-				&& Math.Sqrt(Math.Pow(-3140 - old.playerX, 2) + Math.Pow(1012 - old.playerY, 2)) > 1000) {
+				&& Math.Sqrt(Math.Pow(-3140 - current.x, 2) + Math.Pow(1012 - current.y, 2)) < 200 
+				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
 			print("Split: TeleportToCastle");
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
 		if (settings["Any%_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
-				&& Math.Sqrt(Math.Pow(1962 - current.playerX, 2) + Math.Pow(-2644 - current.playerY, 2)) < 200) {
+				&& Math.Sqrt(Math.Pow(1962 - current.x, 2) + Math.Pow(-2644 - current.y, 2)) < 200) {
 			print("Split: OpenGate");
 			return vars.completedSplits.Add("OpenGate");
 		}
@@ -302,12 +310,11 @@ split {
 			return vars.completedSplits.Add("Chapter5");
 		}
 		if (settings["Any%_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && current.world == 1 && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")
-				&& Math.Sqrt(Math.Pow(19408.43555 - current.playerX, 2) + Math.Pow(51082.89062 - current.playerY, 2)) < 1000) {
+				&& Math.Sqrt(Math.Pow(19408.43555 - current.x, 2) + Math.Pow(51082.89062 - current.y, 2)) < 1000) {
 			print("Split: CollectMap");
 			return vars.completedSplits.Add("CollectMap");
 		}
-		if (settings["Any%_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && current.world == 1 
-				&& vars.IsInDialogue(801) && current.exp == old.exp + 2000) {
+		if (settings["Any%_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && vars.globals["Torlof"].Current == 1) {
 			print("Split: RecruitTorlof");
 			return vars.completedSplits.Add("RecruitTorlof");
 		}
@@ -315,7 +322,7 @@ split {
 			print("Split: Irdorath");
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
+		if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 			print("Split: UndeadDragon");
 			return vars.completedSplits.Add("UndeadDragon");
 		}
@@ -338,12 +345,12 @@ split {
 			return vars.completedSplits.Add("CollectTeleportToCastle");
 		}
 		if (settings["Any%NoFlying_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
-				&& Math.Sqrt(Math.Pow(-3140 - current.playerX, 2) + Math.Pow(1012 - current.playerY, 2)) < 200 
-				&& Math.Sqrt(Math.Pow(-3140 - old.playerX, 2) + Math.Pow(1012 - old.playerY, 2)) > 1000) {
+				&& Math.Sqrt(Math.Pow(-3140 - current.x, 2) + Math.Pow(1012 - current.y, 2)) < 200 
+				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
 		if (settings["Any%NoFlying_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
-				&& Math.Sqrt(Math.Pow(1962 - current.playerX, 2) + Math.Pow(-2644 - current.playerY, 2)) < 200) {
+				&& Math.Sqrt(Math.Pow(1962 - current.x, 2) + Math.Pow(-2644 - current.y, 2)) < 200) {
 			return vars.completedSplits.Add("OpenGate");
 		}
 		if (settings["Any%NoFlying_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
@@ -364,14 +371,13 @@ split {
 		if (settings["Any%NoFlying_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")) {
 			return vars.completedSplits.Add("CollectMap");
 		}
-		if (settings["Any%NoFlying_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && current.world == 1 
-				&& vars.IsInDialogue(801) && current.exp == old.exp + 2000) {
+		if (settings["Any%NoFlying_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && vars.globals["Torlof"].Current == 1) {
 			return vars.completedSplits.Add("RecruitTorlof");
 		}
 		if (settings["Any%NoFlying_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["Any%NoFlying_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
+		if (settings["Any%NoFlying_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 		if (settings["Any%NoFlying_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
@@ -391,7 +397,7 @@ split {
 			return vars.completedSplits.Add("EnterValley");
 		}
 		if (settings["AllChapters_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
-				&& Math.Sqrt(Math.Pow(1962 - current.playerX, 2) + Math.Pow(-2644 - current.playerY, 2)) < 200) {
+				&& Math.Sqrt(Math.Pow(1962 - current.x, 2) + Math.Pow(-2644 - current.y, 2)) < 200) {
 			print("Split open gate");
 			return vars.completedSplits.Add("OpenGate");
 		}
@@ -438,7 +444,7 @@ split {
 		if (settings["AllChapters_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
+		if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 		if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
@@ -468,8 +474,8 @@ split {
 			return vars.completedSplits.Add("CollectTeleportToCastle");
 		}
 		if (settings["GlitchRestricted_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
-				&& Math.Sqrt(Math.Pow(-3140 - current.playerX, 2) + Math.Pow(1012 - current.playerY, 2)) < 200 
-				&& Math.Sqrt(Math.Pow(-3140 - old.playerX, 2) + Math.Pow(1012 - old.playerY, 2)) > 1000) {
+				&& Math.Sqrt(Math.Pow(-3140 - current.x, 2) + Math.Pow(1012 - current.y, 2)) < 200 
+				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
 		if (settings["GlitchRestricted_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.globals["chapter"].Current == 3) {
@@ -508,7 +514,7 @@ split {
 		if (settings["GlitchRestricted_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["GlitchRestricted_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
+		if (settings["GlitchRestricted_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 		if (settings["GlitchRestricted_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
@@ -521,7 +527,7 @@ split {
 		if (settings["UndeadDragonKill_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
-		if (settings["UndeadDragonKill_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && current.world == 3 && current.exp > old.exp && vars.IsDead(vars.UNDEAD_DRAGON)) {
+		if (settings["UndeadDragonKill_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
 	}
