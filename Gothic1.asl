@@ -84,7 +84,8 @@ init {
 	vars.globals = new Dictionary<string, MemoryWatcher>();
 
 	var globalsDict = new Dictionary<string, string> {
-		{ "KAPITEL",            "chapter"      },
+		{ "KAPITEL",       "chapter"              },
+		{ "ENTEREDTEMPLE", "enteredSleeperTemple" },
 	};
 
 	// cur_table.table
@@ -335,7 +336,7 @@ split {
 		if (settings["AllChapters_Temple"] && !vars.completedSplits.Contains("Temple") && current.world == "ORCTEMPEL") {
 			return vars.completedSplits.Add("Temple");
 		}
-		if (settings["AllChapters_LeaveTemple"] && !vars.completedSplits.Contains("LeaveTemple") && current.world == "WORLD" && current.enteredSleeperTemple == 1 
+		if (settings["AllChapters_LeaveTemple"] && !vars.completedSplits.Contains("LeaveTemple") && current.world == "WORLD" && vars.globals["enteredSleeperTemple"].Current == 1 
 				&& Math.Sqrt(Math.Pow(-37301 - current.x, 2) + Math.Pow(-28734 - current.y, 2)) < 200) {
 			return vars.completedSplits.Add("LeaveTemple");
 		}
