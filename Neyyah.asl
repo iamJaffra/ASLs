@@ -3,9 +3,22 @@
 state("Neyyah") {}
 
 startup {
+	vars.splits = new List<string[]> {	
+		// Split name, origin, destination, description
+		new string[] { "Felitsu Island", 
+		               "OlujayJalood Station 14a",
+		               "Felitsu Island Gufunkye Arrival Area 1a",
+		               "Reach Felitsu Island"},
+	};
+
 	settings.Add("Splits", true, "Splits");
-		settings.Add("Felitsu Island", true, "Reach Felitsu Island", "Splits");
-		// ...
+
+	foreach (var s in vars.splits) {
+		var splitName   = s[0];
+		var description = s[3];
+
+		settings.Add(splitName, true, description, "Splits");
+	}
 }
 
 init {
@@ -55,12 +68,15 @@ reset {
 }
 
 split {
-	if (settings["Felitsu Island"] && 
-	    current.card == "Felitsu Island Gufunkye Arrival Area 1a" && old.card == "OlujayJalood Station 14a" && 
-	    vars.completedSplits.Add("Felitsu Island")) {
-		return true;
-	}
+	foreach (var s in vars.splits) {
+		var splitName   = s[0];
+		var origin      = s[1];
+		var destination = s[2];
 
-	// more to come
-	// let me finish the game casually first
+		if (settings[splitName] &&
+		    old.card == origin && current.card == destination &&
+		    vars.completedSplits.Add(splitName)) {
+			return true;
+		}
+	}
 }
