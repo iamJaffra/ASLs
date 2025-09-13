@@ -12,6 +12,8 @@ state("Gothic2") {
 	int guild:         "Gothic2.exe", 0x5831DC, 0x21C;
 	int exp:           "Gothic2.exe", 0x5831DC, 0x3A0;
 	int inDialogue:    "Gothic2.exe", 0x5831DC, 0x284;
+	string32 mobName:  "Gothic2.exe", 0x5831DC, 0x8D0, 0x198, 0x0;
+	int mobState:      "Gothic2.exe", 0x5831DC, 0x8D0, 0x1F4;
 
 	// MISC
 	byte inCutscene:   "Gothic2.exe", 0x4C38B8;
@@ -93,8 +95,15 @@ startup {
 		settings.Add("GlitchRestricted_SwampDragon", true, "Kill Swamp Dragon", "GlitchRestricted");
 		settings.Add("GlitchRestricted_IceDragon", false, "Kill Ice Dragon", "GlitchRestricted");
 		settings.Add("GlitchRestricted_Chapter5", true, "Reach chapter 5", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Irdorath", true, "Enter Irdorath", "GlitchRestricted");
-		settings.Add("GlitchRestricted_UndeadDragon", true, "Kill Undead Dragon", "GlitchRestricted");
+		settings.Add("GlitchRestricted_IrdorathGroup", true, "Irdorath splits", "GlitchRestricted");
+			settings.Add("GlitchRestricted_Irdorath", true, "Enter Irdorath", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathMasterKey", true, "Collect the Key from the Key Master", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch1", true, "Activate switch 1", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch2", true, "Activate switch 2", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch3", true, "Activate switch 3", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch4", true, "Activate switch 4", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathOpenHall", true, "Open the Hall of the Seekers", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_UndeadDragon", true, "Kill Undead Dragon", "GlitchRestricted_IrdorathGroup");
 		settings.Add("GlitchRestricted_End", true, "Finish Game", "GlitchRestricted");
 
 	// Undead Dragon Kill
@@ -123,6 +132,7 @@ init {
 		//{ "PLAYER_ISAPPRENTICE", "apprentice" }
 	};
 
+	// cur_table.table
 	int symtab = new DeepPointer("Gothic2.exe", 0x585F70, 0x8).Deref<int>(game);
 	int size = new DeepPointer("Gothic2.exe", 0x585F70, 0x8 + 0x4).Deref<int>(game);
 	
@@ -514,6 +524,27 @@ split {
 		if (settings["GlitchRestricted_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
 		}
+
+		if (settings["GlitchRestricted_IrdorathMasterKey"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathMasterKey") && current.world == 3 && vars.PlayerHasItem("ITKE_EVT_UNDEAD_02")) {
+			return vars.completedSplits.Add("GlitchRestricted_IrdorathMasterKey");
+		}
+
+		if (settings["GlitchRestricted_IrdorathSwitch1"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch1") && current.world == 3 && current.mobName == "EVT_RIGHT_ROOM_01_MSG_SWITCH" && current.mobState == 1) {
+			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch1");
+		}
+		if (settings["GlitchRestricted_IrdorathSwitch2"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch2") && current.world == 3 && current.mobName == "EVT_LEFT_ROOM_01_MSG_SWITCH" && current.mobState == 1) {
+			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch2");
+		}
+		if (settings["GlitchRestricted_IrdorathSwitch3"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch3") && current.world == 3 && current.mobName == "EVT_RIGHT_ROOM_02_MSG_SWITCH" && current.mobState == 1) {
+			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch3");
+		}
+		if (settings["GlitchRestricted_IrdorathSwitch4"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch4") && current.world == 3 && current.mobName == "EVT_LEFT_ROOM_02_MSG_SWITCH" && current.mobState == 1) {
+			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch4");
+		}
+		if (settings["GlitchRestricted_IrdorathOpenHall"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathOpenHall") && current.world == 3 && current.mobName == "EVENT_TRIGGERLIST_FOR_LOCK_FINAL" && current.mobState == 1) {
+			return vars.completedSplits.Add("GlitchRestricted_IrdorathOpenHall");
+		}
+
 		if (settings["GlitchRestricted_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 			return vars.completedSplits.Add("UndeadDragon");
 		}
