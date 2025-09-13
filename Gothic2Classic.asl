@@ -97,12 +97,12 @@ startup {
 		settings.Add("GlitchRestricted_Chapter5", true, "Reach chapter 5", "GlitchRestricted");
 		settings.Add("GlitchRestricted_IrdorathGroup", true, "Irdorath splits", "GlitchRestricted");
 			settings.Add("GlitchRestricted_Irdorath", true, "Enter Irdorath", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathMasterKey", true, "Collect the Key from the Key Master", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch1", true, "Activate switch 1", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch2", true, "Activate switch 2", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch3", true, "Activate switch 3", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch4", true, "Activate switch 4", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathOpenHall", true, "Open the Hall of the Seekers", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathMasterKey", false, "Collect the key from the Key Master", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch1", false, "Activate switch 1", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch2", false, "Activate switch 2", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch3", false, "Activate switch 3", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathSwitch4", false, "Activate switch 4", "GlitchRestricted_IrdorathGroup");
+			settings.Add("GlitchRestricted_IrdorathOpenHall", false, "Open the Hall of the Seekers", "GlitchRestricted_IrdorathGroup");
 			settings.Add("GlitchRestricted_UndeadDragon", true, "Kill Undead Dragon", "GlitchRestricted_IrdorathGroup");
 		settings.Add("GlitchRestricted_End", true, "Finish Game", "GlitchRestricted");
 
