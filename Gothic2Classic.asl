@@ -231,6 +231,25 @@ init {
 		return false;
 	});
 
+	vars.IsActive = (Func<string, bool>)((str) => {
+		// ogame.world.voblist.data
+		IntPtr vob = (IntPtr) new DeepPointer("Gothic2.exe", 0x5813DC, 0x8, 0x627C, 0x8).Deref<int>(game);
+
+		while (vob != IntPtr.Zero) {
+			var vobData = game.ReadPointer(vob + 0x4);
+			string vobString = game.ReadString(game.ReadPointer(vobData + 0x198), 32);
+			var status = game.ReadValue<int>(vobData + 0x1F4);
+
+			if (vobString == str && status == 1) {
+				return true;
+			}
+	
+			vob = game.ReadPointer(vob + 0x8);
+		}
+
+		return false;
+	});
+
 	vars.canReset = true;
 }
 
@@ -529,19 +548,19 @@ split {
 			return vars.completedSplits.Add("GlitchRestricted_IrdorathMasterKey");
 		}
 
-		if (settings["GlitchRestricted_IrdorathSwitch1"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch1") && current.world == 3 && current.mobName == "EVT_RIGHT_ROOM_01_MSG_SWITCH" && current.mobState == 1) {
+		if (settings["GlitchRestricted_IrdorathSwitch1"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch1") && current.world == 3 && Math.Sqrt(Math.Pow(23888 - current.x, 2) + Math.Pow(-15424 - current.y, 2)) < 500 && vars.IsActive("EVT_RIGHT_ROOM_01_MSG_SWITCH")) {
 			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch1");
 		}
-		if (settings["GlitchRestricted_IrdorathSwitch2"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch2") && current.world == 3 && current.mobName == "EVT_LEFT_ROOM_01_MSG_SWITCH" && current.mobState == 1) {
+		if (settings["GlitchRestricted_IrdorathSwitch2"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch2") && current.world == 3 && Math.Sqrt(Math.Pow(23875 - current.x, 2) + Math.Pow(-19488 - current.y, 2)) < 500 && vars.IsActive("EVT_LEFT_ROOM_01_MSG_SWITCH")) {
 			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch2");
 		}
-		if (settings["GlitchRestricted_IrdorathSwitch3"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch3") && current.world == 3 && current.mobName == "EVT_RIGHT_ROOM_02_MSG_SWITCH" && current.mobState == 1) {
+		if (settings["GlitchRestricted_IrdorathSwitch3"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch3") && current.world == 3 && Math.Sqrt(Math.Pow(19686 - current.x, 2) + Math.Pow(-15408 - current.y, 2)) < 500 && vars.IsActive("EVT_RIGHT_ROOM_02_MSG_SWITCH")) {
 			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch3");
 		}
-		if (settings["GlitchRestricted_IrdorathSwitch4"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch4") && current.world == 3 && current.mobName == "EVT_LEFT_ROOM_02_MSG_SWITCH" && current.mobState == 1) {
+		if (settings["GlitchRestricted_IrdorathSwitch4"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch4") && current.world == 3 && Math.Sqrt(Math.Pow(19676 - current.x, 2) + Math.Pow(-19505 - current.y, 2)) < 500 && vars.IsActive("EVT_LEFT_ROOM_02_MSG_SWITCH")) {
 			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch4");
 		}
-		if (settings["GlitchRestricted_IrdorathOpenHall"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathOpenHall") && current.world == 3 && current.mobName == "EVENT_TRIGGERLIST_FOR_LOCK_FINAL" && current.mobState == 1) {
+		if (settings["GlitchRestricted_IrdorathOpenHall"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathOpenHall") && current.world == 3 && Math.Sqrt(Math.Pow(22138 - current.x, 2) + Math.Pow(-17461 - current.y, 2)) < 500 && vars.IsActive("EVENT_TRIGGERLIST_FOR_LOCK_FINAL")) {
 			return vars.completedSplits.Add("GlitchRestricted_IrdorathOpenHall");
 		}
 
