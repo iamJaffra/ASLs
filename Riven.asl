@@ -83,7 +83,6 @@ init {
 		};
 		
 		var size = svm.Read<int>("_vars", "_mask");
-		print("size = " + size);
 
 		foreach (var global in globalsDict) {
 			bool globalFound = false;
@@ -131,9 +130,9 @@ update {
 				var playing = game.ReadValue<bool>(data + 2 * (int)vars.PTRSIZE + 0xA);
 
 				if ((id == 45 && playing && settings["BestEnding_Fissure"]      ) ||
-					(id == 47 && playing && settings["BadEnding_Fissure"]       ) ||
-					(id == 48 && playing && settings["ImpossibleEnding_Fissure"]) ||
-					(id ==  3 && playing && settings["Opera_OSoleMio"]          )) {
+				    (id == 47 && playing && settings["BadEnding_Fissure"]       ) ||
+				    (id == 48 && playing && settings["ImpossibleEnding_Fissure"]) ||
+				    (id ==  3 && playing && settings["Opera_OSoleMio"]          )) {
 					if (!vars.triggeredEnding) {
 						vars.TimerModel.Split();
 						vars.triggeredEnding = true;
