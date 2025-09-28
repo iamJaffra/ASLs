@@ -88,7 +88,7 @@ init {
 			bool globalFound = false;
 
 			for (int i = 0; i < size; i++) {
-				string key = svm.ReadString("_vars", "_storage", i * vars.PTRSIZE, "_key", 0x0);	
+				string key = svm.ReadString("_vars", "_storage", i * vars.PTRSIZE, "_key");	
 
 				if (global.Key == key) {
 					svm[global.Value] = svm.Watch<int>("_vars", "_storage", i * vars.PTRSIZE, "_value");
@@ -147,7 +147,8 @@ update {
 	}
 	
 	// START/RESET
-	if (current.stack == 8 && old.card == 1 && current.card == 2) {
+	if ((current.stack == 8 && old.card == 1 && current.card == 2) ||
+	    (current.stack == 4 && old.card == 1 && current.card == 159)) {
 		var phase = timer.CurrentPhase;
 		bool startEnabled = settings.StartEnabled;
 		bool resetEnabled = settings.ResetEnabled;
