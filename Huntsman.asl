@@ -45,35 +45,6 @@ init {
 	}
 
 
-	var fNamePoolCache = new Dictionary<ulong, string>() {{0, "None"}};
-
-	vars.FNameToString = (Func<ulong, string>)(fName =>
-	{
-		var number     = (fName & 0xFFFFFFFF00000000) >> 0x20;
-		var nameLookup = (fName & 0x00000000FFFFFFFF) >> 0x00;
-
-		string name;
-		if (fNamePoolCache.ContainsKey(nameLookup)) {
-			name = fNamePoolCache[nameLookup];
-		} 
-		else {
-			var chunkIdx = (fName & 0x00000000FFFF0000) >> 0x10;
-			var nameIdx  = (fName & 0x000000000000FFFF) >> 0x00;
-
-			var chunk = game.ReadPointer(fNamePool + 0x10 + (int)chunkIdx * 0x8);
-			var nameEntry = chunk + (int)nameIdx * 0x2;
-
-			var length = game.ReadValue<short>(nameEntry) >> 6;
-			name = game.ReadString(nameEntry + 0x2, length);
-
-			fNamePoolCache[nameLookup] = name;
-		}
-
-		//return name;
-		return number == 0 ? name : name + "_" + number;
-	});
-
-
 	// GWorld.URL
 	vars.world = new StringWatcher(new DeepPointer(gWorld, (vars.version == "Steam" ? 0x6A8 : 0x5C8), 0x0), ReadStringType.UTF16, 100);
 	
