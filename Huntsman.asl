@@ -19,6 +19,7 @@ startup {
 	settings.Add("Steam", false, "Steam version");
 		settings.Add("SteamSplits", true, "Split on ...", "Steam");
 			settings.Add("Maintenance Key", true, "Collecting the Maintenance Key", "SteamSplits");
+			settings.Add("Steam Demo End", true, "Finishing the demo", "SteamSplits");
 }
 
 init {
@@ -63,6 +64,11 @@ init {
 	// GEngine.GameInstance.LocalPlayers[0].PlayerController.AHorrorEngineCharacter_C.YouWin_NewTrack
 	vars.spiderHasBeenEliminated = new MemoryWatcher<float>(new DeepPointer(gEngine, 0x10A8, 0x38, 0x0, 0x30, 0x2E0, 0x698));
 
+	// GEngine.GameInstance.LocalPlayers[0].PlayerController.AcknowledgedPawn.As Horror Engine.Dead
+	vars.dead = new MemoryWatcher<bool>(new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x7F8));
+	// GEngine.GameInstance.LocalPlayers[0].PlayerController.AcknowledgedPawn.As Horror Engine.EndOfDemo?
+	vars.endOfDemo = new MemoryWatcher<bool>(new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x890));
+
 
 	vars.LastItem = (Func<string>)(() => {
 		var numberOfItems = vars.version == "itch.io"
@@ -82,6 +88,8 @@ init {
 
 
 	vars.completedSplits = new HashSet<string>();
+
+	vars.delay = new Stopwatch();
 }
 
 update {
@@ -90,6 +98,8 @@ update {
 	vars.debug.Update(game);
 	vars.loading.Update(game);
 	vars.spiderHasBeenEliminated.Update(game);
+	vars.dead.Update(game);
+	vars.endOfDemo.Update(game);
 
 	if (vars.world.Changed) {
 		print("World: " + vars.world.Current);
@@ -113,12 +123,24 @@ reset {
 }
 
 split {
-	// End of game: text "Spider has been Eliminated" appears on screen
+	// End of game
+	// itch.io: text "Spider has been Eliminated" appears on screen
 	if (settings["itch.ioEnd"] && vars.spiderHasBeenEliminated.Current > 0 && vars.spiderHasBeenEliminated.Old == 0) {
 		return true;
 	}
+	// Steam: demo end screen appears after getting killed by the spider
+	if (settings["Steam Demo End"] && vars.endOfDemo.Current && vars.dead.Current && vars.dead.Changed) {
+		vars.delay.Start();
+		print("Died after End of Demo. Started timer.");
+	}
+	if (vars.delay.ElapsedMilliseconds >= 6900 && vars.completedSplits.Add("endOfDemo")) {
+		vars.delay.Reset();
+		print("Timer is up. Split.");
+		return true;
+	}
+
 	// Items splits
-	else if (vars.numberOfItems.Current > vars.numberOfItems.Old) {
+	if (vars.numberOfItems.Current > vars.numberOfItems.Old) {
 		var item = vars.LastItem();
 		print("Picked up " + item);
 		return settings[item] && vars.completedSplits.Add(item);
