@@ -640,7 +640,7 @@ update {
 }
 
 reset {
-	if (current.world == "G1R_MainMenu_C" || current.world == "G1RNyrasPrologue_MainMenu_C") {
+	if (current.world == "G1R_MainMenu_C" || current.world == "G1RNyrasPrologue_MenuMap") {
 		vars.MainMenuDisplayedWidget.Update(game);
 
 		if (vars.MainMenuDisplayedWidget.Changed) {
@@ -648,6 +648,10 @@ reset {
 		}
 		
 		if (vars.FNameToString(vars.MainMenuDisplayedWidget.Current) == "NewGame") {
+			return true;
+		}
+
+		if (current.world == "G1RNyrasPrologue_MenuMap" && old.world != "G1RNyrasPrologue_MenuMap") {
 			return true;
 		}
 	}
