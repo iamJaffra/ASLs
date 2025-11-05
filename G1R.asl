@@ -1,3 +1,15 @@
+/*
+
+   ______      __  __    _          ____                       __             ___   _____ __ 
+  / ____/___  / /_/ /_  (_)____    / __ \___  ____ ___  ____ _/ /_____       /   | / ___// / 
+ / / __/ __ \/ __/ __ \/ / ___/   / /_/ / _ \/ __ `__ \/ __ `/ //_/ _ \     / /| | \__ \/ /  
+/ /_/ / /_/ / /_/ / / / / /__    / _, _/  __/ / / / / / /_/ / ,< /  __/    / ___ |___/ / /___
+\____/\____/\__/_/ /_/_/\___/   /_/ |_|\___/_/ /_/ /_/\__,_/_/|_|\___/    /_/  |_/____/_____/
+
+by: Jaffra
+
+*/
+
 state("G1R-Win64-Shipping") {}
 
 startup {
@@ -116,9 +128,46 @@ startup {
 	vars.NyrasPrologue_Y = -56429.3303492728d;
 	vars.X =  98555.7733905069d;
 	vars.Y = -56429.3303492728d;
+
+	//
+	vars.launcherProcessTimeout = DateTime.MaxValue;
 }
 
 init {
+#region Attaching to the right process
+	if (File.Exists(Path.Combine(
+        Path.GetDirectoryName(modules[0].FileName),
+        "G1R", "Binaries", "Win64", "G1R-Win64-Shipping.exe"
+    ))) {
+        if (vars.launcherProcessTimeout < DateTime.Now) {
+            vars.Info("Timeout expired; assuming this is actually the game process.");
+        } else {
+            if (vars.launcherProcessTimeout == DateTime.MaxValue) {
+                vars.Info("Hooked launcher process - retrying");
+                vars.launcherProcessTimeout = DateTime.Now.AddSeconds(30);
+            }
+
+            var allComponents = timer.Layout.Components;
+            if (timer.Run.AutoSplitter != null && timer.Run.AutoSplitter.Component != null) {
+                allComponents = allComponents.Append(timer.Run.AutoSplitter.Component);
+            }
+            foreach (var component in allComponents) {
+                var type = component.GetType();
+                if (type.Name == "ASLComponent") {
+                    var script = type.GetProperty("Script").GetValue(component);
+                    script.GetType().GetField(
+                        "_game",
+                        BindingFlags.NonPublic | BindingFlags.Instance
+                    ).SetValue(script, null);
+                }
+            }
+            return;
+        }
+    } else {
+        vars.launcherProcessTimeout = DateTime.MaxValue;
+    }
+#endregion
+
 #region Signature scanning
 	var scanner = new SignatureScanner(game, modules[0].BaseAddress, modules[0].ModuleMemorySize);
 
