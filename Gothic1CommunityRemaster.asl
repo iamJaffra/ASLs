@@ -4,46 +4,32 @@ startup {
 	Assembly.Load(File.ReadAllBytes("Components/uhara9")).CreateInstance("Main");
 	vars.Uhara.EnableDebug();
 
+#region Settings
 	vars.splitData = new Dictionary<string, Tuple<string, string, string>> { 
 		{ "Ch6_EnterSleeperTemple", 
-			Tuple.Create("World",        "Orc_Tempel",           "Enter the Sleeper Temple.") 
+			Tuple.Create("World",  "Orc_Tempel",           "Enter the Sleeper Temple.") 
 		},
 		{ "Ch6_Sword1", 
-			Tuple.Create("Item",         "BP_Lichtbringer_C",    "Collect 1st Priest's Sword.") 
+			Tuple.Create("Item",   "BP_Lichtbringer_C",    "Collect the 1st Priest's Sword.") 
 		}, 
 		{ "Ch6_Sword2", 
-			Tuple.Create("Item",         "BP_Weltenspalter_C",   "Collect 2nd Priest's Sword.") 
+			Tuple.Create("Item",   "BP_Weltenspalter_C",   "Collect the 2nd Priest's Sword.") 
 		}, 
 		{ "Ch6_Sword3", 
-			Tuple.Create("Item",         "BP_Zeitenklinge_C",    "Collect 3rd Priest's Sword.") 
+			Tuple.Create("Item",   "BP_Zeitenklinge_C",    "Collect the 3rd Priest's Sword.") 
 		}, 
 		{ "Ch6_Sword4", 
-			Tuple.Create("Item",         "BP_Daemonenstreich_C", "Collect 4th Priest's Sword.") 
+			Tuple.Create("Item",   "BP_Daemonenstreich_C", "Collect the 4th Priest's Sword.") 
 		}, 
 		{ "Ch6_Sword5", 
-			Tuple.Create("Item",         "BP_Bannklinge_C",      "Collect 5th Priest's Sword.") 
+			Tuple.Create("Item",   "BP_Bannklinge_C",      "Collect the 5th Priest's Sword.") 
 		}, 
 		{ "Ch6_Ending",
-			Tuple.Create("Ending",       "",                     "Trigger the Ending Cutscene.") 
+			Tuple.Create("Ending", "",                     "Trigger the Ending Cutscene.") 
 		},
 	};
 
-	/*
-	for (int i = 2; i < 7; i++) {
-		string chapterNum = i.ToString();
-		vars.splitData["Ch" + chapterNum + "_StartChapter"] = Tuple.Create(
-			"Chapter", chapterNum, "Start Chapter " + chapterNum + ".");
-	} 
-	*/
-
 	settings.Add("Main", false, "Any% Splits");
-	//settings.Add("Chapter 6", true, "Chapter 6", "Main");
-	/*
-	for (int i = 1; i < 7; i++) {
-		string chapter = "Chapter " + i.ToString();
-		settings.Add(chapter, true, chapter, "Main");
-	}
-	*/
 
 	foreach (var kv in vars.splitData) {
 		var splitName = kv.Key;
@@ -51,6 +37,7 @@ startup {
 		
 		settings.Add(splitName, true, splitDesc, "Main");
 	}
+#endregion
 
 	vars.Info = (Action<string>)((msg) => {
 		print("[Gothic 1 Remaster ASL] " + msg);
