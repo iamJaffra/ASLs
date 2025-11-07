@@ -106,6 +106,13 @@ init {
 		return true;
 	});
 
+	vars.Move = (Func<int, int, int, int, bool>)((oldStack, oldCard, currentStack, currentCard) => {
+	return (vars.ScummVM["stack"].Old == oldStack) &&
+	       (vars.ScummVM["card"].Old == oldCard) &&
+	       (vars.ScummVM["stack"].Current == currentStack) &&
+	       (vars.ScummVM["card"].Current == currentCard);
+	});
+
 	vars.completedSplits = new HashSet<string>();
 	vars.triggeredEnding = false;
 }
@@ -176,52 +183,48 @@ onStart {
 }
 
 split {
-	if (game.ReadPointer((IntPtr)vars.ScummVM.GEngine) == IntPtr.Zero) {
-		return false;
-	}
-
 #region Best Ending
 	if (settings["BestEnding"]) {
-		if (settings["BestEnding_Temple->Jungle"] && old.stack == 4 && old.card == 55 && current.stack == 7 && current.card == 810) {
+		if (settings["BestEnding_Temple->Jungle"] && vars.Move(4, 55, 7, 810)) {
 			return true;
 		}
-		else if (settings["BestEnding_ExitJungleElevator"] && current.stack == 7 && old.card == 361 && current.card == 392) {
+		else if (settings["BestEnding_ExitJungleElevator"] && vars.Move(7, 361, 7, 392)) {
 			return true;
 		} 
-		else if (settings["BestEnding_Village"] && current.stack == 7 && old.card == 726 && current.card == 529) {
+		else if (settings["BestEnding_Village"] && vars.Move(7, 726, 7, 529)) {
 			return true;
 		}
-		else if (settings["BestEnding_Gallows"] && current.stack == 7 && old.card == 287 && current.card == 263) {
+		else if (settings["BestEnding_Gallows"] && vars.Move(7, 287, 7, 263)) {
 			return true;
 		} 
-		else if (settings["BestEnding_Jungle->Tay"] && old.stack == 7 && old.card == 227 && current.stack == 3 && current.card == 3) {
+		else if (settings["BestEnding_Jungle->Tay"] && vars.Move(7, 227, 3, 3)) {
 			return true;
 		} 
-		else if (settings["BestEnding_Jungle->Boiler"] && old.stack == 7 && old.card == 609 && current.stack == 5 && current.card == 1) {
+		else if (settings["BestEnding_Jungle->Boiler"] && vars.Move(7, 609, 5, 1)) {
 			return true;
 		} 
-		else if (settings["BestEnding_ReadGehnsJournal"] && current.stack == 5 && old.card == 278 && current.card == 277 && vars.completedSplits.Add("ReadGehnsJournal")) {
+		else if (settings["BestEnding_ReadGehnsJournal"] && vars.Move(5, 278, 5, 277) && vars.completedSplits.Add("ReadGehnsJournal")) {
 			return true;
 		} 
-		else if (settings["BestEnding_ReachWaffle"] && current.stack == 4 && old.card == 227 && current.card == 229 && vars.completedSplits.Add("ReachWaffle")) {
+		else if (settings["BestEnding_ReachWaffle"] && vars.Move(4, 227, 4, 229) && vars.completedSplits.Add("ReachWaffle")) {
 			return true;
 		} 
 		else if (settings["BestEnding_Power"] && old.power == 0 && current.power == 1) {
 			return true;
 		}
-		else if (settings["BestEnding_ReachTempleDome"] && current.stack == 4 && old.card == 389 && current.card == 392 && vars.completedSplits.Add("ReachTempleDome")) {
+		else if (settings["BestEnding_ReachTempleDome"] && vars.Move(4, 389, 4, 392) && vars.completedSplits.Add("ReachTempleDome")) {
 			return true;
 		}
-		else if (settings["BestEnding_CallGehn"] && current.stack == 1 && old.card == 33 && current.card == 2) {
+		else if (settings["BestEnding_CallGehn"] && vars.Move(1, 33, 1, 2)) {
 			return true;
 		} 
-		else if (settings["BestEnding_TrapGehn"] && current.stack == 1 && old.card == 2 && current.card == 7) {
+		else if (settings["BestEnding_TrapGehn"] && vars.Move(1, 2, 1, 7)) {
 			return true;
 		} 
-		else if (settings["BestEnding_ReachPrisonDome"] && current.stack == 2 && old.card == 2 && current.card == 42) {
+		else if (settings["BestEnding_ReachPrisonDome"] && vars.Move(2, 2, 2, 42)) {
 			return true;
 		}
-		else if (settings["BestEnding_EnterPrisonDome"] && current.stack == 2 && old.card == 2 && current.card == 43) {
+		else if (settings["BestEnding_EnterPrisonDome"] && vars.Move(2, 2, 2, 43)) {
 			return true;
 		}
 	}
@@ -229,22 +232,22 @@ split {
 
 #region Bad Ending
 	if (settings["BadEnding"]) {
-		if (settings["BadEnding_Temple->Jungle"] && old.stack == 4 && old.card == 55 && current.stack == 7 && current.card == 810) {
+		if (settings["BadEnding_Temple->Jungle"] && vars.Move(4, 55, 7, 810)) {
 			return true;
 		}
-		else if (settings["BadEnding_ExitJungleElevator"] && current.stack == 7 && old.card == 361 && current.card == 392) {
+		else if (settings["BadEnding_ExitJungleElevator"] && vars.Move(7, 361, 7, 392)) {
 			return true;
 		} 
-		else if (settings["BadEnding_Village"] && current.stack == 7 && old.card == 726 && current.card == 529) {
+		else if (settings["BadEnding_Village"] && vars.Move(7, 726, 7, 529)) {
 			return true;
 		}
-		else if (settings["BadEnding_Gallows"] && current.stack == 7 && old.card == 287 && current.card == 263) {
+		else if (settings["BadEnding_Gallows"] && vars.Move(7, 287, 7, 263)) {
 			return true;
 		} 
-		else if (settings["BadEnding_Jungle->Tay"] && old.stack == 7 && old.card == 227 && current.stack == 3 && current.card == 3) {
+		else if (settings["BadEnding_Jungle->Tay"] && vars.Move(7, 227, 3, 3)) {
 			return true;
 		} 
-		else if (settings["BadEnding_Jungle->Temple"] && old.stack == 7 && old.card == 811 && current.stack == 4 && current.card == 54) {
+		else if (settings["BadEnding_Jungle->Temple"] && vars.Move(7, 811, 4, 54)) {
 			return true;
 		} 
 	}
@@ -252,40 +255,40 @@ split {
 
 #region Opera
 	if (settings["Opera"]) {
-		if (settings["Opera_ExitMaglevTemple1"] && current.stack == 7 && old.card == 810 && current.card == 809 && vars.completedSplits.Add("Opera_ExitMaglevTemple1")) {
+		if (settings["Opera_ExitMaglevTemple1"] && vars.Move(7, 810, 7, 809) && vars.completedSplits.Add("Opera_ExitMaglevTemple1")) {
 			return true;
 		}
-		else if (settings["Opera_Egg"] && current.stack == 5 && old.card == 257 && current.card == 256) {
+		else if (settings["Opera_Egg"] && vars.Move(5, 257, 5, 256)) {
 			return true;
 		}
-		else if (settings["Opera_ExitMaglevTemple2"] && current.stack == 7 && old.card == 810 && current.card == 809 && vars.completedSplits.Add("Opera_ExitMaglevTemple2")) {
+		else if (settings["Opera_ExitMaglevTemple2"] && vars.Move(7, 810, 7, 809) && vars.completedSplits.Add("Opera_ExitMaglevTemple2")) {
 			return true;
 		}
-		else if (settings["Opera_ExitJungleElevator"] && current.stack == 7 && old.card == 361 && current.card == 392) {
+		else if (settings["Opera_ExitJungleElevator"] && vars.Move(7, 361, 7, 392)) {
 			return true;
 		}
-		else if (settings["Opera_Gallows"] && current.stack == 7 && old.card == 287 && current.card == 263) {
+		else if (settings["Opera_Gallows"] && vars.Move(7, 287, 7, 263)) {
 			return true;
 		}
-		else if (settings["Opera_Jungle->Tay"] && old.stack == 7 && old.card == 227 && current.stack == 3 && current.card == 3) {
+		else if (settings["Opera_Jungle->Tay"] && vars.Move(7, 227, 3, 3)) {
 			return true;
 		}
-		else if (settings["Opera_ExitTunnel"] && old.stack == 7 && old.card == 191 && old.stack == 7 && current.card == 187) {
+		else if (settings["Opera_ExitTunnel"] && vars.Move(7, 191, 7, 187)) {
 			return true;
 		}
-		else if (settings["Opera_Sub"] && current.stack == 7 && old.card == 590 && current.card == 582) {
+		else if (settings["Opera_Sub"] && vars.Move(7, 590, 7, 582)) {
 			return true;
 		}
-		else if (settings["Opera_Jungle->Boiler"] && old.stack == 7 && old.card == 30 && current.stack == 5 && current.card == 248) {
+		else if (settings["Opera_Jungle->Boiler"] && vars.Move(7, 30, 5, 248)) {
 			return true;
 		}
 		else if (settings["Opera_RAWA"] && current.stack == 4 && old.card == 60 && current.card != 60) {
 			return true;
 		}
-		else if (settings["Opera_CallGehn"] && current.stack == 1 && old.card == 33 && current.card == 2) {
+		else if (settings["Opera_CallGehn"] && vars.Move(1, 33, 1, 2)) {
 			return true;
 		}
-		else if (settings["Opera_TrapGehn"] && current.stack == 1 && old.card == 2 && current.card == 7) {
+		else if (settings["Opera_TrapGehn"] && vars.Move(1, 2, 1, 7)) {
 			return true;
 		}		
 	}
