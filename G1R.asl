@@ -134,38 +134,46 @@ startup {
 }
 
 init {
+
 #region Attaching to the right process
 	if (File.Exists(Path.Combine(
-        Path.GetDirectoryName(modules[0].FileName),
-        "G1R", "Binaries", "Win64", "G1R-Win64-Shipping.exe"
-    ))) {
-        if (vars.launcherProcessTimeout < DateTime.Now) {
-            vars.Info("Timeout expired; assuming this is actually the game process.");
-        } else {
-            if (vars.launcherProcessTimeout == DateTime.MaxValue) {
-                vars.Info("Hooked launcher process - retrying");
-                vars.launcherProcessTimeout = DateTime.Now.AddSeconds(30);
-            }
+		Path.GetDirectoryName(modules[0].FileName),
+		"G1R", "Binaries", "Win64", "G1R-Win64-Shipping.exe"
+	))) {
+		var allComponents = timer.Layout.Components;
+		if (timer.Run.AutoSplitter != null && timer.Run.AutoSplitter.Component != null) {
+			allComponents = allComponents.Append(timer.Run.AutoSplitter.Component);
+		}
+		foreach (var component in allComponents) {
+			var type = component.GetType();
+			if (type.Name == "ASLComponent") {
+				var script = type.GetProperty("Script").GetValue(component);
+				script.GetType().GetField(
+					"_game",
+					BindingFlags.NonPublic | BindingFlags.Instance
+				).SetValue(script, null);
+			}
+		}
+		return;
+	}
+	
+#endregion
 
-            var allComponents = timer.Layout.Components;
-            if (timer.Run.AutoSplitter != null && timer.Run.AutoSplitter.Component != null) {
-                allComponents = allComponents.Append(timer.Run.AutoSplitter.Component);
-            }
-            foreach (var component in allComponents) {
-                var type = component.GetType();
-                if (type.Name == "ASLComponent") {
-                    var script = type.GetProperty("Script").GetValue(component);
-                    script.GetType().GetField(
-                        "_game",
-                        BindingFlags.NonPublic | BindingFlags.Instance
-                    ).SetValue(script, null);
-                }
-            }
-            return;
-        }
-    } else {
-        vars.launcherProcessTimeout = DateTime.MaxValue;
-    }
+#region Version detection
+	string hash;
+
+	using (var md5 = System.Security.Cryptography.MD5.Create())
+	using (var fs = File.OpenRead(modules.First().FileName))
+		hash = string.Concat(md5.ComputeHash(fs).Select(b => b.ToString("X2")));
+
+	vars.Info("Hash: " + hash);
+
+	if (hash == "DF985F22D3378D74E49995F17500CBDD") { // Nyras Prologue (Steam)
+		vars.NyrasFadeOffset = 0x959946C;
+	}
+	else if (hash == "DF985F22D3378D74E49995F17500CBDD") { // Nyras Prologue (GOG)
+		vars.NyrasFadeOffset = 0x959946C;
+	}
 #endregion
 
 #region Signature scanning
@@ -358,7 +366,7 @@ init {
 			))
 		},
 		{ "NyrasFade",
-			new MemoryWatcher<float>(new DeepPointer("G1R-Win64-Shipping.exe", 0x959946C))
+			new MemoryWatcher<float>(new DeepPointer("G1R-Win64-Shipping.exe", vars.NyrasFadeOffset))
 		},
 	};
 
@@ -631,7 +639,7 @@ init {
 		}
 		else if (type == "Dialogue") {
 			splits[splitName] = () => vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation") && 
-			                          vars.IsInConversation(arg);
+									  vars.IsInConversation(arg);
 		}
 		else if (type == "World") {
 			splits[splitName] = () => vars.FNameToString(vars.Watchers["GWorldFName"].Current) == arg;
@@ -641,12 +649,12 @@ init {
 		}
 		else if (type == "FinishNyrasPrologue") {
 			splits[splitName] = () => vars.FNameToString(vars.Watchers["ViewTarget"].Current) == "CineCameraActor" && 
-			                          vars.Watchers["NyrasFade"].Old < 1.0f && vars.Watchers["NyrasFade"].Current == 1.0f;
+									  vars.Watchers["NyrasFade"].Old < 1.0f && vars.Watchers["NyrasFade"].Current == 1.0f;
 		} 
 		/*
 		else if (type == "ExitFreeMine") {
 			splits[splitName] = () => vars.Watchers["someVar"].Current == 12345 &&
-			                          vars.FNameToString(vars.Watchers["GWorldFName"].Current) == "G1R_MainMap";
+									  vars.FNameToString(vars.Watchers["GWorldFName"].Current) == "G1R_MainMap";
 		}
 		*/
 	}
@@ -681,7 +689,7 @@ update {
 
 	if (vars.timerPaused) {
 		if (vars.worlds.Contains(current.world)) { 	
-			if (vars.Watchers["loadingScreen"].Old && !vars.Watchers["loadingScreen"].Current) {
+			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
 				vars.timerPaused = false;
 			}
 		}
@@ -709,7 +717,7 @@ reset {
 start {
 	if (current.world == "G1R_MainMap") {
 		if (Math.Abs(vars.Watchers["X"].Current - vars.X) < 0.000000001 &&
-		    Math.Abs(vars.Watchers["Y"].Current - vars.Y) < 0.000000001) {
+			Math.Abs(vars.Watchers["Y"].Current - vars.Y) < 0.000000001) {
 			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
 				return true;
 			}
@@ -718,7 +726,7 @@ start {
 
 	if (current.world == "G1RNyrasPrologue_MainMap") {
 		if (Math.Abs(vars.Watchers["X"].Current - vars.NyrasPrologue_X) < 0.000000001 &&
-		    Math.Abs(vars.Watchers["Y"].Current - vars.NyrasPrologue_Y) < 0.000000001) {
+			Math.Abs(vars.Watchers["Y"].Current - vars.NyrasPrologue_Y) < 0.000000001) {
 			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
 				return true;
 			}
@@ -745,8 +753,8 @@ split {
 
 isLoading {
 	return vars.Watchers["LoadingScreen"].Current || 
-	       vars.Watchers["CinematicState"].Current == 3 || 
-	       vars.timerPaused;
+		   vars.Watchers["CinematicState"].Current == 3 || 
+		   vars.timerPaused;
 }
 
 exit {
