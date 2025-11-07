@@ -128,9 +128,6 @@ startup {
 	vars.NyrasPrologue_Y = -56429.3303492728d;
 	vars.X =  98555.7733905069d;
 	vars.Y = -56429.3303492728d;
-
-	//
-	vars.launcherProcessTimeout = DateTime.MaxValue;
 }
 
 init {
