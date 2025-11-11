@@ -29,7 +29,8 @@ init {
 
 		vars.Helper["canControl"] = mono.Make<bool>("CameraController", "cc", "canControl");
 		
-		
+		//vars.Helper["isLoading"] = mono.Make<float>("SceneLoadManager", "slm", "target");
+		vars.Helper["isLoading"] = mono.Make<float>("SceneLoadManager", "slm", "loadingBar", "m_FillAmount");
 		return true;
 	});
 
@@ -160,8 +161,6 @@ split {
 }
 
 isLoading {
-	return vars.isLoading;
+	//return vars.isLoading;
+	return current.isLoading != 1.0f;
 }
-
-
-
