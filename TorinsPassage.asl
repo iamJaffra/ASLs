@@ -11,13 +11,9 @@ startup {
 init {
 	vars.ScummVM.Init();
 
-	vars.ScummVM.TryLoad = (Func<dynamic, bool>)(svm => {
-		svm["room"] = svm.Watch<ushort>("_gamestate", "variables", 0x0, 11 * 0x4 + 0x2);
-		svm["score"] = svm.Watch<ushort>("_gamestate", "variables", 0x0, 15 * 0x4 + 0x2);
-		svm["chapter"] = svm.Watch<ushort>("_gamestate", "variables", 0x0, 202 * 0x4 + 0x2);
-		
-		return true;
-	});
+	vars.ScummVM["room"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 0x0, 11 * 0x4 + 0x2);
+	vars.ScummVM["score"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 0x0, 15 * 0x4 + 0x2);
+	vars.ScummVM["chapter"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 0x0, 202 * 0x4 + 0x2);
 }
 
 update {
