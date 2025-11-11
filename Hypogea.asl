@@ -11,7 +11,7 @@ startup {
 		//settings.Add("Elevator", true, "Take elevator", "Splits");
 		//settings.Add("End", true, "Pull final lever", "Splits");
 		settings.Add("Levels", true, "Split on every level change.", "Splits");
-		settings.Add("End", true, "Split on losing control to the credits.", "Splits");
+		settings.Add("End", true, "Split on losing control to the ending cutscene.", "Splits");
 	settings.Add("Reset", true, "Reset timer on main menu");
 
 	vars.Info = (Action<string>)((msg) => {
@@ -162,5 +162,6 @@ split {
 isLoading {
 	return vars.isLoading;
 }
+
 
 
