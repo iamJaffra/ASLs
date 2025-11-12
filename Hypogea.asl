@@ -3,6 +3,7 @@ state("Hypogea") {}
 startup {
 	Assembly.Load(File.ReadAllBytes("Components/asl-help")).CreateInstance("Unity");
 	vars.Helper.LoadSceneManager = true;
+	vars.Helper.AlertLoadless();
 
 	settings.Add("Start", true, "Start timer after intro cutscene");
 	settings.Add("Splits", true, "Splits");
@@ -77,11 +78,11 @@ update {
 	current.loadingScene = vars.Helper.Scenes.Loaded[0].Name ?? current.loadingScene;
 
 	if (old.activeScene != current.activeScene) {
-		vars.Log("activeScene: " + old.activeScene + " -> " + current.activeScene);
+		vars.Info("activeScene: " + old.activeScene + " -> " + current.activeScene);
 		vars.isLoading = false;
 	}
 	if (old.loadingScene != current.loadingScene) {
-		vars.Log("loadingScene: " + old.loadingScene + " -> " + current.loadingScene);
+		vars.Info("loadingScene: " + old.loadingScene + " -> " + current.loadingScene);
 		vars.isLoading = true;
 	}
 
@@ -151,8 +152,7 @@ split {
 		return true;
 	}
 	
-	// End split
-	// Split on losing control of the camera
+	// Ending cutscene
 	if (settings["End"] && current.activeScene == "EndLevel" && current.traversalState == 18 && 
 		old.canControl && !current.canControl && !vars.completedSplits.Contains("End")) {
 		vars.completedSplits.Add("End");
