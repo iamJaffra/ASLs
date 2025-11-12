@@ -25,6 +25,7 @@ init {
 		vars.Helper["traversalState"] = mono.Make<int>("PlayerController", "pc", "currState");
 		vars.Helper["batteryCount"] = mono.Make<int>("PlayerController", "pc", "batteryCount");
 		vars.Helper["sequencePlayer"] = mono.Make<int>("CameraController", "cc", "currentSequence");
+		vars.Helper["sequenceDuration"] = mono.Make<float>("CameraController", "cc", "currentSequence", "sequenceDuration");
 		vars.Helper["isMenuScene"] = mono.Make<bool>("SaveManager", "sm", "isMenuScene");
 		vars.Helper["savedElementsIDs"] = mono.Make<IntPtr>("SaveManager", "sm", "savedElementsIDs");
 
@@ -59,7 +60,7 @@ update {
 	// SaveManager.savedElementsIDs._size
 	current.numberOfEvents = game.ReadValue<int>((IntPtr)current.savedElementsIDs + 0xC);
 	
-	/*
+	
 	// DEBUG PRINTS FOR FINDING EVENT IDS
 	if (current.numberOfEvents != old.numberOfEvents) {
 		// SaveManager.savedElementsIDs._size
@@ -72,7 +73,7 @@ update {
 			vars.Info(item);
 		}
 	}
-	*/
+	
 
 	current.activeScene = vars.Helper.Scenes.Active.Name ?? current.activeScene;
 	current.loadingScene = vars.Helper.Scenes.Loaded[0].Name ?? current.loadingScene;
@@ -86,17 +87,17 @@ update {
 		vars.isLoading = true;
 	}
 
-	/*
+	
 	if (old.traversalState != current.traversalState) {
 		vars.Log("traversalState: " + old.traversalState + " -> " + current.traversalState);
-		vars.Log("currentSequence = " + current.sequencePlayer.ToString("X"));
+		//vars.Log("currentSequence = " + current.sequencePlayer.ToString("X"));
 
 	}
 	
 	if (old.canControl != current.canControl) {
 		vars.Log("canControl: " + old.canControl + " -> " + current.canControl);
 	}
-	*/
+	
 }
 
 reset {
@@ -146,6 +147,7 @@ split {
 		// tankBotSetup|1
 	}
 	*/
+	
 
 	if (settings["Levels"] && current.loadingScene != old.loadingScene && current.loadingScene != "MainMenu" && old.loadingScene != "MainMenu") {
 		vars.Info("Split on level change.");
@@ -153,11 +155,12 @@ split {
 	}
 	
 	// Ending cutscene
-	if (settings["End"] && current.activeScene == "EndLevel" && current.traversalState == 18 && 
-		old.canControl && !current.canControl && !vars.completedSplits.Contains("End")) {
+	if (settings["End"] && current.activeScene == "EndLevel" && !current.canControl && 
+		current.sequenceDuration > 120.0f && !vars.completedSplits.Contains("End")) {
 		vars.completedSplits.Add("End");
 		return true;
 	}
+	
 }
 
 isLoading {
