@@ -92,11 +92,10 @@ startup {
 			"[Diego] I'm Diego. \n"+ 
 			"[You] I'm... \n"+ 
 			"[Diego] I'm not interested in who you are. \n"+ 
-			"[Diego] Your Livesplit is set to Real Time (RTA), \n"+
-			"[Diego] but this game uses Load Removed Time (LRT). \n"+
-			"[Diego] Would you like to switch to Game Time?",
+			"[Diego] Removing loads requires comparing against Game Time\n"+
+			"[Diego] Would you like to switch to it?",
 			"LiveSplit | Gothic 1 Remake",
-			MessageBoxButtons.YesNo,MessageBoxIcon.Question
+			MessageBoxButtons.YesNo
 		);
 		
 		if (timingMessage == DialogResult.Yes) {
@@ -131,7 +130,6 @@ startup {
 }
 
 init {
-
 #region Attaching to the right process
 	if (File.Exists(Path.Combine(
 		Path.GetDirectoryName(modules[0].FileName),
@@ -153,7 +151,6 @@ init {
 		}
 		return;
 	}
-	
 #endregion
 
 #region Version detection
