@@ -56,7 +56,7 @@ init {
 }
 
 update {
-	
+	/*
 	// SaveManager.savedElementsIDs._size
 	current.numberOfEvents = game.ReadValue<int>((IntPtr)current.savedElementsIDs + 0xC);
 	
@@ -73,7 +73,7 @@ update {
 			vars.Info(item);
 		}
 	}
-	
+	*/
 
 	current.activeScene = vars.Helper.Scenes.Active.Name ?? current.activeScene;
 	current.loadingScene = vars.Helper.Scenes.Loaded[0].Name ?? current.loadingScene;
@@ -87,7 +87,7 @@ update {
 		vars.isLoading = true;
 	}
 
-	
+	/*
 	if (old.traversalState != current.traversalState) {
 		vars.Log("traversalState: " + old.traversalState + " -> " + current.traversalState);
 		//vars.Log("currentSequence = " + current.sequencePlayer.ToString("X"));
@@ -97,7 +97,7 @@ update {
 	if (old.canControl != current.canControl) {
 		vars.Log("canControl: " + old.canControl + " -> " + current.canControl);
 	}
-	
+	*/
 }
 
 reset {
@@ -157,6 +157,7 @@ split {
 	// Ending cutscene
 	if (settings["End"] && current.activeScene == "EndLevel" && !current.canControl && 
 		current.sequenceDuration > 120.0f && !vars.completedSplits.Contains("End")) {
+		vars.Info("Split on ending sequence.");
 		vars.completedSplits.Add("End");
 		return true;
 	}
