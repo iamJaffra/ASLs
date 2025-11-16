@@ -179,9 +179,15 @@ reset {
 
 start {
 	if ((old.room == 902 && current.room == 900) ||
-	     old.room == 902 && current.room != 902 && current.room != 91 && current.room != 0) {
+	    (old.room == 902 && current.room != 902 && current.room != 91 && current.room != 0)) {
 		return true;
 	}
+
+	// Script 902 local 200
+	// vars.ScummVM["clickedChapterSelectButton"] = vars.ScummVM.Watch<ushort>("_gamestate", "_segMan", "_heap", 26 * PTRSIZE, "_localsBlock", "_locals", 200 * 0x4 + 0x2)
+	/*
+	return current.room == 902 && old.clickedChapterSelectButton == 0 && current.clickedChapterSelectButton == 1;
+	*/
 }
 
 split {
