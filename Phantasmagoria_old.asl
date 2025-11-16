@@ -1,8 +1,6 @@
 state("scummvm") {}
 
 startup {
-	Assembly.Load(File.ReadAllBytes("Components/scummvm-help")).CreateInstance("SCI");
-
 	settings.Add("ResetOnMainMenu", true, "Reset timer on main menu");
 	settings.Add("Main", true, "Main splits");
 		settings.Add("2", true, "Start Chapter 2", "Main");
@@ -38,8 +36,6 @@ startup {
 }
 
 init {
-	vars.ScummVM.Init();
-
 #region Scan Functions
 	vars.Scan = (Func<SigScanTarget, IntPtr>)(trg => {
 		var ptr = IntPtr.Zero;
@@ -70,9 +66,64 @@ init {
 	});
 #endregion
 
-#region Inventory Scan
-	// I'm working on a more efficient replacement for this section
+#region Globals Scan
+	var globals =
+		"1C 00 D7 07"+
+		"01 00 67 39"+
+		"?? ?? ?? ??"+
+		"15 00 02 00"+
+		"00 00 00 00"+
+		"06 00 4B 15"+
+		"06 00 17 16"+
+		"06 00 31 16"+
+		"06 00 E9 15"+
+		"1E 00 73 07";
 
+	// gGameTime
+	var gGameTimeOffset = 88 * 0x4 + 0x2;
+
+	// The global variables block can appear in multiple places in memory,
+	// but only the variables of one of the blocks keep updating.
+	// To identify the true block, we can use the gGameTime variable.
+	// If this variable doesn't constantly change, it's the wrong block.
+	
+	var realGlobalsPtr = IntPtr.Zero;
+	
+	var globalsTrg = new SigScanTarget(0, globals);
+	var globalsCandidates = vars.ScanAll(globalsTrg);
+	
+	foreach (var addr in globalsCandidates) {
+		print("Candidate address: " + addr.ToString("X"));
+	}
+	
+	// Store the two bytes at each candidate's gGameTime offset
+	var firstScanMap = new Dictionary<IntPtr, byte[]>();
+
+	foreach (var ptr in globalsCandidates) {
+		var gameTime = game.ReadBytes((IntPtr)ptr + gGameTimeOffset, 2);
+		firstScanMap[ptr] = gameTime;
+	}
+
+	// Wait before second scan
+	Thread.Sleep(50); 
+
+	foreach (var ptr in globalsCandidates) {
+		var currentBytes = game.ReadBytes((IntPtr)ptr + gGameTimeOffset, 2);
+		var oldBytes = firstScanMap[ptr];
+
+		if (currentBytes[0] != oldBytes[0] || currentBytes[1] != oldBytes[1]) {
+			realGlobalsPtr = ptr;
+			print("Changing address found: " + ptr.ToString("X"));
+			break;
+		}
+	}
+
+	if (realGlobalsPtr == IntPtr.Zero) {
+		throw new Exception("No changing address found. Retrying...");
+	}
+#endregion
+
+#region Inventory Scan
 	var invBytes =
 		"00 00 34 12"+ // SCI magic number 0x1234
 		"00 00 40 00"+ // -size-
@@ -131,32 +182,44 @@ init {
 	}
 #endregion
 
+#region Locals Part 1
+	var locals =
+			"?? 00 96 2C"+ // sChaseBegin
+			"00 00 00 00"+
+			"00 00 3E 17"+ // video 5950
+			"00 00 00 00"+
+			"00 00 00 00"+
+			"00 00 00 00"+
+			"00 00 00 00"+
+			"00 00 ?? 00";
+
+	// Put this in vars because we will only resolve it later
+	vars.localsTrg = new SigScanTarget(0, locals);
+#endregion
+
 #region Watchers
-	// + 0x2 because, unlike objects, variables only use the last two bytes of the SCI address format (SSSS:OOOO)
-	var PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
-
-	// Globals
-	vars.ScummVM["room"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 0 * PTRSIZE,  11 * 0x4 + 0x2);
-	vars.ScummVM["chapter"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 0 * PTRSIZE, 106 * 0x4 + 0x2);
-
-	// Locals
-	vars.ScummVM["video"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 1 * PTRSIZE, 2 * 0x4 + 0x2);
-
-	// Inventory Items
-	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
+	vars.Watchers = new Dictionary<string, MemoryWatcher> {
+		// + 0x2 because, unlike objects, variables only use the last two bytes of the SCI address format (SSSS:OOOO)
+		{ "Room",    new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr +  11 * 0x4 + 2)) }, 
+		{ "Chapter", new MemoryWatcher<ushort>(new DeepPointer(realGlobalsPtr + 106 * 0x4 + 2)) }
+	};
+	
 	foreach (var entry in invPtrs) {
 		// owner property ~ item.properties[59]
-		vars.InventoryWatchers[entry.Key] = new MemoryWatcher<short>(new DeepPointer(entry.Value + 59 * 0x4 + 0x2));
+		vars.Watchers[entry.Key] = new MemoryWatcher<short>(new DeepPointer(entry.Value + 59 * 0x4 + 0x2));
 	};
 #endregion
+
+	vars.bFoundLocals = false;
 }
 
 update {
-	vars.ScummVM.Update();
-
-	foreach (var watcher in vars.InventoryWatchers.Values) {
+	foreach (var watcher in vars.Watchers.Values) {
 		watcher.Update(game);
 	}
+
+	current.room = vars.Watchers["Room"].Current;
+	current.chapter = vars.Watchers["Chapter"].Current;
 
 	if (current.room != old.room) {
 		print("Room changed: " + old.room  + " -> " + current.room);
@@ -165,9 +228,18 @@ update {
 		print("Chapter changed: " + old.chapter  + " -> " + current.chapter);
 	}
 
-	if (current.video != old.video && current.video != 0) {
-		print("Current video: " + current.video);
+#region Locals Part 2
+	// Start scanning for locals when in chapter 7 and entering the darkroom
+	if (!vars.bFoundLocals && current.chapter == 7 && current.room == 45950) {
+		var localsPtr = vars.Scan(vars.localsTrg);
+
+		if (localsPtr != IntPtr.Zero) {
+			vars.Watchers["Video"] = new MemoryWatcher<ushort>(new DeepPointer(localsPtr + 2 * 0x4 + 0x2));
+			vars.bFoundLocals = true;
+			print("Found locals at " + localsPtr.ToString("X"));
+		}
 	}
+#endregion
 }
 
 reset {
@@ -178,8 +250,7 @@ reset {
 }
 
 start {
-	if ((old.room == 902 && current.room == 900) ||
-	     old.room == 902 && current.room != 902 && current.room != 91 && current.room != 0) {
+	if (old.room == 902 && current.room == 900) {
 		return true;
 	}
 }
@@ -188,7 +259,7 @@ split {
 	// End of game
 	// When video 2640 is loaded into local variable [2] of script 40100
 	// then the final cutscene is playing and the run is over
-	if (settings["End"] && current.room == 40100 && current.video != old.video && current.video == 2640) {
+	if (settings["End"] && vars.bFoundLocals && current.room == 40100 && vars.Watchers["Video"].Current == 2640 && vars.Watchers["Video"].Changed) {
 		return true;
 	}
 	// Chapter splits
@@ -199,7 +270,7 @@ split {
 	if (settings["Items"]) { // no need to loop if the player doesn't have any item splits
 		foreach (var item in vars.invItems.Keys) {
 			// item.owner is -1 by default, and -2 when gEgo is the owner
-			if (settings[item] && vars.InventoryWatchers[item].Current == -2 && vars.InventoryWatchers[item].Changed) {
+			if (settings[item] && vars.Watchers[item].Current == -2 && vars.Watchers[item].Changed) {
 				return true;
 			}
 		}
