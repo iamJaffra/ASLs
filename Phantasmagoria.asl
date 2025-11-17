@@ -149,9 +149,28 @@ init {
 		vars.InventoryWatchers[entry.Key] = new MemoryWatcher<short>(new DeepPointer(entry.Value + 59 * 0x4 + 0x2));
 	};
 #endregion
+
+	// vars.watching902 = false;
 }
 
 update {
+	if (game.ReadPointer((IntPtr)vars.ScummVM.GEngine) == IntPtr.Zero) {
+		var allComponents = timer.Layout.Components;
+		if (timer.Run.AutoSplitter != null && timer.Run.AutoSplitter.Component != null) {
+			allComponents = allComponents.Append(timer.Run.AutoSplitter.Component);
+		}
+		foreach (var component in allComponents) {
+			var type = component.GetType();
+			if (type.Name == "ASLComponent") {
+				var script = type.GetProperty("Script").GetValue(component);
+				script.GetType().GetField(
+					"_game",
+					BindingFlags.NonPublic | BindingFlags.Instance
+				).SetValue(script, null);
+			}
+		}
+	}
+
 	vars.ScummVM.Update();
 
 	foreach (var watcher in vars.InventoryWatchers.Values) {
@@ -168,6 +187,12 @@ update {
 	if (current.video != old.video && current.video != 0) {
 		print("Current video: " + current.video);
 	}
+
+	/*
+	if (vars.watching902 && current.room != 902) {
+		vars.watching902 = false;
+	}
+	*/
 }
 
 reset {
@@ -183,10 +208,33 @@ start {
 		return true;
 	}
 
-	// Script 902 local 200
-	// vars.ScummVM["clickedChapterSelectButton"] = vars.ScummVM.Watch<ushort>("_gamestate", "_segMan", "_heap", 26 * PTRSIZE, "_localsBlock", "_locals", 200 * 0x4 + 0x2)
+	// When on the chapter select screen, iterate the heap segments to find script 902, 
+	// then create a watcher for local 200 of said script.
+
 	/*
-	return current.room == 902 && old.clickedChapterSelectButton == 0 && current.clickedChapterSelectButton == 1;
+	if (current.room == 902) {
+		if (!vars.watching902) {
+			var capacity = vars.ScummVM.Read<int>("_gamestate", "_segMan", "_heap", "_capacity");
+
+			// Starting at 1 because the heap always starts with an empty segment
+			for (int i = 1; i < capacity; i++) {
+				var type = vars.ScummVM.Read<int>("_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_type")
+				var nr = vars.ScummVM.Read<int>("_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_nr")
+				
+				if (type == 1 && nr == 902) {
+					vars.ScummVM["clickedChapterSelectButton"] = vars.ScummVM.Watch<short>(
+						"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_localsBlock", "_locals", 200 * 0x4 + 0x2
+					);
+
+					vars.watching902 = true;
+					break;
+				}
+			}
+		}
+		else {
+			return old.clickedChapterSelectButton == 0 && current.clickedChapterSelectButton == 1;
+		}
+	}
 	*/
 }
 
@@ -211,3 +259,44 @@ split {
 		}
 	}
 }
+
+
+/*
+
+	var foundItems = new Dictionary<string, int>();
+	var targetSet = new HashSet<string>(invItems);
+
+	IntPtr 
+
+	for (int i = 0; i < mask; i++) {
+		string s = mask[i];
+		if (targetSet.Contains(s)) {
+			foundItems[s] = i;
+		}
+	}
+
+	if (foundItems.Count != targetSet.Count) {
+		var missing = targetSet.Except(foundItems.Keys);
+		throw new Exception("Couldn't find addresses for: " + string.Join(", ", missing));
+	}
+
+	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
+	foreach (var kv in foundItems) {
+		var itemName = kv.Key;
+		var index = kv.Value;
+
+		// owner property ~ item.properties[59]
+		vars.InventoryWatchers[itemName] = vars.ScummVM.Watch<short>(
+			"_gamestate", "_segMan", "_heap", "_storage", index * PTRSIZE
+			"", "", "", "", "", "" , 59 * 0x4 + 0x2
+		);
+	}
+
+	// Inventory Items
+	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
+	foreach (var entry in invPtrs) {
+		// owner property ~ item.properties[59]
+		vars.InventoryWatchers[entry.Key] = new MemoryWatcher<short>(new DeepPointer(entry.Value + 59 * 0x4 + 0x2));
+	};
+
+*/
