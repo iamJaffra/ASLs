@@ -63,54 +63,52 @@ startup {
 init {
 	vars.ScummVM.Init();
 
-	vars.IS64BIT = game.Is64Bit();
-	vars.PTRSIZE = vars.IS64BIT ? 0x8 : 0x4;
+	int PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
 	
-	vars.ScummVM.TryLoad = (Func<dynamic, bool>)(svm => {
-		svm["stack"] = svm.Watch<ushort>("_stack", "_id");
-		svm["card"] = svm.Watch<ushort>("_card", "_id");
+	var globalsDict = new Dictionary<string, string> {
+		{ "aPower",        "power"          },
+		{ "tTelescope",    "telescopePos"   }, 
+		//{ "aDomeCombo",    "domeCombo"      },
+		//{ "tCorrectOrder", "telescopeCombo" }, 
+		//{ "pCorrectOrder", "prisonCombo"    },
+	};
 
-		svm["videos"] = vars.IS64BIT
-			? svm.Watch<ulong>("_video")
-			: svm.Watch<uint>("_video");
-		
-		var globalsDict = new Dictionary<string, string> {
-			{ "aPower",        "power"          },
-			{ "tTelescope",    "telescopePos"   }, 
-			//{ "aDomeCombo",    "domeCombo"      },
-			//{ "tCorrectOrder", "telescopeCombo" }, 
-			//{ "pCorrectOrder", "prisonCombo"    },
-		};
-		
-		var size = svm.Read<int>("_vars", "_mask");
+	var foundGlobals = new Dictionary<int, int>();
+	
+	var mask = vars.ScummVM.Read<int>("_vars", "_mask");
 
-		foreach (var global in globalsDict) {
-			bool globalFound = false;
+	foreach (var global in globalsDict) {
+		bool globalFound = false;
 
-			for (int i = 0; i < size; i++) {
-				string key = svm.ReadString("_vars", "_storage", i * vars.PTRSIZE, "_key");	
+		for (int i = 0; i < mask; i++) {
+			string key = vars.ScummVM.ReadString("_vars", "_storage", i * PTRSIZE, "_key");	
 
-				if (global.Key == key) {
-					svm[global.Value] = svm.Watch<int>("_vars", "_storage", i * vars.PTRSIZE, "_value");
-					globalFound = true;
-					print(global + " found");
-				}
+			if (global.Key == key) {
+				vars.ScummVM[global.Value] = vars.ScummVM.Watch<int>("_vars", "_storage", i * PTRSIZE, "_value");
+				globalFound = true;
+				print(global + " found");
 			}
+		}
 
-			if (!globalFound) {
-				print(global + " not found!");
-				return false;
-			}
-		} 
+		if (!globalFound) {
+			throw new Exception(global + " not found!");
+		}
+	} 
 
-		return true;
-	});
+	// 
+	vars.ScummVM["stack"] = vars.ScummVM.Watch<ushort>("_stack", "_id");
+	vars.ScummVM["card"] = vars.ScummVM.Watch<ushort>("_card", "_id");
 
+	vars.ScummVM["videos"] = game.Is64Bit()
+		? vars.ScummVM.Watch<ulong>("_video")
+		: vars.ScummVM.Watch<uint>("_video");
+
+	// 
 	vars.Move = (Func<int, int, int, int, bool>)((oldStack, oldCard, currentStack, currentCard) => {
-	return (vars.ScummVM["stack"].Old == oldStack) &&
-	       (vars.ScummVM["card"].Old == oldCard) &&
-	       (vars.ScummVM["stack"].Current == currentStack) &&
-	       (vars.ScummVM["card"].Current == currentCard);
+		return (vars.ScummVM["stack"].Old == oldStack) &&
+		       (vars.ScummVM["card"].Old == oldCard) &&
+		       (vars.ScummVM["stack"].Current == currentStack) &&
+		       (vars.ScummVM["card"].Current == currentCard);
 	});
 
 	vars.completedSplits = new HashSet<string>();
@@ -118,23 +116,21 @@ init {
 }
 
 update {
-	if (game.ReadPointer((IntPtr)vars.ScummVM.GEngine) == IntPtr.Zero) {
-		return false;
-	}
-
 	vars.ScummVM.Update();
 	
+	int PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
+
 	// FINAL CUTSCENES
 	if (current.telescopePos == 1 || (current.stack == 1 && current.card == 10)) {
 		if (current.videos != 0) {
-			var anchor = (IntPtr)current.videos + (int)vars.PTRSIZE;
-			var next = game.ReadPointer((IntPtr)anchor + (int)vars.PTRSIZE);
+			var anchor = (IntPtr)current.videos + PTRSIZE;
+			var next = game.ReadPointer((IntPtr)anchor + PTRSIZE);
 			
 			while (next != anchor) {
-				var data = game.ReadPointer(next + 2 * (int)vars.PTRSIZE);
+				var data = game.ReadPointer(next + 2 * PTRSIZE);
 
-				var id = game.ReadValue<ushort>(data + 2 * (int)vars.PTRSIZE);
-				var playing = game.ReadValue<bool>(data + 2 * (int)vars.PTRSIZE + 0xA);
+				var id = game.ReadValue<ushort>(data + 2 * PTRSIZE);
+				var playing = game.ReadValue<bool>(data + 2 * PTRSIZE + 0xA);
 
 				if ((id == 45 && playing && settings["BestEnding_Fissure"]      ) ||
 				    (id == 47 && playing && settings["BadEnding_Fissure"]       ) ||
@@ -148,7 +144,7 @@ update {
 					break;
 				}
 		
-				next = game.ReadPointer(next + (int)vars.PTRSIZE);
+				next = game.ReadPointer(next + PTRSIZE);
 			}
 		}
 	}
