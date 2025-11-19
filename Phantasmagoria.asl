@@ -3,6 +3,9 @@ state("scummvm") {}
 startup {
 	Assembly.Load(File.ReadAllBytes("Components/scummvm-help")).CreateInstance("SCI");
 
+	vars.ScummVM.LogChangedWatchers();
+	//vars.ScummVM.LogResolvedPaths();
+
 	settings.Add("ResetOnMainMenu", true, "Reset timer on main menu");
 	settings.Add("Main", true, "Main splits");
 		settings.Add("2", true, "Start Chapter 2", "Main");
@@ -35,164 +38,134 @@ startup {
 		settings.Add("invCutter", false, "Glass Shard", "Items");
 		settings.Add("invDogBone", false, "Dog Bone", "Items");
 		settings.Add("invFigurine", false, "Figurine", "Items");
+
+		vars.Info = (Action<string>)((msg) => {
+			print("[Phantasmagoria ASL] " + msg);
+		});
 }
 
 init {
 	vars.ScummVM.Init();
 
-#region Scan Functions
-	vars.Scan = (Func<SigScanTarget, IntPtr>)(trg => {
-		var ptr = IntPtr.Zero;
-
-		foreach (var page in game.MemoryPages(true)) {
-			var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
-			ptr = scanner.Scan(trg);
-
-			if (ptr != IntPtr.Zero) {
-				return ptr;
-			}
-		}
-
-		return ptr;
-	});
-
-	vars.ScanAll = (Func<SigScanTarget, IEnumerable<IntPtr>>)(trg => {
-		var results = new List<IntPtr>();
-
-		foreach (var page in game.MemoryPages(true)) {
-			var scanner = new SignatureScanner(game, page.BaseAddress, (int)page.RegionSize);
-			var matches = scanner.ScanAll(trg);
-
-			results.AddRange(matches);
-		}
-
-		return results;
-	});
-#endregion
-
 #region Inventory Scan
-	// I'm working on a more efficient replacement for this section
-
-	var invBytes =
-		"00 00 34 12"+ // SCI magic number 0x1234
-		"00 00 40 00"+ // -size-
-		"1E 00 ?? ??"+ // -propDict-
-		"00 00 ?? ??"+ // -methDict-
-		"00 00 1C 00"+ // -classScript-
-		"00 00 FF FF"+ // -script-
-		"1E 00 BB 07"+ // -super-   <-- getting all the instances of ScaryInventory
-		"?? ?? ?? ??"+ // -info-
-		"1E 00";       // <------------ name
-		               // owner property at +(59 * 0x4)
-
-	vars.invItems = new Dictionary<string, string> {
-		{"invLibKey",    invBytes + "8A 15"},
-		{"invMoney",     invBytes + "94 15"},
-		{"invNail",      invBytes + "9D 15"},
-		{"invNewspaper", invBytes + "A5 15"},
-		{"invPoker",     invBytes + "B2 15"},
-		{"invHammer",    invBytes + "BB 15"},
-		{"invStairKey",  invBytes + "C5 15"},
-		{"invVampBook",  invBytes + "D1 15"},
-		{"invMatch",     invBytes + "DD 15"},
-		{"invTarot",     invBytes + "E6 15"},
-		{"invBrooch",    invBytes + "EF 15"},
-		{"invPhoto",     invBytes + "F9 15"},
-		{"invLensPiece", invBytes + "02 16"},
-		{"invDrainCln",  invBytes + "0F 16"},
-		{"invCrucifix",  invBytes + "1B 16"},
-		{"invBeads",     invBytes + "27 16"},
-		{"invSpellBook", invBytes + "30 16"},
-		{"invXmasOrn",   invBytes + "3D 16"},
-		{"invStone",     invBytes + "48 16"},
-		{"invCutter",    invBytes + "51 16"},
-		{"invDogBone",   invBytes + "5B 16"},
-		{"invFigurine",  invBytes + "66 16"}
+	vars.itemNames = new Dictionary<int, string> {
+		{ 0x158A001E, "invLibKey"    },
+		{ 0x1594001E, "invMoney"     },
+		{ 0x159D001E, "invNail"      },
+		{ 0x15A5001E, "invNewspaper" },
+		{ 0x15B2001E, "invPoker"     },
+		{ 0x15BB001E, "invHammer"    },
+		{ 0x15C5001E, "invStairKey"  },
+		{ 0x15D1001E, "invVampBook"  },
+		{ 0x15DD001E, "invMatch"     },
+		{ 0x15E6001E, "invTarot"     },
+		{ 0x15EF001E, "invBrooch"    },
+		{ 0x15F9001E, "invPhoto"     },
+		{ 0x1602001E, "invLensPiece" },
+		{ 0x160F001E, "invDrainCln"  },
+		{ 0x161B001E, "invCrucifix"  },
+		{ 0x1627001E, "invBeads"     },
+		{ 0x1630001E, "invSpellBook" },
+		{ 0x163D001E, "invXmasOrn"   },
+		{ 0x1648001E, "invStone"     },
+		{ 0x1651001E, "invCutter"    },
+		{ 0x165B001E, "invDogBone"   },
+		{ 0x1666001E, "invFigurine"  } 
 	};
-	
-	var invTrgs = new Dictionary<string, SigScanTarget>();
-	
-	foreach (var item in vars.invItems) {
-		invTrgs[item.Key] = new SigScanTarget(0, item.Value);
-	}
-	
-	var invPtrs = new Dictionary<string, IntPtr>();
 
-	foreach (var trg in invTrgs) {
-		print("Scanning for " + trg.Key + " address...");
-		var ptr = vars.Scan(trg.Value);
-		if (ptr == IntPtr.Zero) {
-			throw new Exception("Failed to find pointer for " + trg.Key);
-		}
-		else {
-			invPtrs[trg.Key] = ptr;
-			print(trg.Key + " address = " + ptr.ToString("X"));
+	int PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
+
+	var foundItems = new Dictionary<int, int>();
+
+	var capacity = vars.ScummVM.Read<int>(
+		"_gamestate", "_segMan", "_heap", "_capacity"
+	);
+
+	int segmentIndex = 0;
+
+	for (int i = 1; i < capacity; i++) {
+		var type = vars.ScummVM.Read<int>(
+			"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_type"
+		);
+		var nr = vars.ScummVM.Read<int>(
+			"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_nr"
+		);
+
+		//vars.Info("Type: " + type + ", Nr: " + nr);
+
+		if (type == 1 && nr == 28) {
+			vars.Info("Found Script 28.");
+			// Now look for the inventory objects
+			segmentIndex = i;
+
+			vars.Info("Locating inventory objects...");
+
+			int mask = vars.ScummVM.Read<int>(
+				"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_objects", "_mask"
+			);
+
+			for (int j = 0; j < mask; j++) {
+				int name = vars.ScummVM.Read<int>(
+					"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_objects", "_storage", j * PTRSIZE, "_value", "_name"
+				);
+				if (vars.itemNames.ContainsKey(name)) {
+					foundItems[name] = j;				
+					vars.Info("Found item: " + vars.itemNames[name]);
+				}
+			}
+
+			break;
 		}
 	}
 #endregion
 
 #region Watchers
-	// + 0x2 because, unlike objects, variables only use the last two bytes of the SCI address format (SSSS:OOOO)
-	var PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
+	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
+	foreach (var kv in vars.itemNames) {
+		string itemName = kv.Value;
 
+		int index;
+		if (!foundItems.TryGetValue(kv.Key, out index)) {
+			throw new Exception("String " + itemName + " not found.");
+		}
+		
+		// owner property at +(59 * 0x4)
+		// owner is -1 by default, and -2 when gEgo is the owner
+		vars.InventoryWatchers[itemName] = vars.ScummVM.Watch<short>(
+			"_gamestate", "_segMan", "_heap", "_storage", segmentIndex * PTRSIZE, "_objects", "_storage", index * PTRSIZE, "_value", "_variables", "_storage", 59 * 0x4 + 0x2
+		);
+	}
+
+	// + 0x2 because, unlike objects, variables only use the last two bytes of
+	// the SCI address format (SSSS:OOOO)
+	
 	// Globals
-	vars.ScummVM["room"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 0 * PTRSIZE,  11 * 0x4 + 0x2);
-	vars.ScummVM["chapter"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 0 * PTRSIZE, 106 * 0x4 + 0x2);
+	vars.ScummVM["room"] = vars.ScummVM.Watch<ushort>(
+		"_gamestate", "variables", 0 * PTRSIZE,  11 * 0x4 + 0x2
+	);
+	vars.ScummVM["chapter"] = vars.ScummVM.Watch<ushort>(
+		"_gamestate", "variables", 0 * PTRSIZE, 106 * 0x4 + 0x2
+	);
 
 	// Locals
-	vars.ScummVM["video"] = vars.ScummVM.Watch<ushort>("_gamestate", "variables", 1 * PTRSIZE, 2 * 0x4 + 0x2);
-
-	// Inventory Items
-	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
-	foreach (var entry in invPtrs) {
-		// owner property ~ item.properties[59]
-		vars.InventoryWatchers[entry.Key] = new MemoryWatcher<short>(new DeepPointer(entry.Value + 59 * 0x4 + 0x2));
-	};
+	vars.ScummVM["video"] = vars.ScummVM.Watch<ushort>(
+		"_gamestate", "variables", 1 * PTRSIZE, 2 * 0x4 + 0x2
+	);
 #endregion
 
-	// vars.watching902 = false;
+	vars.watching902 = false;
 }
 
 update {
-	if (game.ReadPointer((IntPtr)vars.ScummVM.GEngine) == IntPtr.Zero) {
-		var allComponents = timer.Layout.Components;
-		if (timer.Run.AutoSplitter != null && timer.Run.AutoSplitter.Component != null) {
-			allComponents = allComponents.Append(timer.Run.AutoSplitter.Component);
-		}
-		foreach (var component in allComponents) {
-			var type = component.GetType();
-			if (type.Name == "ASLComponent") {
-				var script = type.GetProperty("Script").GetValue(component);
-				script.GetType().GetField(
-					"_game",
-					BindingFlags.NonPublic | BindingFlags.Instance
-				).SetValue(script, null);
-			}
-		}
-	}
-
 	vars.ScummVM.Update();
 
 	foreach (var watcher in vars.InventoryWatchers.Values) {
 		watcher.Update(game);
 	}
-
-	if (current.room != old.room) {
-		print("Room changed: " + old.room  + " -> " + current.room);
-	}
-	if (current.chapter != old.chapter) {
-		print("Chapter changed: " + old.chapter  + " -> " + current.chapter);
-	}
-
-	if (current.video != old.video && current.video != 0) {
-		print("Current video: " + current.video);
-	}
-
-	/*
+	
 	if (vars.watching902 && current.room != 902) {
 		vars.watching902 = false;
-	}
-	*/
+	}	
 }
 
 reset {
@@ -203,27 +176,30 @@ reset {
 }
 
 start {
-	if ((old.room == 902 && current.room == 900) ||
-	    (old.room == 902 && current.room != 902 && current.room != 91 && current.room != 0)) {
-		return true;
-	}
+	// When on the chapter select screen, go through the heap segments 
+	// to find script 902, then create a watcher for local 200 of said script.
 
-	// When on the chapter select screen, iterate the heap segments to find script 902, 
-	// then create a watcher for local 200 of said script.
-
-	/*
+	int PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
+	
 	if (current.room == 902) {
 		if (!vars.watching902) {
-			var capacity = vars.ScummVM.Read<int>("_gamestate", "_segMan", "_heap", "_capacity");
+			var capacity = vars.ScummVM.Read<int>(
+				"_gamestate", "_segMan", "_heap", "_capacity"
+			);
 
-			// Starting at 1 because the heap always starts with an empty segment
+			// Starting at 1 because the first segment is always empty.
 			for (int i = 1; i < capacity; i++) {
-				var type = vars.ScummVM.Read<int>("_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_type")
-				var nr = vars.ScummVM.Read<int>("_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_nr")
+				var type = vars.ScummVM.Read<int>(
+					"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_type"
+				);
+				var nr = vars.ScummVM.Read<int>(
+					"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_nr"
+				);
 				
 				if (type == 1 && nr == 902) {
-					vars.ScummVM["clickedChapterSelectButton"] = vars.ScummVM.Watch<short>(
-						"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_localsBlock", "_locals", 200 * 0x4 + 0x2
+					vars.ScummVM["clickedChapterSelectButton"] = 
+						vars.ScummVM.Watch<short>(
+							"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_localsBlock", "_locals", "_storage", 200 * 0x4 + 0x2
 					);
 
 					vars.watching902 = true;
@@ -235,68 +211,27 @@ start {
 			return old.clickedChapterSelectButton == 0 && current.clickedChapterSelectButton == 1;
 		}
 	}
-	*/
 }
 
 split {
 	// End of game
-	// When video 2640 is loaded into local variable [2] of script 40100
-	// then the final cutscene is playing and the run is over
 	if (settings["End"] && current.room == 40100 && current.video != old.video && current.video == 2640) {
+		vars.Info("Split: Triggered final cutscene.");
 		return true;
 	}
 	// Chapter splits
 	if (current.chapter > 1 && current.chapter == old.chapter + 1 && settings[current.chapter.ToString()]) {
+		vars.Info("Split: Changed chapter.");
 		return true;
 	}
 	// Item splits
 	if (settings["Items"]) { // no need to loop if the player doesn't have any item splits
-		foreach (var item in vars.invItems.Keys) {
+		foreach (var item in vars.itemNames.Values) {
 			// item.owner is -1 by default, and -2 when gEgo is the owner
 			if (settings[item] && vars.InventoryWatchers[item].Current == -2 && vars.InventoryWatchers[item].Changed) {
+				vars.Info("Split: Picked up " + item);
 				return true;
 			}
 		}
 	}
 }
-
-
-/*
-
-	var foundItems = new Dictionary<string, int>();
-	var targetSet = new HashSet<string>(invItems);
-
-	IntPtr 
-
-	for (int i = 0; i < mask; i++) {
-		string s = mask[i];
-		if (targetSet.Contains(s)) {
-			foundItems[s] = i;
-		}
-	}
-
-	if (foundItems.Count != targetSet.Count) {
-		var missing = targetSet.Except(foundItems.Keys);
-		throw new Exception("Couldn't find addresses for: " + string.Join(", ", missing));
-	}
-
-	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
-	foreach (var kv in foundItems) {
-		var itemName = kv.Key;
-		var index = kv.Value;
-
-		// owner property ~ item.properties[59]
-		vars.InventoryWatchers[itemName] = vars.ScummVM.Watch<short>(
-			"_gamestate", "_segMan", "_heap", "_storage", index * PTRSIZE
-			"", "", "", "", "", "" , 59 * 0x4 + 0x2
-		);
-	}
-
-	// Inventory Items
-	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
-	foreach (var entry in invPtrs) {
-		// owner property ~ item.properties[59]
-		vars.InventoryWatchers[entry.Key] = new MemoryWatcher<short>(new DeepPointer(entry.Value + 59 * 0x4 + 0x2));
-	};
-
-*/
