@@ -7,37 +7,53 @@ startup {
 	//vars.ScummVM.LogResolvedPaths();
 
 	settings.Add("ResetOnMainMenu", true, "Reset timer on main menu");
-	settings.Add("Main", true, "Main splits");
-		settings.Add("2", true, "Start Chapter 2", "Main");
-		settings.Add("3", true, "Start Chapter 3", "Main");
-		settings.Add("4", true, "Start Chapter 4", "Main");
-		settings.Add("5", true, "Start Chapter 5", "Main");
-		settings.Add("6", true, "Start Chapter 6", "Main");
-		settings.Add("7", true, "Start Chapter 7", "Main");
-		settings.Add("End", true, "Trigger Final Cutscene", "Main");
-	settings.Add("Items", false, "Item splits. Split on picking up...");
-		settings.Add("invLibKey", false, "Library Key", "Items");
-		settings.Add("invMoney", false, "Money", "Items");
-		settings.Add("invNail", false, "Nail", "Items");
-		settings.Add("invNewspaper", false, "Newspaper", "Items");
-		settings.Add("invPoker", false, "Poker", "Items");
-		settings.Add("invHammer", false, "Hammer", "Items");
-		settings.Add("invStairKey", false, "Stair Key", "Items");
-		settings.Add("invVampBook", false, "Vampire Book", "Items");
-		settings.Add("invMatch", false, "Match", "Items");
-		settings.Add("invTarot", false, "Tarot", "Items");
-		settings.Add("invBrooch", false, "Brooch", "Items");
-		settings.Add("invPhoto", false, "Photo", "Items");
-		settings.Add("invLensPiece", false, "Lens Piece", "Items");
-		settings.Add("invDrainCln", false, "Drain Cleaner", "Items");
-		settings.Add("invCrucifix", false, "Crucifix", "Items");
-		settings.Add("invBeads", false, "Beads", "Items");
-		settings.Add("invSpellBook", false, "Spell Book", "Items");
-		settings.Add("invXmasOrn", false, "Christmas Ornament (Snowman)", "Items");
-		settings.Add("invStone", false, "Stone", "Items");
-		settings.Add("invCutter", false, "Glass Shard", "Items");
-		settings.Add("invDogBone", false, "Dog Bone", "Items");
-		settings.Add("invFigurine", false, "Figurine", "Items");
+
+	settings.Add("Splits", true, "Splits");
+		//
+		settings.Add("Chapter 1", true, "Chapter 1", "Splits");
+			settings.Add("invMatch", false, "Match", "Chapter 1");
+			settings.Add("invPoker", false, "Poker", "Chapter 1");
+			settings.Add("invHammer", false, "Hammer", "Chapter 1");
+			settings.Add("invLibKey", false, "Library Key", "Chapter 1");
+			settings.Add("invFigurine", false, "Figurine (Letter Opener)", "Chapter 1");
+		//
+		settings.Add("Chapter 2", true, "Chapter 2", "Splits");
+			settings.Add("2", true, "Start Chapter 2", "Chapter 2");
+			settings.Add("invMoney", false, "Money", "Chapter 2");
+			settings.Add("invDrainCln", false, "Drain Cleaner", "Chapter 2");
+			settings.Add("invDogBone", false, "Dog Bone", "Chapter 2");
+		//
+		settings.Add("Chapter 3", true, "Chapter 3", "Splits");
+			settings.Add("3", true, "Start Chapter 3", "Chapter 3");
+			settings.Add("invNail", false, "Nail", "Chapter 3");
+			settings.Add("invStairKey", false, "Stair Key", "Chapter 3");
+			settings.Add("invVampBook", false, "Vampire Book", "Chapter 3");
+		//
+		settings.Add("Chapter 4", true, "Chapter 4", "Splits");
+			settings.Add("4", true, "Start Chapter 4", "Chapter 4");
+			settings.Add("invLensPiece", false, "Lens", "Chapter 4");
+			settings.Add("invBrooch", false, "Brooch", "Chapter 4");
+		//
+		settings.Add("Chapter 5", true, "Chapter 5", "Splits");
+			settings.Add("5", true, "Start Chapter 5", "Chapter 5");
+			settings.Add("invPhoto", false, "Photo", "Chapter 5");
+		//
+		settings.Add("Chapter 6", true, "Chapter 6", "Splits");
+			settings.Add("6", true, "Start Chapter 6", "Chapter 6");
+			settings.Add("invCrucifix", false, "Crucifix", "Chapter 6");
+		//
+		settings.Add("Chapter 7", true, "Chapter 7", "Splits");
+			settings.Add("7", true, "Start Chapter 7", "Chapter 7");
+			settings.Add("invCutter", false, "Glass Shard", "Chapter 7");
+			settings.Add("invXmasOrn", false, "Snowman", "Chapter 7");
+			settings.Add("invSpellBook", false, "Spell Book", "Chapter 7");
+			settings.Add("invStone", false, "Stone", "Chapter 7");
+			settings.Add("End", true, "Trigger Final Cutscene", "Chapter 7");
+		
+		// not used in the run
+		// settings.Add("invNewspaper", false, "Newspaper", "Items");
+		// settings.Add("invTarot", false, "Tarot", "Items");
+		// settings.Add("invBeads", false, "Beads", "Items");
 
 		vars.Info = (Action<string>)((msg) => {
 			print("[Phantasmagoria ASL] " + msg);
@@ -52,19 +68,19 @@ init {
 		{ 0x158A001E, "invLibKey"    },
 		{ 0x1594001E, "invMoney"     },
 		{ 0x159D001E, "invNail"      },
-		{ 0x15A5001E, "invNewspaper" },
+		//{ 0x15A5001E, "invNewspaper" },
 		{ 0x15B2001E, "invPoker"     },
 		{ 0x15BB001E, "invHammer"    },
 		{ 0x15C5001E, "invStairKey"  },
 		{ 0x15D1001E, "invVampBook"  },
 		{ 0x15DD001E, "invMatch"     },
-		{ 0x15E6001E, "invTarot"     },
+		//{ 0x15E6001E, "invTarot"     },
 		{ 0x15EF001E, "invBrooch"    },
 		{ 0x15F9001E, "invPhoto"     },
 		{ 0x1602001E, "invLensPiece" },
 		{ 0x160F001E, "invDrainCln"  },
 		{ 0x161B001E, "invCrucifix"  },
-		{ 0x1627001E, "invBeads"     },
+		//{ 0x1627001E, "invBeads"     },
 		{ 0x1630001E, "invSpellBook" },
 		{ 0x163D001E, "invXmasOrn"   },
 		{ 0x1648001E, "invStone"     },
@@ -215,7 +231,7 @@ start {
 
 split {
 	// End of game
-	if (settings["End"] && current.room == 40100 && current.video != old.video && current.video == 2640) {
+	if (settings["End"] && current.room == 40100 && current.video != old.video && (current.video == 2640 || current.video == 2630)) {
 		vars.Info("Split: Triggered final cutscene.");
 		return true;
 	}
@@ -225,13 +241,11 @@ split {
 		return true;
 	}
 	// Item splits
-	if (settings["Items"]) { // no need to loop if the player doesn't have any item splits
-		foreach (var item in vars.itemNames.Values) {
-			// item.owner is -1 by default, and -2 when gEgo is the owner
-			if (settings[item] && vars.InventoryWatchers[item].Current == -2 && vars.InventoryWatchers[item].Changed) {
-				vars.Info("Split: Picked up " + item);
-				return true;
-			}
+	foreach (var item in vars.itemNames.Values) {
+		// item.owner is -1 by default, and -2 when gEgo is the owner
+		if (settings[item] && vars.InventoryWatchers[item].Current == -2 && vars.InventoryWatchers[item].Changed) {
+			vars.Info("Split: Picked up " + item);
+			return true;
 		}
 	}
 }
