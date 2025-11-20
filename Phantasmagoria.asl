@@ -169,6 +169,7 @@ init {
 	);
 #endregion
 
+	vars.completedSplits = new HashSet<string>();
 	vars.watching902 = false;
 }
 
@@ -229,6 +230,10 @@ start {
 	}
 }
 
+onStart {
+	vars.completedSplits.Clear();
+}
+
 split {
 	// End of game
 	if (settings["End"] && current.room == 40100 && current.video != old.video && (current.video == 2640 || current.video == 2630)) {
@@ -243,7 +248,7 @@ split {
 	// Item splits
 	foreach (var item in vars.itemNames.Values) {
 		// item.owner is -1 by default, and -2 when gEgo is the owner
-		if (settings[item] && vars.InventoryWatchers[item].Current == -2 && vars.InventoryWatchers[item].Changed) {
+		if (settings[item] && vars.InventoryWatchers[item].Changed && vars.InventoryWatchers[item].Current == -2 && vars.completedSplits.Add(item)) {
 			vars.Info("Split: Picked up " + item);
 			return true;
 		}
