@@ -62,25 +62,24 @@ startup {
 
 init {
 	vars.ScummVM.Init();
-
-#region Inventory Scan
+	
 	vars.itemNames = new Dictionary<int, string> {
 		{ 0x158A001E, "invLibKey"    },
 		{ 0x1594001E, "invMoney"     },
 		{ 0x159D001E, "invNail"      },
-		//{ 0x15A5001E, "invNewspaper" },
+	//	{ 0x15A5001E, "invNewspaper" },
 		{ 0x15B2001E, "invPoker"     },
 		{ 0x15BB001E, "invHammer"    },
 		{ 0x15C5001E, "invStairKey"  },
 		{ 0x15D1001E, "invVampBook"  },
 		{ 0x15DD001E, "invMatch"     },
-		//{ 0x15E6001E, "invTarot"     },
+	//	{ 0x15E6001E, "invTarot"     },
 		{ 0x15EF001E, "invBrooch"    },
 		{ 0x15F9001E, "invPhoto"     },
 		{ 0x1602001E, "invLensPiece" },
 		{ 0x160F001E, "invDrainCln"  },
 		{ 0x161B001E, "invCrucifix"  },
-		//{ 0x1627001E, "invBeads"     },
+	//	{ 0x1627001E, "invBeads"     },
 		{ 0x1630001E, "invSpellBook" },
 		{ 0x163D001E, "invXmasOrn"   },
 		{ 0x1648001E, "invStone"     },
@@ -89,85 +88,92 @@ init {
 		{ 0x1666001E, "invFigurine"  } 
 	};
 
-	int PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
+	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
 
-	var foundItems = new Dictionary<int, int>();
+	vars.ScummVM.OnEngineReady = (Func<bool>)(() => {
+#region Inventory Scan
+		int PTRSIZE = game.Is64Bit() ? 0x8 : 0x4;
 
-	var capacity = vars.ScummVM.Read<int>(
-		"_gamestate", "_segMan", "_heap", "_capacity"
-	);
+		var foundItems = new Dictionary<int, int>();
 
-	int segmentIndex = 0;
-
-	for (int i = 1; i < capacity; i++) {
-		var type = vars.ScummVM.Read<int>(
-			"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_type"
-		);
-		var nr = vars.ScummVM.Read<int>(
-			"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_nr"
+		var capacity = vars.ScummVM.Read<int>(
+			"_gamestate", "_segMan", "_heap", "_capacity"
 		);
 
-		//vars.Info("Type: " + type + ", Nr: " + nr);
+		int segmentIndex = 0;
 
-		if (type == 1 && nr == 28) {
-			vars.Info("Found Script 28.");
-			// Now look for the inventory objects
-			segmentIndex = i;
-
-			vars.Info("Locating inventory objects...");
-
-			int mask = vars.ScummVM.Read<int>(
-				"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_objects", "_mask"
+		for (int i = 1; i < capacity; i++) {
+			var type = vars.ScummVM.Read<int>(
+				"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_type"
+			);
+			var nr = vars.ScummVM.Read<int>(
+				"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_nr"
 			);
 
-			for (int j = 0; j < mask; j++) {
-				int name = vars.ScummVM.Read<int>(
-					"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_objects", "_storage", j * PTRSIZE, "_value", "_name"
-				);
-				if (vars.itemNames.ContainsKey(name)) {
-					foundItems[name] = j;				
-					vars.Info("Found item: " + vars.itemNames[name]);
-				}
-			}
+			//vars.Info("Type: " + type + ", Nr: " + nr);
 
-			break;
+			if (type == 1 && nr == 28) {
+				vars.Info("Found Script 28.");
+				// Now look for the inventory objects
+				segmentIndex = i;
+
+				vars.Info("Locating inventory objects...");
+
+				int mask = vars.ScummVM.Read<int>(
+					"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_objects", "_mask"
+				);
+
+				for (int j = 0; j < mask; j++) {
+					int name = vars.ScummVM.Read<int>(
+						"_gamestate", "_segMan", "_heap", "_storage", i * PTRSIZE, "_objects", "_storage", j * PTRSIZE, "_value", "_name"
+					);
+					if (vars.itemNames.ContainsKey(name)) {
+						foundItems[name] = j;				
+						vars.Info("Found item: " + vars.itemNames[name]);
+					}
+				}
+
+				break;
+			}
 		}
-	}
 #endregion
 
 #region Watchers
-	vars.InventoryWatchers = new Dictionary<string, MemoryWatcher>();
-	foreach (var kv in vars.itemNames) {
-		string itemName = kv.Value;
+		foreach (var kv in vars.itemNames) {
+			string itemName = kv.Value;
 
-		int index;
-		if (!foundItems.TryGetValue(kv.Key, out index)) {
-			throw new Exception("String " + itemName + " not found.");
+			int index;
+			if (!foundItems.TryGetValue(kv.Key, out index)) {
+				vars.Info("Item " + itemName + " not found.");
+				return false;
+			}
+			
+			// owner property at +(59 * 0x4)
+			// owner is -1 by default, and -2 when gEgo is the owner
+			vars.InventoryWatchers[itemName] = vars.ScummVM.Watch<short>(
+				"_gamestate", "_segMan", "_heap", "_storage", segmentIndex * PTRSIZE, "_objects", "_storage", index * PTRSIZE, "_value", "_variables", "_storage", 59 * 0x4 + 0x2
+			);
 		}
+
+		// + 0x2 because, unlike objects, variables only use the last two bytes of
+		// the SCI address format (SSSS:OOOO)
 		
-		// owner property at +(59 * 0x4)
-		// owner is -1 by default, and -2 when gEgo is the owner
-		vars.InventoryWatchers[itemName] = vars.ScummVM.Watch<short>(
-			"_gamestate", "_segMan", "_heap", "_storage", segmentIndex * PTRSIZE, "_objects", "_storage", index * PTRSIZE, "_value", "_variables", "_storage", 59 * 0x4 + 0x2
+		// Globals
+		vars.ScummVM["room"] = vars.ScummVM.Watch<ushort>(
+			"_gamestate", "variables", 0 * PTRSIZE,  11 * 0x4 + 0x2
 		);
-	}
+		vars.ScummVM["chapter"] = vars.ScummVM.Watch<ushort>(
+			"_gamestate", "variables", 0 * PTRSIZE, 106 * 0x4 + 0x2
+		);
 
-	// + 0x2 because, unlike objects, variables only use the last two bytes of
-	// the SCI address format (SSSS:OOOO)
-	
-	// Globals
-	vars.ScummVM["room"] = vars.ScummVM.Watch<ushort>(
-		"_gamestate", "variables", 0 * PTRSIZE,  11 * 0x4 + 0x2
-	);
-	vars.ScummVM["chapter"] = vars.ScummVM.Watch<ushort>(
-		"_gamestate", "variables", 0 * PTRSIZE, 106 * 0x4 + 0x2
-	);
-
-	// Locals
-	vars.ScummVM["video"] = vars.ScummVM.Watch<ushort>(
-		"_gamestate", "variables", 1 * PTRSIZE, 2 * 0x4 + 0x2
-	);
+		// Locals
+		vars.ScummVM["video"] = vars.ScummVM.Watch<ushort>(
+			"_gamestate", "variables", 1 * PTRSIZE, 2 * 0x4 + 0x2
+		);
 #endregion
+
+		return true;
+	});
 
 	vars.completedSplits = new HashSet<string>();
 	vars.watching902 = false;
