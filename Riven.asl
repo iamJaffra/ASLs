@@ -58,6 +58,10 @@ startup {
 	settings.Add(cat + "_TrapGehn",           true, "Trap Gehn.",                                            cat);
 	settings.Add(cat + "_OSoleMio",           true, "Trigger O Sole Mio.",                                   cat);
 #endregion
+
+	vars.Info = (Action<string>)((msg) => {
+		print("[Loom ASL] " + msg);
+	});
 }
 
 init {
@@ -73,29 +77,32 @@ init {
 		//{ "pCorrectOrder", "prisonCombo"    },
 	};
 
-	var foundGlobals = new Dictionary<int, int>();
-	
-	var mask = vars.ScummVM.Read<int>("_vars", "_mask");
+	vars.ScummVM.OnEngineReady = (Func<bool>)(() => {
+		var mask = vars.ScummVM.Read<int>("_vars", "_mask");
 
-	foreach (var global in globalsDict) {
-		bool globalFound = false;
+		foreach (var global in globalsDict) {
+			bool globalFound = false;
 
-		for (int i = 0; i < mask; i++) {
-			string key = vars.ScummVM.ReadString("_vars", "_storage", i * PTRSIZE, "_key");	
+			for (int i = 0; i < mask; i++) {
+				string key = vars.ScummVM.ReadString("_vars", "_storage", i * PTRSIZE, "_key");	
 
-			if (global.Key == key) {
-				vars.ScummVM[global.Value] = vars.ScummVM.Watch<int>("_vars", "_storage", i * PTRSIZE, "_value");
-				globalFound = true;
-				print(global + " found");
+				if (global.Key == key) {
+					vars.ScummVM[global.Value] = vars.ScummVM.Watch<int>("_vars", "_storage", i * PTRSIZE, "_value");
+					globalFound = true;
+					vars.Info("Found " + global.Key + ".");
+				}
 			}
-		}
 
-		if (!globalFound) {
-			throw new Exception(global + " not found!");
-		}
-	} 
+			if (!globalFound) {
+				vars.Info(global + " not found!");
+				return false;
+			}
+		} 
 
-	// 
+		return true;
+	});
+
+	// Basic watchers
 	vars.ScummVM["stack"] = vars.ScummVM.Watch<ushort>("_stack", "_id");
 	vars.ScummVM["card"] = vars.ScummVM.Watch<ushort>("_card", "_id");
 
@@ -103,7 +110,7 @@ init {
 		? vars.ScummVM.Watch<ulong>("_video")
 		: vars.ScummVM.Watch<uint>("_video");
 
-	// 
+	// Helper function for checking card traversal
 	vars.Move = (Func<int, int, int, int, bool>)((oldStack, oldCard, currentStack, currentCard) => {
 		return (vars.ScummVM["stack"].Old == oldStack) &&
 		       (vars.ScummVM["card"].Old == oldCard) &&
