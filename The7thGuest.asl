@@ -1,145 +1,88 @@
-// ASL by Jaffra
-
-state("t7g", "GOG") {
-	// The 25th anniversary edition runs on a modified version of ScummVM
-	// and was given a new interface using HTML Renderer. 
-
-	// The Groovie engine uses a byte array of size 1024 to store its gamestate variables
-	// We use these to track which puzzles have been completed.
-	
-	// GroovieEngine.Script._variables[i]  (0x1A4 + i)
-	bool cake:       0x004486D4, 0x58, 0x27A;
-	bool cans:       0x004486D4, 0x58, 0x262; 
-	bool grate:      0x004486D4, 0x58, 0x2A6; 
-	bool coffins:    0x004486D4, 0x58, 0x24E; 
-	bool queens:     0x004486D4, 0x58, 0x274; 
-	bool bed:        0x004486D4, 0x58, 0x250; 
-	bool spiders:    0x004486D4, 0x58, 0x287;
-	byte bishops:    0x004486D4, 0x58, 0x295;
-	bool telescope:  0x004486D4, 0x58, 0x266;
-	bool dollroom:   0x004486D4, 0x58, 0x241;
-	bool blocks:     0x004486D4, 0x58, 0x253;
-	bool knights:    0x004486D4, 0x58, 0x268;
-	bool heartmaze:  0x004486D4, 0x58, 0x25E;
-	bool cards:      0x004486D4, 0x58, 0x23E;
-	bool coins:      0x004486D4, 0x58, 0x278;
-	byte chapel:     0x004486D4, 0x58, 0x297;
-	byte knives:     0x004486D4, 0x58, 0x296;
-	bool piano:      0x004486D4, 0x58, 0x271;
-	
-	// The room variable only keeps track of which room the player is currently in, 
-	// but not the position within that room.
-	byte room: 0x004486D4, 0x58, 0x231;
-	
-	// We also monitor the memory address that stores the reference "id" of the current video
-	// GroovieEngine.Script._videoRef
-	short video: 0x004486D4, 0x58, 0x784;
-
-	byte instruction: 0x004486D4, 0x58, 0x19B;
-}
-
-state("t7g", "Steam") {
-	// GroovieEngine.Script._variables[i]  (0x1A4 + i)
-	bool cake:       0x0044731C, 0x58, 0x27A;
-	bool cans:       0x0044731C, 0x58, 0x262; 
-	bool grate:      0x0044731C, 0x58, 0x2A6; 
-	bool coffins:    0x0044731C, 0x58, 0x24E; 
-	bool queens:     0x0044731C, 0x58, 0x274; 
-	bool bed:        0x0044731C, 0x58, 0x250; 
-	bool spiders:    0x0044731C, 0x58, 0x287;
-	byte bishops:    0x0044731C, 0x58, 0x295;
-	bool telescope:  0x0044731C, 0x58, 0x266;
-	bool dollroom:   0x0044731C, 0x58, 0x241;
-	bool blocks:     0x0044731C, 0x58, 0x253;
-	bool knights:    0x0044731C, 0x58, 0x268;
-	bool heartmaze:  0x0044731C, 0x58, 0x25E;
-	bool cards:      0x0044731C, 0x58, 0x23E;
-	bool coins:      0x0044731C, 0x58, 0x278;
-	bool chapel:     0x0044731C, 0x58, 0x297;
-	byte knives:     0x0044731C, 0x58, 0x296;
-	bool piano:      0x0044731C, 0x58, 0x271;
-	
-	// The room variable only keeps track of which room the player is currently in, 
-	// but not the position within that room.
-	byte room: 0x0044731C, 0x58, 0x231;
-	
-	// We also monitor the memory address that stores the reference "id" of the current video
-	// GroovieEngine.Script._videoRef
-	short video: 0x0044731C, 0x58, 0x784;
-
-	byte instruction: 0x0044731C, 0x58, 0x19B;
-}
+state("scummvm") {}
+state("t7g") {}
+// The 25th Anniversary Edition (t7g.exe) is actually a custom ScummVM in a trenchcoat,
+// or rather, ScummVM wrapped in HTML Renderer. Thanks to the library, the below code 
+// is able to handle both the normal ("Legacy") versions and the 25th Anniversary Edition.
 
 startup {
-	settings.Add("Puzzles",             false, "Puzzle splits");
-		settings.Add("Cake",            false, "Cake",            "Puzzles");
-		settings.Add("Cans",            false, "Cans",            "Puzzles");
-		settings.Add("Grate",           false, "Grate",           "Puzzles");
-		settings.Add("Maze",            false, "Maze",            "Puzzles");
-		settings.Add("Coffins",         false, "Coffins",         "Puzzles");
-		settings.Add("Queens",          false, "Queens",          "Puzzles");
-		settings.Add("Bishops",         false, "Bishops",         "Puzzles");
-		settings.Add("Bed",             false, "Martine's Bed",   "Puzzles");
-		settings.Add("Spiders",         false, "Spiders",         "Puzzles");
-		settings.Add("Telescope",       false, "Telescope",       "Puzzles");
-		settings.Add("Doll Room",       false, "Doll Room",       "Puzzles");
-		settings.Add("Spelling Blocks", false, "Spelling Blocks", "Puzzles");
-		settings.Add("Knights",         false, "Knights",         "Puzzles");
-		settings.Add("Heart Maze",      false, "Heart Maze",      "Puzzles");
-		settings.Add("Cards",           false, "Cards",           "Puzzles");
-		settings.Add("Coins",           false, "Coins",           "Puzzles");
-		settings.Add("Chapel",          false, "Chapel",          "Puzzles");
-		settings.Add("Microscope",      false, "Microscope",      "Puzzles");
-		settings.Add("Gallery",         false, "Gallery",         "Puzzles");
-		settings.Add("Piano",           false, "Piano",           "Puzzles");
-		settings.Add("Knives",          false, "Knives",          "Puzzles");
-	settings.Add("End", true, "Split on turning left at the mirror in the attic (Final input)");
+	Assembly.Load(File.ReadAllBytes("Components/scummvm-help")).CreateInstance("Groovie");
+	
+	vars.ScummVM.LogChangedWatchers();
+	vars.ScummVM.LogResolvedPaths();
+
+	vars.Puzzles = new Dictionary<string, int> {
+		// Name,             Index
+		{ "Cake",             0xFA },
+		{ "Cans",             0xF9 },
+		{ "Grate",            0xF8 },
+		{ "Maze",               -1 },
+		{ "Coffins",          0xF4 },
+		{ "Queens",           0xF0 },
+		{ "Bishops",          0xF1 },
+		{ "Bed",              0xEF },
+		{ "Spiders",          0xFB },
+		{ "Telescope",        0xF5 },
+		{ "Doll_Room",        0xEE },
+		{ "Spelling_Blocks",  0xF7 },
+		{ "Knights",          0xEC },
+		{ "Heart_Maze",       0xE8 },
+		{ "Cards",            0xEA },
+		{ "Coins",            0xE9 },
+		{ "Chapel",           0xF3 },
+		{ "Microscope",       0xEB },
+		{ "Gallery_Portrait", 0xED },
+		{ "Piano",            0xF6 },
+		{ "Knives",           0xF2 },
+	//	{ "Attic",            0xE7 },
+	};
+
+	settings.Add("Splits", true, "Splits");
+		settings.Add("Puzzles", true, "Puzzles", "Splits");
+
+	foreach (var puzzle in vars.Puzzles.Keys) {
+		settings.Add(puzzle, false, puzzle.Replace("_", " "), "Puzzles");
+	}
+	vars.Puzzles.Remove("Maze");
+
+	settings.Add("End", true, "Turn left at the mirror in the attic (Final input)", "Splits");
+
+	vars.Info = (Action<string>)((msg) => {
+		print("[The 7th Guest ASL] " + msg);
+	});
 }
 
 init {
-	string hash;
+	vars.ScummVM.Init();
 
-	using (var md5 = System.Security.Cryptography.MD5.Create())
-	using (var fs = File.OpenRead(modules.First().FileName))
-		hash = string.Concat(md5.ComputeHash(fs).Select(b => b.ToString("X2")));
+	vars.ScummVM["video"] = vars.ScummVM.Watch<short>("_script", "_videoRef");
+	vars.ScummVM["room"] = vars.ScummVM.Watch<short>("_script", "_variables", 0x8C);
+	vars.ScummVM["cursor"] = vars.ScummVM.Watch<byte>("_script", "_lastCursor");
 
-	print(hash);
-	
-	if (hash == "9131097EC35B25831061C8CBB84AC2AF") {
-		version = "GOG";
-	} 
-	else if (hash == "00FA6418CE08F55B5B54296C54D98F7A") {
-		version = "Steam";
-	} 
-	else {
-		version = "Unknown";
+	foreach (var puzzle in vars.Puzzles) {
+		var puzzleName = puzzle.Key;
+		var index = puzzle.Value;
+
+		vars.ScummVM[puzzleName] = vars.ScummVM.Watch<byte>("_script", "_variables", index);
 	}
 
-	vars.LogPuzzle = (Action<string>)((puzzle) => {
-		print("[T7G ASL] Split due to completing the " + puzzle + " Puzzle.");
-	});
+	vars.StartTransitions = new HashSet<int> { 
+		0x1422, // turn left
+		0x1401, // move to the left door
+		0x1403, // move up the stairs
+		0x1402, // move to the right door
+		0x1427  // turn right 
+	};
 
 	vars.completedSplits = new HashSet<string>();
-
-	refreshRate = 120;
 }
 
 update {
-	if (version == "Unknown") {
-		return false;
-	}
+	vars.ScummVM.Update();
 }
 
 start {
-	// Time starts on first movement, i.e. on one of these transitions:
-	if (current.video == 0x1422 // turn left
-	 || current.video == 0x1401 // to left door
-	 || current.video == 0x1403 // up the stairs
-	 || current.video == 0x1402 // right door
-	 || current.video == 0x1427 // turn right 
-	) {
-		return old.video == 0x0000;
-	}
+	// Time starts on first movement, i.e. on one of the start transitions
+	return (old.video == 0 || old.video == -1) && vars.StartTransitions.Contains(current.video);
 }
 
 onStart {
@@ -147,98 +90,37 @@ onStart {
 }
 
 reset {
-	return current.video == 0x1C02 && old.video != 0x1C02;
+	return (vars.ScummVM["g_engine"].Changed && vars.ScummVM["g_engine"].Current == 0) ||
+	       (current.video == 0x1C02 && old.video != 0x1C02); // intro 
 }
 
 split {
-	if (settings["Cake"] && !old.cake && current.cake && vars.completedSplits.Add("Cake")) {
-		vars.LogPuzzle("Cake");
-		return true;
+	// FINAL SPLIT
+	// turn left at the mirror in the attic
+	if (current.room == 0x0102 && current.cursor == 0x01 && current.video == 0x0007) {
+		if (settings["End"] && vars.completedSplits.Add("End")) {
+			vars.Info("SPLIT: Final input.");
+			return true;
+		}
 	}
-	else if (settings["Cans"] && !old.cans && current.cans && vars.completedSplits.Add("Cans")) {
-		vars.LogPuzzle("Cans");
-		return true;
+
+	// PUZZLE SPLITS
+	foreach (var puzzle in vars.Puzzles.Keys) {
+		if (vars.ScummVM[puzzle].Changed && vars.ScummVM[puzzle].Current == 0x31) {
+			// Solved puzzles are set to 0x31. 
+			// Why? Because it's the ASCII code for '1'.
+			if (settings[puzzle] && vars.completedSplits.Add(puzzle)) {	
+				vars.Info("SPLIT: Solved " + puzzle + ".");
+				return true;
+			}
+		}
 	}
-	else if (settings["Grate"] && current.room == 5 && !old.grate && current.grate && vars.completedSplits.Add("Grate")) { 
-		// The "grate variable" is also used for other things, so we 
-		// additionally check whether the player is currently in the maze (5)
-		vars.LogPuzzle("Grate");
-		return true;
-	}
-	else if (current.room == 6 && old.room == 5 && vars.completedSplits.Add("Maze") && settings["Maze"]) {
-		vars.LogPuzzle("Maze");
-		return true;
-	}
-	else if (settings["Coffins"] && current.coffins && !old.coffins && vars.completedSplits.Add("Coffins")) {
-		vars.LogPuzzle("Coffins");
-		return true;
-	}
-	else if (settings["Queens"] && !old.queens && current.queens && vars.completedSplits.Add("Queens")) {
-		vars.LogPuzzle("Queens");
-		return true;
-	}
-	else if (settings["Bishops"] && current.bishops == 49 && old.bishops != 49 && vars.completedSplits.Add("Bishops")) {
-		vars.LogPuzzle("Bishops");
-		return true;
-	}
-	else if (settings["Bed"] && !old.bed && current.bed && vars.completedSplits.Add("Bed")) {
-		vars.LogPuzzle("Martine's Bed");
-		return true;
-	}
-	else if (settings["Spiders"] && !old.spiders && current.spiders && vars.completedSplits.Add("Spiders")) {
-		vars.LogPuzzle("Spiders");
-		return true;
-	}
-	else if (settings["Telescope"] && !old.telescope && current.telescope && vars.completedSplits.Add("Telescope")) {
-		vars.LogPuzzle("Telescope");
-		return true;
-	}
-	else if (settings["Doll Room"] && !old.dollroom && current.dollroom && vars.completedSplits.Add("Doll Room")) {
-		vars.LogPuzzle("Doll Room");
-		return true;
-	}
-	else if (settings["Spelling Blocks"] && !old.blocks && current.blocks && vars.completedSplits.Add("Spelling Blocks")) {
-		vars.LogPuzzle("Spelling Blocks");
-		return true;
-	}
-	else if (settings["Knights"] && !old.knights && current.knights && vars.completedSplits.Add("Knights")) {
-		vars.LogPuzzle("Knights");
-		return true;
-	}
-	else if (settings["Heart Maze"] && !old.heartmaze && current.heartmaze && vars.completedSplits.Add("Heart Maze")) {
-		vars.LogPuzzle("Heart Maze");
-		return true;
-	}
-	else if (settings["Cards"] && !old.cards && current.cards && vars.completedSplits.Add("Cards")) {
-		vars.LogPuzzle("Cards");
-		return true;
-	}
-	else if (settings["Coins"] && !old.coins && current.coins && vars.completedSplits.Add("Coins")) {
-		vars.LogPuzzle("Coins");
-		return true;
-	}
-	else if (settings["Chapel"] && current.chapel == 49 && old.chapel != 49 && vars.completedSplits.Add("Chapel")) {
-		vars.LogPuzzle("Chapel");
-		return true;
-	}
-	else if (settings["Microscope"] && current.room == 7 && current.video == 0x3006 && old.video == 0x50A0 && vars.completedSplits.Add("Microscope")) {
-		vars.LogPuzzle("Microscope");
-		return true;
-	}
-	else if (settings["Gallery"] && current.video == 0x4829 && old.video != 0x4829 && vars.completedSplits.Add("Gallery")) {
-		vars.LogPuzzle("Gallery Portrait");
-		return true;
-	}
-	else if (settings["Piano"] && !old.piano && current.piano && vars.completedSplits.Add("Piano")) {
-		vars.LogPuzzle("Piano");
-		return true;
-	}
-	else if (settings["Knives"] && current.room == 2 && current.knives == 49 && old.knives != 49 && vars.completedSplits.Add("Knives")) {
-		vars.LogPuzzle("Knives");
-		return true;
-	}
-	else if (settings["End"] && current.room == 1 && current.video == 0x0007 && current.instruction != 0x37 && vars.completedSplits.Add("End")) {
-		print("[T7G ASL] Split on final input -- The run is over.");
-		return true;
+
+	// MAZE
+	if (old.room == 0x0500 && current.room == 0x0600) {
+		if (settings["Maze"] && vars.completedSplits.Add("Maze")) {
+			vars.Info("SPLIT: Completed the Maze.");
+			return true;
+		}
 	}
 }
