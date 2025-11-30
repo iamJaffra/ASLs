@@ -23,7 +23,56 @@ startup {
 			{ "Robin",         Tuple.Create(RIDDLE, 6)    },
 		}},
 		{ 2, new Dictionary<string, Tuple<int, int>> {
-			{ "Desk drawers",   Tuple.Create(RIDDLE, 1)    },
+			{ "Desk drawers",            Tuple.Create(RIDDLE, 1)    },
+			{ "Torso",                   Tuple.Create(RIDDLE, 2)    },
+			{ "Champagne bottle",        Tuple.Create(RIDDLE, 3)    },
+			{ "POOL BALLS",              Tuple.Create(PUZZLE, 0xFF) },
+			{ "Setter",                  Tuple.Create(RIDDLE, 4)    },
+			{ "Clock face",              Tuple.Create(RIDDLE, 5)    },
+			{ "SPIDERS",                 Tuple.Create(PUZZLE, 0xFF) },
+			{ "Razor",                   Tuple.Create(RIDDLE, 6)    },
+			{ "Orange",                  Tuple.Create(RIDDLE, 7)    },
+			{ "MIRROR",                  Tuple.Create(PUZZLE, 0xFF) },
+			{ "Picture above fireplace", Tuple.Create(RIDDLE, 8)    },
+			{ "Great Dane",              Tuple.Create(RIDDLE, 9)    },
+		}},
+		{ 3, new Dictionary<string, Tuple<int, int>> {
+			{ "Broken TV",      Tuple.Create(RIDDLE, 1)    },
+			{ "Pipe organ",     Tuple.Create(RIDDLE, 2)    },
+			{ "TOY TRAINS",     Tuple.Create(PUZZLE, 0xFF) },
+			{ "Rook",           Tuple.Create(RIDDLE, 3)    },
+			{ "Torch",          Tuple.Create(RIDDLE, 4)    },
+			{ "PLATES",         Tuple.Create(PUZZLE, 0xFF) },
+			{ "Cheese grater",  Tuple.Create(RIDDLE, 5)    },
+			{ "7th Guest disc", Tuple.Create(RIDDLE, 6)    },
+			{ "Toothpaste",     Tuple.Create(RIDDLE, 7)    },
+			{ "DICE CUBE",      Tuple.Create(PUZZLE, 0xFF) },
+			{ "Guillotine",     Tuple.Create(RIDDLE, 8)    },
+			{ "White flower",   Tuple.Create(RIDDLE, 9)    },
+			{ "PYRAMID",        Tuple.Create(PUZZLE, 0xFF) },
+			{ "Red rose",       Tuple.Create(RIDDLE, 10)   },
+			{ "JEWELRY BOX",    Tuple.Create(PUZZLE, 0xFF) },
+			{ "Earring",        Tuple.Create(RIDDLE, 11)   },
+			
+		}},
+		{ 4, new Dictionary<string, Tuple<int, int>> {
+			{ "FURNITURE",   Tuple.Create(PUZZLE, 0xFF) },
+			{ "Harp",        Tuple.Create(RIDDLE, 1)    },
+			{ "Toy Soldier", Tuple.Create(RIDDLE, 2)    },
+			{ "Eyeball",     Tuple.Create(RIDDLE, 3)    },
+			{ "Dagger",      Tuple.Create(RIDDLE, 4)    },
+			{ "Train",       Tuple.Create(RIDDLE, 5)    },
+			{ "Bed Sheets",  Tuple.Create(RIDDLE, 6)    },
+			{ "Cleaver",     Tuple.Create(RIDDLE, 7)    },
+		}},
+		{ 5, new Dictionary<string, Tuple<int, int>> {
+			{ "Lion statue",      Tuple.Create(RIDDLE, 1)    },
+			{ "Glass of port",    Tuple.Create(RIDDLE, 2)    },
+			{ "BISHOPS",          Tuple.Create(PUZZLE, 0xFF) },
+			{ "Baby rattle",      Tuple.Create(RIDDLE, 3)    },
+			{ "XI on the clock",  Tuple.Create(RIDDLE, 4)    },
+			{ "Inkstand",         Tuple.Create(RIDDLE, 5)    },
+			{ "DOLL HOUSE PENTE", Tuple.Create(PUZZLE, 0xFF) },
 		}}
 	};
 
@@ -39,68 +88,11 @@ startup {
 			settings.Add(splitName, false, splitName, chapter.ToString());
 		}
 	}
-	settings.Add("Modern art", false, "Modern art (Finish chapter 1)", "1");
-
-	settings.Add("End", true, "Pick a door (Trigger an ending)", "2");
-
-	/*
-	vars.RiddlesChapter1 = new Dictionary<int, Tuple<string, int>> {
-		{ "Winter coat worn for a mixer?",                1 },
-		{ "Rolling rock, bottle cap",                     2 },
-		{ "Artsy, excited lecher",                        3 },
-		{ "A heart attack could put you into the ground", 4 },
-		{ "BattleGround",                                 5 },
-		{ "Bars deter cuckoo bird",                       6 },
-		{ "Modern art flourishes under the sun",          7 },
-	};
-	
-	vars.RiddlesChapter2 = new Dictionary<string, int> {
-		{ "SkedAddled", },
-		{ "Part of the body examined in doctor's office", },
-		{ "Libation for an affectionate puppy called Sounder", },
-		{ "Animal sullied street", },
-		{ "Jfcr vx qctf...", },
-		{ "Zu gotdy od ...", },
-		{ "Fruit Loop on stove", },
-		{ "Dreams abound of arming the rebels? What of nocturnal horses schedules?", },
-		{ "A distant, ancient castle keep ...", },
-		{ "A man-horse on the fly sounds like a wounded bull's eye.", },
-	};
-
-	vars.RiddlesChapter3 = new Dictionary<string, int> {
-		{ "Put an olive in a stein, mix it up ...", },
-		{ "A vital, instrumental part", },
-		{ "22233642-736846873", },
-		{ "Light piece from great orchestra", },
-		{ "Cheesy gadget that sounds larger", },
-		{ "500=100=0", },
-		{ "Blend a TEAPOT SHOT and the pearlies won't rot", },
-		{ "Slyness holding shipment in choppe?", },
-		{ "Poor drainage could still produce a flower", },
-		{ "Sounds like it got higher from wine", },
-		{ "What kind of jewelry is angrier?", },
-		{ "You might hear a well-mannered Cockney with a 60's hairstyle", },
-	};
-
-	vars.RiddlesChapter4 = new Dictionary<string, int> {
-		{ "Instrument is sharp, but is missing its head", },
-		{ "A defective truck with a crane makes for a ball-busting ballet.", },
-		{ "Look at key missing 1st misprinted label", },
-		{ "Disabled cutting edge", },
-		{ "Unreasonable reason", },
-		{ "Paper used in unusual theses", },
-		{ "Adroit holding a sharp instrument", },
-		{ "A desserted Arthropod", },
-	};
-
-	vars.RiddlesChapter5 = new Dictionary<string, int> {
-		{ "663 264625 46 2 6455466", },
-		{ "Drink left at sea", },
-		{ "Snake, baby, trap", },
-		{ "A letter from Greece is quite a number in Rome", },
-		{ "This eight letter word has 'kst' in the middle ...", },
-	};
-	*/
+	settings.Add("Modern art", false, "MODERN ART (Finish chapter 1)", "1");
+	settings.Add("Triangle", false, "TRIANGLE (Finish chapter 2)", "2");
+	settings.Add("Beehive", false, "BEEHIVE (Finish chapter 3)", "3");
+	settings.Add("Dessert", false, "DESSERT (Finish chapter 4)", "4");
+	settings.Add("End", true, "Pick a door (Trigger an ending)", "5");
 
 	vars.Info = (Action<string>)((msg) => {
 		print("[The 11th Hour ASL] " + msg);
@@ -193,6 +185,7 @@ onStart {
 }
 
 reset {
+	// Reset on returning to the ScummVM launcher
 	return vars.ScummVM["g_engine"].Changed && vars.ScummVM["g_engine"].Current == 0;
 }
 
@@ -208,21 +201,18 @@ split {
 
 	// RIDDLES AND PUZZLES
 	foreach (var split in vars.Splits[current.chapter]) {
+		var name = split.Key;
 		var type = split.Value.Item1;
 
 		if (type == 1) { // RIDDLE
 			var riddle = split.Value.Item2;
-			var name = split.Key;
 
 			if (vars.SolvedRiddle(riddle)) {
 				vars.Info("SPLIT: Solved riddle: " + name);
 				return true;
 			}
 		}
-		else if (type == 2) { // PUZZLE
-			var puzzle = split.Value.Item2;
-			var name = split.Key;
-
+		else if (type == 2) { // PUZZLE	
 			if (vars.ScummVM[name].Changed && vars.ScummVM[name].Current >= 0x05) {
 				vars.Info("SPLIT: Solved puzzle: " + name);
 				return true;
@@ -230,7 +220,12 @@ split {
 		}
 	}
 	if (old.chapter == 1 && current.chapter == 2) {
-		vars.Info("SPLIT: Solved riddle: Modern art & Completed Chapter 1");
+		vars.Info("SPLIT: Solved Modern art & completed Chapter 1");
 		return true;
 	}
+	if (old.chapter == 2 && current.chapter == 3) {
+		vars.Info("SPLIT: Solved Triangle puzzle & completed Chapter 2");
+		return true;
+	}
+	
 }
