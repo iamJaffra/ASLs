@@ -76,6 +76,13 @@ startup {
 		}}
 	};
 
+	vars.ChapterSplits = new Dictionary<string, int> {
+		{ "MODERN ART", 1 },
+		{ "TRIANGLE",   2 },
+		{ "BEEHIVE",    3 },
+		{ "DESSERT",    4 }
+	};
+
 	settings.Add("Splits", true, "Splits");
 	foreach (var kv in vars.Splits) {
 		var chapter = kv.Key;
@@ -88,10 +95,13 @@ startup {
 			settings.Add(splitName, false, splitName, chapter.ToString());
 		}
 	}
-	settings.Add("Modern art", false, "MODERN ART (Finish chapter 1)", "1");
-	settings.Add("Triangle", false, "TRIANGLE (Finish chapter 2)", "2");
-	settings.Add("Beehive", false, "BEEHIVE (Finish chapter 3)", "3");
-	settings.Add("Dessert", false, "DESSERT (Finish chapter 4)", "4");
+	foreach (var kv in vars.ChapterSplits) {
+		var puzzle = kv.Key;
+		var chapter = kv.Value.ToString();
+
+		settings.Add(puzzle, false, puzzle + " (Finish chapter " + chapter + ")", chapter);
+	}
+	
 	settings.Add("End", true, "Pick a door (Trigger an ending)", "5");
 
 	vars.Info = (Action<string>)((msg) => {
@@ -219,13 +229,15 @@ split {
 			}
 		}
 	}
-	if (old.chapter == 1 && current.chapter == 2) {
-		vars.Info("SPLIT: Solved Modern art & completed Chapter 1");
-		return true;
+
+	// CHAPTERS
+	foreach (var split in vars.ChapterSplits) {
+		var puzzle = split.Key;
+		var chapter = split.Value;
+
+		if (old.chapter == chapter && current.chapter == old.chapter + 1) {
+			vars.Info("SPLIT: Solved " + puzzle + " & completed Chapter " + chapter);
+			return true;
+		}
 	}
-	if (old.chapter == 2 && current.chapter == 3) {
-		vars.Info("SPLIT: Solved Triangle puzzle & completed Chapter 2");
-		return true;
-	}
-	
 }
