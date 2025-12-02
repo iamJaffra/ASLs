@@ -1,6 +1,21 @@
 state("Huntsman-Win64-Shipping") {}
 
 startup {
+	Assembly.Load(File.ReadAllBytes("Components/uhara9")).CreateInstance("Main");
+	vars.Uhara.EnableDebug();
+
+	// Full release
+	settings.Add("FullGame", true, "Full Game Splits");
+		settings.Add("FG Maintenance Key", false, "Collect the Maintenance Key", "FullGame");
+		settings.Add("FG Power", false, "Turn on the power", "FullGame");
+		settings.Add("FG Keycode", false, "Enter the keycode", "FullGame");
+		settings.Add("FG Lab Keycard", false, "Collect the Lab Keycard", "FullGame");
+		settings.Add("FG Dimethyl Sulfoxide", false, "Collect Dimethyl Sulfoxide", "FullGame");
+		settings.Add("FG Ammonium Hydroxide", false, "Collect Ammonium Hydroxide", "FullGame"); 
+		settings.Add("FG Toxic Base", false, "Collect Toxic Base", "FullGame"); 
+		settings.Add("FG Neurotoxin", false, "Collect Neurotoxin", "FullGame"); 
+		settings.Add("FG End", false, "Complete the game (trigger the credits)", "FullGame"); 
+		
 	// itch.io
 	settings.Add("itch.io", false, "itch.io version");
 		settings.Add("itch.ioSplits", true, "Split on ...", "itch.io");
@@ -35,17 +50,17 @@ init {
 	var gEngineTrg = vars.version == "Steam"
 		? new SigScanTarget(3, "48 8B 0D ???????? 48 8B 89 ???????? E8") { OnFound = onFound }
 		: new SigScanTarget(3, "48 8B 0D ???????? 66 0F 5A C9 E8") { OnFound = onFound };		
-	var fNamePoolTrg = new SigScanTarget(7, "8B D9 74 ?? 48 8D 15 ???????? EB") { OnFound = onFound };
+	var gNamesTrg = new SigScanTarget(7, "8B D9 74 ?? 48 8D 15 ???????? EB") { OnFound = onFound };
 
 	var gWorld = scanner.Scan(gWorldTrg);
 	var gEngine = scanner.Scan(gEngineTrg);
-	var fNamePool = scanner.Scan(fNamePoolTrg);
+	var gNames = scanner.Scan(gNamesTrg);
 	
-	if (gWorld == IntPtr.Zero || gEngine == IntPtr.Zero || fNamePool == IntPtr.Zero) {
+	if (gWorld == IntPtr.Zero || gEngine == IntPtr.Zero || gNames == IntPtr.Zero) {
 		throw new InvalidOperationException("Not all signatures resolved. Trying again.");
 	}
 
-
+#region Demo versions
 	// GWorld.URL
 	vars.world = new StringWatcher(new DeepPointer(gWorld, (vars.version == "Steam" ? 0x6A8 : 0x5C8), 0x0), ReadStringType.UTF16, 100);
 	
@@ -85,7 +100,52 @@ init {
 			? game.ReadString(game.ReadPointer(itemsPtr + (numberOfItems - 1) * 0x10), ReadStringType.UTF16, 100)
 			: new DeepPointer(itemsPtr + (numberOfItems - 1) * 0x8, 0x508, 0x20, 0x0).DerefString(game, ReadStringType.UTF16, 100);
 	});
+#endregion
 
+#region Full Game Watchers
+	vars.Events = vars.Uhara.CreateTool("UnrealEngine", "Events");
+	//[BP_Car_C] [BP_SUV_C_UAID_0C9D92C69631DE8B02] [ExecuteUbergraph_BP_Car]
+	//[HorrorEngineCharacter_C] [HorrorEngineCharacter_C] [OnLanded]
+
+	vars.Watchers = new Dictionary<string, MemoryWatcher> {
+		{ "BeginGame", 
+			new MemoryWatcher<ulong>(new DeepPointer(
+				vars.Events.FunctionFlag("MainMenu_C", "MainMenu_C", 
+				"BndEvt__MainMenu_NewGameButton_*")
+			)) 
+		},
+		{ "OnLanded", 
+			new MemoryWatcher<ulong>(new DeepPointer(
+				vars.Events.FunctionFlag("HorrorEngineCharacter_C", "HorrorEngineCharacter_C", "OnLanded")
+			)) 
+		},
+		{ "PowerSwitch", 
+			new MemoryWatcher<ulong>(new DeepPointer(
+				vars.Events.FunctionFlag("BP_PowerSwitch_C", "BP_PowerSwitch_C*", "*OnSuccess*")
+			)) 
+		},
+		{ "Keypad", 
+			new MemoryWatcher<ulong>(new DeepPointer(
+				vars.Events.FunctionFlag("SecurityControl_C", "SecurityControl_C*", "WarningTimeline*")
+			)) 
+		},
+		/*
+		{ "Elevator", 
+			new MemoryWatcher<ulong>(new DeepPointer(
+				vars.Events.FunctionFlag("BP_Elevator_C", "BP_Elevator_C_UAID_*", "MoveTimeline__UpdateFunc")
+			)) 
+		},
+		*/
+		{ "Credits", 
+			new MemoryWatcher<ulong>(new DeepPointer(
+				vars.Events.FunctionFlag("WB_Credits_New_C", "WB_Credits_New_C", "Tick")
+			)) 
+		},
+	};
+#endregion
+
+	// Flags
+	vars.StartReady = false;
 
 	vars.completedSplits = new HashSet<string>();
 
@@ -101,6 +161,10 @@ update {
 	vars.dead.Update(game);
 	vars.endOfDemo.Update(game);
 
+	foreach (var watcher in vars.Watchers.Values) {
+		watcher.Update(game);
+	}
+
 	if (vars.world.Changed) {
 		print("World: " + vars.world.Current);
 	}
@@ -110,6 +174,18 @@ start {
 	if (vars.debug.Current == vars.debug.Old + 1) {
 		return vars.world.Current == "/Game/Development/Maps/Hunstman_Level" ||
 		       vars.world.Current == "/Game/Development/Maps/L_Facility";
+	}
+
+	if (!vars.StartReady) {
+		if (vars.Watchers["BeginGame"].Changed && vars.Watchers["BeginGame"].Current != 0) {
+			vars.StartReady = true;
+		}
+	}
+	if (vars.StartReady) {
+		if (vars.Watchers["OnLanded"].Changed && vars.Watchers["OnLanded"].Current != 0) {
+			vars.StartReady = false;
+			return true;
+		}
 	}
 }
 
@@ -143,10 +219,29 @@ split {
 	if (vars.numberOfItems.Current > vars.numberOfItems.Old) {
 		var item = vars.LastItem();
 		print("Picked up " + item);
-		return settings[item] && vars.completedSplits.Add(item);
+		return (settings[item] || settings["FG " + item]) && vars.completedSplits.Add(item);
+	}
+
+	// Power Switch
+	if (settings["FG Power"] && vars.Watchers["PowerSwitch"].Changed && vars.Watchers["PowerSwitch"].Current != 0 && vars.completedSplits.Add("FG Power")) {
+		print("SPLIT: Turned on the power.");
+		return true;
+	}
+	// FG Keycode
+	if (settings["FG Keycode"] && vars.Watchers["Keypad"].Changed && vars.Watchers["Keypad"].Current != 0 && vars.completedSplits.Add("FG Keycode")) {
+		print("SPLIT: Entered the keycode.");
+		return true;
+	}
+	// FG Credits
+	if (settings["FG End"] && vars.Watchers["Credits"].Changed && vars.Watchers["Credits"].Current != 0 && vars.completedSplits.Add("FG End")) {
+		print("SPLIT: Triggered the credits.");
+		return true;
 	}
 }
 
 isLoading {
 	return vars.loading.Current;
 }
+
+
+
