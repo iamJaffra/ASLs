@@ -83,31 +83,19 @@ init {
 	vars.dead = new MemoryWatcher<bool>(new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x7F8));
 	// GEngine.GameInstance.LocalPlayers[0].PlayerController.AcknowledgedPawn.As Horror Engine.EndOfDemo?
 	vars.endOfDemo = new MemoryWatcher<bool>(new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x890));
-
-
-	vars.LastItem = (Func<string>)(() => {
-		var numberOfItems = vars.version == "itch.io"
-			// GWorld.GameInstance.PickedUpItems[].ArraySize
-			? new DeepPointer(gWorld, 0x1D8, 0x2C0 + 0x8).Deref<int>(game)
-			// GEngine.LocalPlayers[0].PlayerController.AcknowledgedPawn.As Horror Engine.PlayerInventory.Num
-			: new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x6A8 + 0x8).Deref<int>(game);
-		
-		var itemsPtr = vars.version == "itch.io"
-			? new DeepPointer(gWorld, 0x1D8, 0x2C0).Deref<IntPtr>(game)
-			: new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x6A8).Deref<IntPtr>(game);
-
-		return vars.version == "itch.io"
-			? game.ReadString(game.ReadPointer(itemsPtr + (numberOfItems - 1) * 0x10), ReadStringType.UTF16, 100)
-			: new DeepPointer(itemsPtr + (numberOfItems - 1) * 0x8, 0x508, 0x20, 0x0).DerefString(game, ReadStringType.UTF16, 100);
-	});
 #endregion
 
 #region Full Game Watchers
 	vars.Events = vars.Uhara.CreateTool("UnrealEngine", "Events");
-	//[BP_Car_C] [BP_SUV_C_UAID_0C9D92C69631DE8B02] [ExecuteUbergraph_BP_Car]
-	//[HorrorEngineCharacter_C] [HorrorEngineCharacter_C] [OnLanded]
+	IntPtr horrorEngine = vars.Events.InstancePtr("HorrorEngine_C", "");
 
 	vars.Watchers = new Dictionary<string, MemoryWatcher> {
+		{ "numberOfItems", 
+			new MemoryWatcher<int>(new DeepPointer(horrorEngine, 0x6A8 + 0x8))
+		},
+		{ "itemsPtr", 
+			new MemoryWatcher<IntPtr>(new DeepPointer(horrorEngine, 0x6A8))
+		},
 		{ "BeginGame", 
 			new MemoryWatcher<ulong>(new DeepPointer(
 				vars.Events.FunctionFlag("MainMenu_C", "MainMenu_C", 
@@ -121,7 +109,7 @@ init {
 		},
 		{ "PowerSwitch", 
 			new MemoryWatcher<ulong>(new DeepPointer(
-				vars.Events.FunctionFlag("BP_PowerSwitch_C", "BP_PowerSwitch_C*", "*OnSuccess*")
+				vars.Events.FunctionFlag("BP_PowerSwitch_C", "BP_PowerSwitch_C*", "FlipSwitch_Timeline*")
 			)) 
 		},
 		{ "Keypad", 
@@ -144,6 +132,22 @@ init {
 	};
 #endregion
 
+	vars.LastItem = (Func<string>)(() => {
+		var numberOfItems = vars.version == "itch.io"
+			// GWorld.GameInstance.PickedUpItems[].ArraySize
+			? new DeepPointer(gWorld, 0x1D8, 0x2C0 + 0x8).Deref<int>(game)
+			// GEngine.LocalPlayers[0].PlayerController.AcknowledgedPawn.As Horror Engine.PlayerInventory.Num
+			: new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x6A8 + 0x8).Deref<int>(game);
+		
+		var itemsPtr = vars.version == "itch.io"
+			? new DeepPointer(gWorld, 0x1D8, 0x2C0).Deref<IntPtr>(game)
+			: new DeepPointer(gEngine, 0x1248, 0x38, 0x0, 0x30, 0x350, 0x1918, 0x6A8).Deref<IntPtr>(game);
+
+		return vars.version == "itch.io"
+			? game.ReadString(game.ReadPointer(itemsPtr + (numberOfItems - 1) * 0x10), ReadStringType.UTF16, 100)
+			: new DeepPointer((IntPtr)vars.Watchers["itemsPtr"].Current + (vars.Watchers["numberOfItems"].Current - 1) * 0x8, 0x508, 0x20, 0x0).DerefString(game, ReadStringType.UTF16, 100);
+	});
+
 	// Flags
 	vars.StartReady = false;
 
@@ -154,7 +158,6 @@ init {
 
 update {
 	vars.world.Update(game);
-	vars.numberOfItems.Update(game);
 	vars.debug.Update(game);
 	vars.loading.Update(game);
 	vars.spiderHasBeenEliminated.Update(game);
@@ -216,7 +219,7 @@ split {
 	}
 
 	// Items splits
-	if (vars.numberOfItems.Current > vars.numberOfItems.Old) {
+	if (vars.Watchers["numberOfItems"].Changed) {
 		var item = vars.LastItem();
 		print("Picked up " + item);
 		return (settings[item] || settings["FG " + item]) && vars.completedSplits.Add(item);
