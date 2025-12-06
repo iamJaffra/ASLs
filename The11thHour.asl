@@ -19,44 +19,44 @@ startup {
 			{ "BOOKCASE",      Tuple.Create(PUZZLE, 0xEE) },
 			{ "Globe",         Tuple.Create(RIDDLE, 4)    },
 			{ "MOUSE",         Tuple.Create(PUZZLE, 0xEF) },
-			{ "Pill bottle",   Tuple.Create(RIDDLE, 5)    },
+			{ "Pill",          Tuple.Create(RIDDLE, 5)    },
 			{ "Robin",         Tuple.Create(RIDDLE, 6)    },
 		}},
 		{ 2, new Dictionary<string, Tuple<int, int>> {
 			{ "Desk drawers",            Tuple.Create(RIDDLE, 1)    },
 			{ "Torso",                   Tuple.Create(RIDDLE, 2)    },
 			{ "Champagne bottle",        Tuple.Create(RIDDLE, 3)    },
-			{ "POOL BALLS",              Tuple.Create(PUZZLE, 0xFF) },
+			{ "POOL BALLS",              Tuple.Create(PUZZLE, 0xF4) },
 			{ "Setter",                  Tuple.Create(RIDDLE, 4)    },
 			{ "Clock face",              Tuple.Create(RIDDLE, 5)    },
-			{ "SPIDERS",                 Tuple.Create(PUZZLE, 0xFF) },
+			{ "SPIDERS",                 Tuple.Create(PUZZLE, 0xF9) }, 
 			{ "Razor",                   Tuple.Create(RIDDLE, 6)    },
 			{ "Orange",                  Tuple.Create(RIDDLE, 7)    },
-			{ "MIRROR",                  Tuple.Create(PUZZLE, 0xFF) },
+			{ "MIRROR",                  Tuple.Create(PUZZLE, 0xF0) },
 			{ "Picture above fireplace", Tuple.Create(RIDDLE, 8)    },
 			{ "Great Dane",              Tuple.Create(RIDDLE, 9)    },
 		}},
 		{ 3, new Dictionary<string, Tuple<int, int>> {
 			{ "Broken TV",      Tuple.Create(RIDDLE, 1)    },
 			{ "Pipe organ",     Tuple.Create(RIDDLE, 2)    },
-			{ "TOY TRAINS",     Tuple.Create(PUZZLE, 0xFF) },
+			{ "TOY TRAINS",     Tuple.Create(PUZZLE, 0xFA) },
 			{ "Rook",           Tuple.Create(RIDDLE, 3)    },
 			{ "Torch",          Tuple.Create(RIDDLE, 4)    },
-			{ "PLATES",         Tuple.Create(PUZZLE, 0xFF) },
+			{ "PLATES",         Tuple.Create(PUZZLE, 0xF1) },
 			{ "Cheese grater",  Tuple.Create(RIDDLE, 5)    },
 			{ "7th Guest disc", Tuple.Create(RIDDLE, 6)    },
 			{ "Toothpaste",     Tuple.Create(RIDDLE, 7)    },
-			{ "DICE CUBE",      Tuple.Create(PUZZLE, 0xFF) },
+			{ "DICE CUBE",      Tuple.Create(PUZZLE, 0xF3) },
 			{ "Guillotine",     Tuple.Create(RIDDLE, 8)    },
 			{ "White flower",   Tuple.Create(RIDDLE, 9)    },
-			{ "PYRAMID",        Tuple.Create(PUZZLE, 0xFF) },
-			{ "Red rose",       Tuple.Create(RIDDLE, 10)   },
-			{ "JEWELRY BOX",    Tuple.Create(PUZZLE, 0xFF) },
-			{ "Earring",        Tuple.Create(RIDDLE, 11)   },
+			{ "PYRAMID",        Tuple.Create(PUZZLE, 0xED) },
+			{ "Red rose",       Tuple.Create(RIDDLE, 49)   },
+			{ "JEWELRY BOX",    Tuple.Create(PUZZLE, 0xF2) },
+			{ "Earring",        Tuple.Create(RIDDLE, 50)   },
 			
 		}},
 		{ 4, new Dictionary<string, Tuple<int, int>> {
-			{ "FURNITURE",   Tuple.Create(PUZZLE, 0xFF) },
+			{ "FURNITURE",   Tuple.Create(PUZZLE, 0xEC) },
 			{ "Harp",        Tuple.Create(RIDDLE, 1)    },
 			{ "Toy Soldier", Tuple.Create(RIDDLE, 2)    },
 			{ "Eyeball",     Tuple.Create(RIDDLE, 3)    },
@@ -68,11 +68,11 @@ startup {
 		{ 5, new Dictionary<string, Tuple<int, int>> {
 			{ "Lion statue",      Tuple.Create(RIDDLE, 1)    },
 			{ "Glass of port",    Tuple.Create(RIDDLE, 2)    },
-			{ "BISHOPS",          Tuple.Create(PUZZLE, 0xFF) },
+			{ "BISHOPS",          Tuple.Create(PUZZLE, 0xF6) },
 			{ "Baby rattle",      Tuple.Create(RIDDLE, 3)    },
 			{ "XI on the clock",  Tuple.Create(RIDDLE, 4)    },
 			{ "Inkstand",         Tuple.Create(RIDDLE, 5)    },
-			{ "DOLL HOUSE PENTE", Tuple.Create(PUZZLE, 0xFF) },
+			{ "DOLL HOUSE PENTE", Tuple.Create(PUZZLE, 0xEB) },
 		}}
 	};
 
@@ -168,6 +168,11 @@ init {
 			if (vars.ScummVM["riddle"].Current == vars.ScummVM["riddle"].Old + 1) {
 				return true;
 			}
+
+			// After 9, the counter goes straight to 49 and then increments normally again
+			if (vars.ScummVM["riddle"].Current == vars.ScummVM["riddle"].Old + 40) {
+				return true;
+			}
 		}
 		return false;
 	});
@@ -210,26 +215,28 @@ split {
 	}
 
 	// RIDDLES AND PUZZLES
-	foreach (var split in vars.Splits[current.chapter]) {
-		var name = split.Key;
-		var type = split.Value.Item1;
+	if (current.chapter > 0 && current.chapter < 6) {
+		foreach (var split in vars.Splits[current.chapter]) {
+			var name = split.Key;
+			var type = split.Value.Item1;
 
-		if (type == 1) { // RIDDLE
-			var riddle = split.Value.Item2;
+			if (type == 1) { // RIDDLE
+				var riddle = split.Value.Item2;
 
-			if (vars.SolvedRiddle(riddle)) {
-				vars.Info("SPLIT: Solved riddle: " + name);
-				return true;
+				if (vars.SolvedRiddle(riddle)) {
+					vars.Info("SPLIT: Solved riddle: " + name);
+					return true;
+				}
 			}
-		}
-		else if (type == 2) { // PUZZLE	
-			if (vars.ScummVM[name].Changed && vars.ScummVM[name].Current >= 0x05) {
-				vars.Info("SPLIT: Solved puzzle: " + name);
-				return true;
+			else if (type == 2) { // PUZZLE	
+				if (vars.ScummVM[name].Changed && vars.ScummVM[name].Current >= 0x05) {
+					vars.Info("SPLIT: Solved puzzle: " + name);
+					return true;
+				}
 			}
 		}
 	}
-
+	
 	// CHAPTERS
 	foreach (var split in vars.ChapterSplits) {
 		var puzzle = split.Key;
