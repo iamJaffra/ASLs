@@ -63,7 +63,9 @@ init {
 		vars.Helper["xSpeed"] = mono.Make<float>("GameLogic", "_Instance", "_MystController", "_MovementSpeed", "x");
 		vars.Helper["zSpeed"] = mono.Make<float>("GameLogic", "_Instance", "_MystController", "_MovementSpeed", "z");
 		vars.Helper["newGame"] = mono.Make<bool>("GameLogic", "_StartNewGame");
-		vars.Helper["engagedPuzzle"] = mono.Make<int>("GameLogic", "_Instance", "_EngagedPuzzle");
+		vars.Helper["engagedPuzzle"] = game.Is64Bit()
+			? mono.Make<long>("GameLogic", "_Instance", "_EngagedPuzzle")
+			: mono.Make<int>("GameLogic", "_Instance", "_EngagedPuzzle");
 		vars.Helper["linkTarget"] = mono.MakeString("LoadingLevel", "_LoadLevel");
 
 		return true;
@@ -87,23 +89,25 @@ init {
 	vars.FindStateSlot = (Func<int, int>)(stateId => {
 		IntPtr dictPtr = vars.Helper["states"].Current;
 
-		var tablePtr = game.ReadPointer(dictPtr + 0x08);
-		var linkSlotsPtr = game.ReadPointer(dictPtr + 0x0C);
-		var keySlotsPtr = game.ReadPointer(dictPtr + 0x10);
+		bool is64Bit = game.Is64Bit();
 
-		int tableLength = game.ReadValue<int>(tablePtr + 0x0C);
+		var tablePtr = game.ReadPointer(dictPtr + (is64Bit ? 0x10 : 0x08));
+		var linkSlotsPtr = game.ReadPointer(dictPtr + (is64Bit ? 0x18 : 0x0C));
+		var keySlotsPtr = game.ReadPointer(dictPtr + (is64Bit ? 0x20 : 0x10));
+
+		int tableLength = game.ReadValue<int>(tablePtr + (is64Bit ? 0x18 : 0x0C));
 
 		int hash = stateId & 0x7FFFFFFF;
 		int bucket = hash % tableLength;
 
-		int bucketVal = game.ReadValue<int>(tablePtr + 0x10 + bucket * 4);
+		int bucketVal = game.ReadValue<int>(tablePtr + (is64Bit ? 0x20 : 0x10) + bucket * 4);
 		int slot = bucketVal - 1;
 
 		while (slot >= 0) {
-			IntPtr linkEntryAddr = linkSlotsPtr + 0x10 + slot * 8;
+			IntPtr linkEntryAddr = linkSlotsPtr + (is64Bit ? 0x20 : 0x10) + slot * 8;
 			int entryHashCode = game.ReadValue<int>(linkEntryAddr);
 			int entryNext = game.ReadValue<int>(linkEntryAddr + 4);
-			int entryKey = game.ReadValue<int>(keySlotsPtr + 0x10 + slot * 4);
+			int entryKey = game.ReadValue<int>(keySlotsPtr + (is64Bit ? 0x20 : 0x10) + slot * 4);
 
 			if ((entryHashCode & 0x7FFFFFFF) == hash && entryKey == stateId)
 				return slot;
@@ -116,31 +120,45 @@ init {
 
 	vars.GetState = (Func<string, int>)(name => {
 		int stateId = vars.StateIDs[name];
+		bool is64Bit = game.Is64Bit();
+
 		int slot = vars.FindStateSlot(stateId);
 		if (slot < 0) return -1;
 
 		IntPtr dictPtr = vars.Helper["states"].Current;
-		var valueSlotsPtr = game.ReadPointer(dictPtr + 0x14);
+		var valueSlotsPtr = game.ReadPointer(dictPtr + (is64Bit ? 0x28 : 0x14));
+		IntPtr valueObjPtr = game.ReadPointer(
+			valueSlotsPtr 
+			+ (is64Bit ? 0x20 : 0x10) 
+			+ slot * (is64Bit ? 8 : 4)
+		);
 
-		IntPtr valueObjPtr = game.ReadPointer(valueSlotsPtr + 0x10 + slot * 4);
 		if (valueObjPtr == IntPtr.Zero) return -1;
 
-		return game.ReadValue<int>(valueObjPtr + 0x8);
+		return game.ReadValue<int>(valueObjPtr + (is64Bit ? 0x10 : 0x8));
 	});
 
 	vars.GetStringState = (Func<string, string>)(name => {
 		int stateId = vars.StateIDs[name];
+		bool is64Bit = game.Is64Bit();
+	
 		int slot = vars.FindStateSlot(stateId);
 		if (slot < 0) return "None";
-
+	
 		IntPtr dictPtr = vars.Helper["states"].Current;
-		var valueSlotsPtr = game.ReadPointer(dictPtr + 0x14);
+		IntPtr valueSlotsPtr = game.ReadPointer(dictPtr + (is64Bit ? 0x28 : 0x14));
+		IntPtr valueObjPtr = game.ReadPointer(
+			valueSlotsPtr
+			+ (is64Bit ? 0x20 : 0x10)
+			+ slot * (is64Bit ? 8 : 4)
+		);
 
-		IntPtr valueObjPtr = game.ReadPointer(valueSlotsPtr + 0x10 + slot * 4);
 		if (valueObjPtr == IntPtr.Zero) return "None";
 
-		IntPtr stringObjPtr = game.ReadPointer(valueObjPtr + 0x8);
-		return game.ReadString(stringObjPtr + 0xC, 32);
+		IntPtr stringObjPtr = game.ReadPointer(valueObjPtr + (is64Bit ? 0x10 : 0x8));
+		if (stringObjPtr == IntPtr.Zero) return "None";
+
+		return game.ReadString(stringObjPtr + (is64Bit ? 0x14 : 0xC), 64);
 	});
 
 	vars.FloatEquals = (Func<float, float, bool>)((float1, float2) => {
@@ -189,7 +207,7 @@ update {
 	if (String.IsNullOrEmpty(old.linkTarget) && !String.IsNullOrEmpty(current.linkTarget)) {
 		vars.Info("Linking to: " + current.linkTarget);
 		vars.linkingToAge = current.linkTarget;
-	}	
+	}
 }
 
 isLoading {
@@ -233,7 +251,9 @@ split {
 	
 		// Bad Ending
 		if (old.engagedPuzzle == 0 && current.engagedPuzzle != 0) {
-			var name = new DeepPointer((IntPtr)current.engagedPuzzle + 0xC, 0x40, 0x4, 0x30, 0x0).DerefString(game, 128);
+			var name = game.Is64Bit()
+				? new DeepPointer((IntPtr)current.engagedPuzzle + 0x18, 0x68, 0x8, 0x48, 0x0).DerefString(game, 128)
+				: new DeepPointer((IntPtr)current.engagedPuzzle + 0xC, 0x40, 0x4, 0x30, 0x0).DerefString(game, 128);
 			vars.Info("Engaged with puzzle: " + name);
 			if (name == "Atrus" && current.whitePage == 0) {
 				return true;
