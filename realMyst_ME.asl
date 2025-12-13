@@ -28,9 +28,34 @@ startup {
 	vars.Info = (Action<string>)((msg) => {
 		print("[realMyst Masterpiece ASL] " + msg);
 	});
+
+	vars.firstLaunch = true;
 }
 
 init {
+	if (vars.firstLaunch) {
+		int delay = 3000;
+		vars.Info("Reattaching in " + delay + "ms...");
+		Thread.Sleep(delay);
+		vars.firstLaunch = false;
+
+		var allComponents = timer.Layout.Components;
+		if (timer.Run.AutoSplitter != null && timer.Run.AutoSplitter.Component != null) {
+			allComponents = allComponents.Append(timer.Run.AutoSplitter.Component);
+		}
+		foreach (var component in allComponents) {
+			var type = component.GetType();
+			if (type.Name == "ASLComponent") {
+				var script = type.GetProperty("Script").GetValue(component);
+				script.GetType().GetField(
+					"_game",
+					BindingFlags.NonPublic | BindingFlags.Instance
+				).SetValue(script, null);
+			}
+		}
+		return;
+	}
+	
 	vars.Helper.TryLoad = (Func<dynamic, bool>)(mono => {
 		vars.Helper["initialProgress"] = mono.Make<float>("LoadLevelManager", "_InitialProgress");
 		vars.Helper["lastFade"] = mono.Make<float>("Fade", "_Instance", "_StartTime");
@@ -45,18 +70,18 @@ init {
 	});
 
 	vars.StateIDs = new Dictionary<string, int> {
-		{ "kGlobalCurrentNodeName",       0x14 },
-		{ "kMystRedBookPages",            0x407 },
-		{ "kMystBlueBookPages",           0x408 },
-		{ "kMystWhitePagePickedUp",       0x412 },
-		{ "kSeleniticRedPagePickedUp",    0x7D6 },
-		{ "kSeleniticBluePagePickedUp",   0x7D7 },
-		{ "kMechanicalRedPagePickedUp",   0xFA1 },
-		{ "kMechanicalBluePagePickedUp",  0xFA2 },
-		{ "kChannelwoodRedPagePickedUp",  0xBB9 },
-		{ "kChannelwoodBluePagePickedUp", 0xBBA },
-		{ "kStoneshipRedPagePickedUp",    0x138A },
-		{ "kStoneshipBluePagePickedUp",   0x138B },
+		{ "kGlobalCurrentNodeName",         20 },
+		{ "kMystRedBookPages",            1031 },
+		{ "kMystBlueBookPages",           1032 },
+		{ "kMystWhitePagePickedUp",       1042 },
+		{ "kSeleniticRedPagePickedUp",    2006 },
+		{ "kSeleniticBluePagePickedUp",   2007 },
+		{ "kChannelwoodRedPagePickedUp",  3001 },
+		{ "kChannelwoodBluePagePickedUp", 3002 },
+		{ "kMechanicalRedPagePickedUp",   4001 },
+		{ "kMechanicalBluePagePickedUp",  4002 },
+		{ "kStoneshipRedPagePickedUp",    5002 },
+		{ "kStoneshipBluePagePickedUp",   5003 },
 	};
 
 	vars.FindStateSlot = (Func<int, int>)(stateId => {
@@ -161,11 +186,8 @@ update {
 	current.stoneshipBluePage = vars.GetState("kStoneshipBluePagePickedUp");
 	current.whitePage = vars.GetState("kMystWhitePagePickedUp");
 
-	if (old.linkTarget != current.linkTarget) {
-		vars.Info("Linking to: " + old.linkTarget + " -> " + current.linkTarget);
-	}
-
 	if (String.IsNullOrEmpty(old.linkTarget) && !String.IsNullOrEmpty(current.linkTarget)) {
+		vars.Info("Linking to: " + current.linkTarget);
 		vars.linkingToAge = current.linkTarget;
 	}	
 }
@@ -252,4 +274,8 @@ split {
 	if (settings["StoneshipBlue"] && old.stoneshipBluePage == 1 && current.stoneshipBluePage == 2) {
 		return true;
 	}	
+}
+
+exit {
+	vars.firstLaunch = true;
 }
