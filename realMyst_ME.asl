@@ -8,11 +8,11 @@ startup {
 	// Settings
 	settings.Add("Splits", true, "Splits");
 		settings.Add("Linking", true, "Split on linking to ...", "Splits");
-			settings.Add("Stoneship", true, "Stoneship", "Linking");
-			settings.Add("Channelwood", true, "Channelwood", "Linking");
-			settings.Add("Selenitic", true, "Selenitic", "Linking");
-			settings.Add("Mechanical", true, "Mechanical", "Linking");
-			settings.Add("Myst Island", true, "Myst", "Linking");
+			settings.Add("Stoneship", false, "Stoneship", "Linking");
+			settings.Add("Channelwood", false, "Channelwood", "Linking");
+			settings.Add("Selenitic", false, "Selenitic", "Linking");
+			settings.Add("Mechanical", false, "Mechanical", "Linking");
+			settings.Add("Myst Island", false, "Myst", "Linking");
 		settings.Add("Pages", true, "Split on handing in ...", "Splits");		
 			settings.Add("StoneshipRed", true, "Stoneship Red", "Pages");
 			settings.Add("StoneshipBlue", true, "Stoneship Blue", "Pages");
@@ -169,6 +169,7 @@ init {
 	vars.isLoading = false;
 	vars.newGame = false;
 	vars.linkingToAge = "";
+	vars.completedSplits = new HashSet<string>();
 }
 
 update {
@@ -182,6 +183,7 @@ update {
 			vars.isLoading = false;
 	
 			if (vars.linkingToAge != "" && settings[vars.linkingToAge]) {
+				vars.Info("Split on arriving in age: " + vars.linkingToAge);
 				vars.linkingToAge = "";
 				vars.TimerModel.Split();
 			}
@@ -239,6 +241,7 @@ start {
 
 onStart {
 	vars.newGame = false;
+	vars.completedSplits.Clear();
 }
 
 split {
@@ -270,28 +273,28 @@ split {
 	}
 	
 	// PAGES
-	if (settings["SeleniticRed"] && old.seleniticRedPage == 1 && current.seleniticRedPage == 2) {
+	if (settings["SeleniticRed"] && old.seleniticRedPage == 1 && current.seleniticRedPage == 2 && vars.completedSplits.Add("SeleniticRed")) {
 		return true;
 	}
-	if (settings["SeleniticBlue"] && old.seleniticBluePage == 1 && current.seleniticBluePage == 2) {
+	if (settings["SeleniticBlue"] && old.seleniticBluePage == 1 && current.seleniticBluePage == 2 && vars.completedSplits.Add("SeleniticBlue")) {
 		return true;
 	}
-	if (settings["ChannelwoodRed"] && old.channelwoodRedPage == 1 && current.channelwoodRedPage == 2) {
+	if (settings["ChannelwoodRed"] && old.channelwoodRedPage == 1 && current.channelwoodRedPage == 2 && vars.completedSplits.Add("ChannelwoodRed")) {
 		return true;
 	}
-	if (settings["ChannelwoodBlue"] && old.channelwoodBluePage == 1 && current.channelwoodBluePage == 2) {
+	if (settings["ChannelwoodBlue"] && old.channelwoodBluePage == 1 && current.channelwoodBluePage == 2 && vars.completedSplits.Add("ChannelwoodBlue")) {
 		return true;
 	}
-	if (settings["MechanicalRed"] && old.mechanicalRedPage == 1 && current.mechanicalRedPage == 2) {
+	if (settings["MechanicalRed"] && old.mechanicalRedPage == 1 && current.mechanicalRedPage == 2 && vars.completedSplits.Add("MechanicalRed")) {
 		return true;
 	}
-	if (settings["MechanicalBlue"] && old.mechanicalBluePage == 1 && current.mechanicalBluePage == 2) {
+	if (settings["MechanicalBlue"] && old.mechanicalBluePage == 1 && current.mechanicalBluePage == 2 && vars.completedSplits.Add("MechanicalBlue")) {
 		return true;
 	}
-	if (settings["StoneshipRed"] && old.stoneshipRedPage == 1 && current.stoneshipRedPage == 2) {
+	if (settings["StoneshipRed"] && old.stoneshipRedPage == 1 && current.stoneshipRedPage == 2 && vars.completedSplits.Add("StoneshipRed")) {
 		return true;
 	}
-	if (settings["StoneshipBlue"] && old.stoneshipBluePage == 1 && current.stoneshipBluePage == 2) {
+	if (settings["StoneshipBlue"] && old.stoneshipBluePage == 1 && current.stoneshipBluePage == 2 && vars.completedSplits.Add("StoneshipBlue")) {
 		return true;
 	}	
 }
