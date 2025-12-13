@@ -8,20 +8,20 @@ startup {
 	// Settings
 	settings.Add("Splits", true, "Splits");
 		settings.Add("Linking", true, "Split on linking to ...", "Splits");
-				settings.Add("Stoneship", true, "Stoneship", "Linking");
-				settings.Add("Channelwood", true, "Channelwood", "Linking");
-				settings.Add("Selenitic", true, "Selenitic", "Linking");
-				settings.Add("Mechanical", true, "Mechanical", "Linking");
-				settings.Add("Myst Island", true, "Myst", "Linking");
+			settings.Add("Stoneship", true, "Stoneship", "Linking");
+			settings.Add("Channelwood", true, "Channelwood", "Linking");
+			settings.Add("Selenitic", true, "Selenitic", "Linking");
+			settings.Add("Mechanical", true, "Mechanical", "Linking");
+			settings.Add("Myst Island", true, "Myst", "Linking");
 		settings.Add("Pages", true, "Split on handing in ...", "Splits");		
-				settings.Add("StoneshipRed", true, "Stoneship Red", "Pages");
-				settings.Add("StoneshipBlue", true, "Stoneship Blue", "Pages");
-				settings.Add("ChannelwoodRed", true, "Channelwood Red", "Pages");
-				settings.Add("ChannelwoodBlue", true, "Channelwood Blue", "Pages");
-				settings.Add("SeleniticRed", true, "Selenitic Red", "Pages");
-				settings.Add("SeleniticBlue", true, "Selenitic Blue", "Pages");
-				settings.Add("MechanicalRed", true, "Mechanical Red", "Pages");
-				settings.Add("MechanicalBlue", true, "Mechanical Blue", "Pages");
+			settings.Add("StoneshipRed", true, "Stoneship Red", "Pages");
+			settings.Add("StoneshipBlue", true, "Stoneship Blue", "Pages");
+			settings.Add("ChannelwoodRed", true, "Channelwood Red", "Pages");
+			settings.Add("ChannelwoodBlue", true, "Channelwood Blue", "Pages");
+			settings.Add("SeleniticRed", true, "Selenitic Red", "Pages");
+			settings.Add("SeleniticBlue", true, "Selenitic Blue", "Pages");
+			settings.Add("MechanicalRed", true, "Mechanical Red", "Pages");
+			settings.Add("MechanicalBlue", true, "Mechanical Blue", "Pages");
 		settings.Add("End", true, "Trigger one of the endings.");
 
 	// Debug
@@ -44,7 +44,6 @@ init {
 		return true;
 	});
 
-	// StateIDs
 	vars.StateIDs = new Dictionary<string, int> {
 		{ "kGlobalCurrentNodeName",       0x14 },
 		{ "kMystRedBookPages",            0x407 },
