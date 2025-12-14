@@ -22,7 +22,8 @@ startup {
 			settings.Add("SeleniticBlue", true, "Selenitic Blue", "Pages");
 			settings.Add("MechanicalRed", true, "Mechanical Red", "Pages");
 			settings.Add("MechanicalBlue", true, "Mechanical Blue", "Pages");
-		settings.Add("End", true, "Trigger one of the endings.");
+		settings.Add("End", true, "Trigger one of the endings.", "Splits");
+	settings.Add("EnableMenuDuringAtrus", false, "Enable the menu during Atrus.");
 
 	// Debug
 	vars.Info = (Action<string>)((msg) => {
@@ -72,6 +73,7 @@ init {
 	});
 
 	vars.StateIDs = new Dictionary<string, int> {
+		{ "kGlobalClassicMode",             19 },
 		{ "kGlobalCurrentNodeName",         20 },
 		{ "kMystRedBookPages",            1031 },
 		{ "kMystBlueBookPages",           1032 },
@@ -169,6 +171,7 @@ init {
 	vars.isLoading = false;
 	vars.newGame = false;
 	vars.linkingToAge = "";
+	current.puzzle = "";
 	vars.completedSplits = new HashSet<string>();
 }
 
@@ -210,6 +213,22 @@ update {
 		vars.Info("Linking to: " + current.linkTarget);
 		vars.linkingToAge = current.linkTarget;
 	}
+
+	if (old.engagedPuzzle == 0 && current.engagedPuzzle != 0) {
+		var name = game.Is64Bit()
+			? new DeepPointer((IntPtr)current.engagedPuzzle + 0x18, 0x68, 0x8, 0x48, 0x0).DerefString(game, 128)
+			: new DeepPointer((IntPtr)current.engagedPuzzle + 0xC, 0x40, 0x4, 0x30, 0x0).DerefString(game, 128);
+		vars.Info("Engaged with puzzle: " + name);
+		current.puzzle = name;
+	}
+	if (old.engagedPuzzle != 0 && current.engagedPuzzle == 0) {
+		current.puzzle = "";
+	}
+
+	if (settings["EnableMenuDuringAtrus"] && old.puzzle == "" && current.puzzle == "Atrus") {
+		game.WriteBytes((IntPtr)current.engagedPuzzle + (game.Is64Bit() ? 0x4B : 0x2B), new byte[] { 0x01 });
+		vars.Info("Enabled menu!");
+	}
 }
 
 isLoading {
@@ -222,6 +241,7 @@ reset {
 
 start {
 	current.node = vars.GetStringState("kGlobalCurrentNodeName");
+	current.classicMode = vars.GetState("kGlobalClassicMode");
 
 	if (vars.newGame) {
 		// Free roam
@@ -233,7 +253,7 @@ start {
 			}			
 		}
 		// Classic mode
-		if (old.node == "Dock1-E" && old.node != current.node && current.node.Contains("Dock")) {
+		if (current.classicMode == 1 && old.node == "Dock1-E" && old.node != current.node && current.node.Contains("Dock")) {
 			return true;
 		}
 	}
@@ -254,11 +274,7 @@ split {
 	
 		// Bad Ending
 		if (old.engagedPuzzle == 0 && current.engagedPuzzle != 0) {
-			var name = game.Is64Bit()
-				? new DeepPointer((IntPtr)current.engagedPuzzle + 0x18, 0x68, 0x8, 0x48, 0x0).DerefString(game, 128)
-				: new DeepPointer((IntPtr)current.engagedPuzzle + 0xC, 0x40, 0x4, 0x30, 0x0).DerefString(game, 128);
-			vars.Info("Engaged with puzzle: " + name);
-			if (name == "Atrus" && current.whitePage == 0) {
+			if (current.puzzle == "Atrus" && current.whitePage == 0) {
 				return true;
 			}	
 		}
