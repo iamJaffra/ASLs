@@ -208,7 +208,7 @@ update {
 			// Timer running?
 			if (phase == TimerPhase.Running) {
 				// Split
-				if (vars.SplitEvents.Contains(eventName)) {
+				if (vars.SplitEvents.Contains(eventName) && settings[eventName] && vars.completedSplits.Add(eventName)) {
 					vars.TimerModel.Split();
 				}
 
@@ -237,6 +237,4 @@ isLoading {
 	return status == 1 || // Loading screen after linking
 	       status == 2 || // Saving
 	       status == 4;   // Loading a save
-}
-
-         
+}   
