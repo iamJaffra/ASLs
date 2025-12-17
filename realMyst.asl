@@ -4,7 +4,7 @@ startup {
 	// Settings
 	vars.PageSplits = new Dictionary<string, Tuple<string, string>> {
 		{ "Mechanical Blue",  Tuple.Create("ME_AC_HaveTheBluePage",   "ME_AC_BluePageIsAdded") },
-		{ "Mechanical Red",   Tuple.Create("ME_SR_HaveTheRedPage",    "ME_SR_RedPageIsAdded") },
+		{ "Mechanical Red",   Tuple.Create("ME_SC_HaveTheRedPage",    "ME_SR_RedPageIsAdded") },
 		{ "Stoneship Blue",   Tuple.Create("ST_SIRM_HaveTheRedPage",  "ST_SIRM_RedPageIsAdded") },
 		{ "Stoneship Red",    Tuple.Create("ST_AKRM_HaveTheBluePage", "ST_AKRM_BluePageIsAdded") },
 		{ "Channelwood Blue", Tuple.Create("CH_AC_HaveTheBluePage",   "CH_AC_BluePageIsAdded") },
@@ -202,6 +202,7 @@ update {
 				if (eventName == "GL_PlayerMoving") {
 					vars.TimerModel.Start();
 					vars.newGame = false;
+					vars.completedSplits.Clear();
 				}
 			}
 
