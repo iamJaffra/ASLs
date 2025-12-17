@@ -203,6 +203,7 @@ update {
 					vars.TimerModel.Start();
 					vars.newGame = false;
 					vars.completedSplits.Clear();
+					vars.Info("--- Started the timer on first movement. ---");
 				}
 			}
 
@@ -211,11 +212,13 @@ update {
 				// Split
 				if (vars.SplitEvents.Contains(eventName) && settings[eventName] && vars.completedSplits.Add(eventName)) {
 					vars.TimerModel.Split();
+					vars.Info("--- Split on event: " + eventName + " ---");
 				}
 
 				// Reset
-				if (eventName.StartsWith("OP_")) {
+				if (eventName.StartsWith("OP_") && settings.ResetEnabled) {
 					vars.TimerModel.Reset();
+					vars.Info("--- Reset on New Game ---");
 				}
 			}
 			
