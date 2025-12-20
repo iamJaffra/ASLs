@@ -176,6 +176,9 @@ update {
 	if (vars.Status.Old == 1 && vars.Status.Current == 0) {
 		vars.linkingTo = "";
 	}
+	if (vars.Status.Old == 0 && vars.Status.Current == 4) {
+		vars.lastDestination = "";
+	}
 
 	var idx = game.ReadValue<int>((IntPtr)vars.idxPtr);
 	if (idx != vars.last) {
