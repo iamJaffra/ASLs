@@ -387,7 +387,7 @@ split {
 		if (settings["Any%NoFlying_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
 			return vars.completedSplits.Add("SwampDragon");
 		}
-		if (settings["Any%NoFlying_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
+		if (settings["Any%NoFlying_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.FIRE_DRAGON)) {
 			return vars.completedSplits.Add("FireDragon");
 		}
 		if (settings["Any%NoFlying_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
