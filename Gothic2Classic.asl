@@ -367,10 +367,12 @@ split {
 		if (settings["Any%NoFlying_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
 			return vars.completedSplits.Add("EnterValley");
 		}
-		if (settings["Any%NoFlying_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")) {
+		if (settings["Any%NoFlying_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
+				&& Math.Sqrt(Math.Pow(27444.02148 - current.x, 2) + Math.Pow(-333.9581604 - current.y, 2)) < 1000) {
 			return vars.completedSplits.Add("CollectTeleportToPass");
 		}
-		if (settings["Any%NoFlying_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && vars.PlayerHasItem("ITRU_TELEPORTOC")) {
+		if (settings["Any%NoFlying_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC")
+				&& Math.Sqrt(Math.Pow(-3099.234131 - current.x, 2) + Math.Pow(1561.480957 - current.y, 2)) < 1000) {
 			return vars.completedSplits.Add("CollectTeleportToCastle");
 		}
 		if (settings["Any%NoFlying_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
