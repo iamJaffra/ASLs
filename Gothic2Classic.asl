@@ -130,6 +130,7 @@ init {
 		{ "UNDEADDRAGONISDEAD", "undeadDragon" },
 		{ "TORLOFISCAPTAIN",    "Torlof"       },
 		//{ "PLAYER_ISAPPRENTICE", "apprentice" }
+		{ "MIS_OCGATEOPEN",     "gateOpen" },
 	};
 
 	// cur_table.table
@@ -325,8 +326,7 @@ split {
 			print("Split: TeleportToCastle");
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
-		if (settings["Any%_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
-				&& Math.Sqrt(Math.Pow(1962 - current.x, 2) + Math.Pow(-2644 - current.y, 2)) < 200) {
+		if (settings["Any%_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.world == 2 && vars.globals["gateOpen"].Old == 0 && vars.globals["gateOpen"].Current == 1) {
 			print("Split: OpenGate");
 			return vars.completedSplits.Add("OpenGate");
 		}
@@ -380,8 +380,7 @@ split {
 				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
-		if (settings["Any%NoFlying_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
-				&& Math.Sqrt(Math.Pow(1962 - current.x, 2) + Math.Pow(-2644 - current.y, 2)) < 200) {
+		if (settings["Any%NoFlying_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.world == 2 && vars.globals["gateOpen"].Old == 0 && vars.globals["gateOpen"].Current == 1) {
 			return vars.completedSplits.Add("OpenGate");
 		}
 		if (settings["Any%NoFlying_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
@@ -427,8 +426,7 @@ split {
 			print("Split enter valley");
 			return vars.completedSplits.Add("EnterValley");
 		}
-		if (settings["AllChapters_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.inCutscene != 0 && current.world == 2
-				&& Math.Sqrt(Math.Pow(1962 - current.x, 2) + Math.Pow(-2644 - current.y, 2)) < 200) {
+		if (settings["AllChapters_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.world == 2 && vars.globals["gateOpen"].Old == 0 && vars.globals["gateOpen"].Current == 1) {
 			print("Split open gate");
 			return vars.completedSplits.Add("OpenGate");
 		}
