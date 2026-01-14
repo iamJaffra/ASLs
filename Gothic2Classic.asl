@@ -365,52 +365,67 @@ split {
 
 	if (settings["Any%NoFlying"]) {
 		if (settings["Any%NoFlying_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
+			print("Split: EnterValley");
 			return vars.completedSplits.Add("EnterValley");
 		}
 		if (settings["Any%NoFlying_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
 				&& Math.Sqrt(Math.Pow(27444.02148 - current.x, 2) + Math.Pow(-333.9581604 - current.y, 2)) < 1000) {
+			print("Split: CollectTeleportToPass");
 			return vars.completedSplits.Add("CollectTeleportToPass");
 		}
 		if (settings["Any%NoFlying_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC")
 				&& Math.Sqrt(Math.Pow(-3099.234131 - current.x, 2) + Math.Pow(1561.480957 - current.y, 2)) < 1000) {
+			print("Split: CollectTeleportToCastle");
 			return vars.completedSplits.Add("CollectTeleportToCastle");
 		}
 		if (settings["Any%NoFlying_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
 				&& Math.Sqrt(Math.Pow(-3140 - current.x, 2) + Math.Pow(1012 - current.y, 2)) < 200 
 				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
+			print("Split: TeleportToCastle");
 			return vars.completedSplits.Add("TeleportToCastle");
 		}
 		if (settings["Any%NoFlying_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.world == 2 && vars.globals["gateOpen"].Old == 0 && vars.globals["gateOpen"].Current == 1) {
+			print("Split: OpenGate");
 			return vars.completedSplits.Add("OpenGate");
 		}
 		if (settings["Any%NoFlying_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
+			print("Split: SwampDragon");
 			return vars.completedSplits.Add("SwampDragon");
 		}
 		if (settings["Any%NoFlying_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.FIRE_DRAGON)) {
+			print("Split: FireDragon");
 			return vars.completedSplits.Add("FireDragon");
 		}
 		if (settings["Any%NoFlying_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
+			print("Split: RockDragon");
 			return vars.completedSplits.Add("RockDragon");
 		}
 		if (settings["Any%NoFlying_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
+			print("Split: Chapter5");
 			return vars.completedSplits.Add("Chapter5");
 		}
 		if (settings["Any%NoFlying_CollectTeleportToTavern"] && !vars.completedSplits.Contains("CollectTeleportToTavern") && vars.PlayerHasItem("ITRU_TELEPORTTAVERNE")) {
+			print("Split: CollectTeleportToTavern");
 			return vars.completedSplits.Add("CollectTeleportToTavern");
 		}
 		if (settings["Any%NoFlying_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")) {
+			print("Split: CollectMap");
 			return vars.completedSplits.Add("CollectMap");
 		}
-		if (settings["Any%NoFlying_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && vars.globals["Torlof"].Current == 1) {
+		if (settings["Any%NoFlying_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && vars.globals["Torlof"].Old == 0 && vars.globals["Torlof"].Current == 1) {
+			print("Split: RecruitTorlof");
 			return vars.completedSplits.Add("RecruitTorlof");
 		}
 		if (settings["Any%NoFlying_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
+			print("Split: Irdorath");
 			return vars.completedSplits.Add("Irdorath");
 		}
 		if (settings["Any%NoFlying_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
+			print("Split: UndeadDragon");
 			return vars.completedSplits.Add("UndeadDragon");
 		}
-		if (settings["Any%NoFlying_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
+		if (settings["Any%NoFlying_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && vars.globals["undeadDragon"].Current == 1 && current.inCutscene == 1) {
+			print("Split: End");
 			return vars.completedSplits.Add("End");
 		}
 	}
@@ -472,11 +487,14 @@ split {
 		}
 		if (settings["AllChapters_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 			return vars.completedSplits.Add("Irdorath");
+			print("Split Irdorath");
 		}
 		if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
+			print("Split UndeadDragon");
 			return vars.completedSplits.Add("UndeadDragon");
 		}
-		if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
+		if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && vars.globals["undeadDragon"].Current == 1 && current.inCutscene == 1) {
+			print("Split End");
 			return vars.completedSplits.Add("End");
 		}
 	}
