@@ -31,6 +31,12 @@ startup {
 	}
 	
 	settings.Add("Credits", true, "Best Friends Forever (Trigger the credits)", "Missions");
+
+	settings.Add("OtherSplits", true, "Other");
+	settings.Add("ShopSplit", false, "Split when opening the shop for the first time", "OtherSplits");
+
+	settings.Add("Debug", true, "Debug");
+	settings.Add("EnableDebugMenu", false, "Enable Debug Menu", "Debug");
 }
 
 init {
@@ -48,22 +54,27 @@ init {
 	vars.Resolver.Watch<ulong>("StartRollingCredits", StartRollingCredits);
 
 	vars.Helper.TryLoad = (Func<dynamic, bool>)(mono => {
-		var gm = mono["BarbieGame", "MissionManager", 1];
+		var mm = mono["BarbieGame", "MissionManager", 1];
 		vars.Helper["Mission"] = mono.MakeString(
-			gm, 
+			mm, 
 			"instance",  
 			0x50,        // <trackedMission>k__BackingField
 			0x10,        // missionSO
 			0x18         // id
 		);
+
+		var sm = mono["BarbieGame", "ShopMenuManager", 1];
+		vars.Helper["ShopOpen"] = mono.Make<bool>(sm, "instance", 0xC8);
+
+		var ac = mono["BarbieGame", "ApplicationConfig_SO", 1];
+		vars.Helper["AppConfig"] = mono.Make<IntPtr>(ac, "_instance");
 		
 		return true;
 	});
 
-	current.ActiveScene = "";
-	current.Mission = "";
-
 	vars.completedSplits = new HashSet<string>();
+
+	vars.EnabledDebugMenu = false;
 }
 
 update {
@@ -74,6 +85,14 @@ update {
 	if (current.Mission != old.Mission) {
 		vars.Log("Mission -> " + current.Mission);
 	}
+
+	if (settings["EnableDebugMenu"] && !vars.EnabledDebugMenu) {
+		if (current.AppConfig != IntPtr.Zero) {
+			vars.Log("Enabling Debug Menu!");
+			game.WriteBytes((IntPtr)current.AppConfig + 0x19, new byte[] { 1 });
+			vars.EnabledDebugMenu = true;
+		}
+	}
 }
 
 reset {
@@ -83,6 +102,10 @@ reset {
 start {
 	return current.FinishCharacterCreation != old.FinishCharacterCreation &&
 	       current.FinishCharacterCreation != 0;
+}
+
+onStart {
+	vars.completedSplits.Clear();
 }
 
 split {
@@ -96,6 +119,11 @@ split {
 		if (vars.Missions.ContainsKey(current.Mission) && settings[current.Mission] && vars.completedSplits.Add(current.Mission)) {
 			return true;
 		}
+	}
+
+	// Shop
+	if (settings["ShopSplit"] && !old.ShopOpen && current.ShopOpen && vars.completedSplits.Add("Shop")) {
+		return true;
 	}
 }
 
