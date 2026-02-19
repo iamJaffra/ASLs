@@ -3,6 +3,9 @@ state("Cralon-Win64-Shipping") {}
 startup {
 	Assembly.Load(File.ReadAllBytes("Components/uhara10")).CreateInstance("Main");
 	vars.Uhara.EnableDebug();
+
+	settings.Add("Splits", true, "Splits");
+	settings.Add("DemoEnd", true, "End Of Demo Screen", "Splits");
 }
 
 init {
@@ -10,7 +13,10 @@ init {
 	vars.Events = vars.Uhara.CreateTool("UnrealEngine", "Events");
 
 	vars.Resolver.WatchString("Floor", vars.Utils.GEngine, 0x1248, 0x3A8, 0x0);
-
+	vars.Resolver.Watch<double>("X", vars.Utils.GEngine, 0x1248, 0x790 + 0x0);
+	vars.Resolver.Watch<double>("Y", vars.Utils.GEngine, 0x1248, 0x790 + 0x8);
+	vars.Resolver.Watch<double>("Z", vars.Utils.GEngine, 0x1248, 0x790 + 0x10);
+	
 	IntPtr GameOver = vars.Events.InstancePtr("WG_GameOver_C", "");
 	vars.Resolver.Watch<int>("EndOfDemoScreenVisibility", GameOver, 0x378, 0xDC);
 
@@ -27,6 +33,14 @@ init {
 	vars.IsLoading = false;
 
 	vars.CompletedSplits = new HashSet<string>();
+
+	vars.DoubleEquals = (Func<double, double, bool>)((double1, double2) => {
+		return Math.Abs(double1 - double2) < 0.00001;
+	});
+
+	vars.StartX = -1768.70838;
+	vars.StartY =  1359.74558;
+	vars.StartZ =  -106.80690;
 }
 
 update {
@@ -52,6 +66,11 @@ update {
 		}
 	}
 
+	/*
+	if (old.X != current.X || old.Y != current.Y || old.Z != current.Z) {
+		print("pos -> " + current.X.ToString("0.00000") + " " + current.Y.ToString("0.00000") + " " + current.Z.ToString("0.00000"));
+	}
+	*/
 }
 
 isLoading {
@@ -63,7 +82,16 @@ reset {
 }
 
 start {
-	return old.IsIntroPlaying && !current.IsIntroPlaying;
+	if (old.IsIntroPlaying && !current.IsIntroPlaying) {
+		return true;
+	}
+	if (current.IsIntroPlaying) {
+		if (vars.DoubleEquals(old.X, vars.StartX) && vars.DoubleEquals(old.Y, vars.StartY) && vars.DoubleEquals(old.Z, vars.StartZ)) {
+			if (!vars.DoubleEquals(current.X, vars.StartX) || !vars.DoubleEquals(current.Y, vars.StartY) || !vars.DoubleEquals(current.Z, vars.StartZ)) {
+				return true;
+			}
+		}
+	}
 }
 
 onStart {
@@ -71,7 +99,7 @@ onStart {
 }
 
 split {
-	if (old.EndOfDemoScreenVisibility == 2 && current.EndOfDemoScreenVisibility == 0) {
+	if (settings["DemoEnd"] && old.EndOfDemoScreenVisibility == 2 && current.EndOfDemoScreenVisibility == 0) {
 		return true;
 	}
 }
