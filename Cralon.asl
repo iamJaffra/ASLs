@@ -4,8 +4,10 @@ startup {
 	Assembly.Load(File.ReadAllBytes("Components/uhara10")).CreateInstance("Main");
 	vars.Uhara.EnableDebug();
 
+	vars.TimerModel = new TimerModel { CurrentState = timer };
+
 	settings.Add("Splits", true, "Splits");
-	settings.Add("DemoEnd", true, "End Of Demo Screen", "Splits");
+		settings.Add("DemoEnd", true, "End Of Demo Screen", "Splits");
 }
 
 init {
@@ -78,7 +80,8 @@ isLoading {
 }
 
 reset {
-	return vars.Resolver.CheckFlag("NewGame");
+	//return vars.Resolver.CheckFlag("NewGame");
+	return false;
 }
 
 start {
@@ -101,5 +104,14 @@ onStart {
 split {
 	if (settings["DemoEnd"] && old.EndOfDemoScreenVisibility == 2 && current.EndOfDemoScreenVisibility == 0) {
 		return true;
+	}
+}
+
+exit {
+	var phase = timer.CurrentPhase;
+	bool reset = settings.ResetEnabled;
+
+	if (phase == TimerPhase.Running && reset) {
+		vars.TimerModel.Reset();
 	}
 }
