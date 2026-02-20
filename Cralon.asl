@@ -23,8 +23,9 @@ init {
 	vars.Resolver.Watch<int>("EndOfDemoScreenVisibility", GameOver, 0x378, 0xDC);
 
 	IntPtr GameController = vars.Events.InstancePtr("BP_GameController_C", "");
+	vars.Resolver.Watch<bool>("IsEndOfDemo", GameController, 0x599);
 	vars.Resolver.Watch<bool>("IsIntroPlaying", GameController, 0x7B9);
-
+	
 	vars.Events.FunctionFlag("InitLoadingScreen", "WG_Loading_C","WG_Loading_C","OnInitialized");
 	vars.Events.FunctionFlag("ReceiveBeginPlay", "BP_Cralon_C", "BP_Cralon_C", "ReceiveBeginPlay");
 	vars.Events.FunctionFlag("DestructLoadingScreen", "WG_Loading_C", "WG_Loading_C", "Destruct");
@@ -102,7 +103,7 @@ onStart {
 }
 
 split {
-	if (settings["DemoEnd"] && old.EndOfDemoScreenVisibility == 2 && current.EndOfDemoScreenVisibility == 0) {
+	if (settings["DemoEnd"] && current.IsEndOfDemo && old.EndOfDemoScreenVisibility == 2 && current.EndOfDemoScreenVisibility == 0) {
 		return true;
 	}
 }
