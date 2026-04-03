@@ -1,99 +1,112 @@
 state("Funi_Raccoon_Game") {}
 
 startup {
+	vars.TimerModel = new TimerModel { CurrentState = timer };
+
 	vars.Levels = new Dictionary<int, string> {
 		//{0, "DEFAULT"},
 		//{1, "NON_EXIST"},
-		{2, "NORWICH"},
-		{3, "GYM_INSIDE"},
-		{4, "SECRET_UNDERGROUND"},
-		{5, "CHICKEN_LEVEL"},
-		{6, "CLEANERS"},
-		{7, "DUMPSTER"}, // The GDScript calls it "MAIN_MENU", but it's The Dumpster
-		{8, "BLIMBO_CITY"},
-		{9, "FISH_INSIDES"},
-		{10, "EVIL_FACTORY"},
-		{11, "MUSEUM"},
-		{12, "TRAIN_STATION"},
-		{13, "DREAM_LIKE"},
-		{14, "OFFICE_START"},
-		{15, "WATER_ZONE"},
-		{16, "CLIFF"},
-		{17, "MONITOR_ROOM"},
-		{18, "WAITING_ROOM"},
-		{19, "CRICKET_PITCH"},
-		{20, "JAPAN_STREET"},
-		{21, "RBMK"},
-		{22, "BLIMBO_VILLAGE"},
-		{23, "PARKING_LOT"},
-		{24, "TRASCO_ENTRANCE"},
-		{25, "LONG_OFFICE"},
-		{26, "FIELDS"},
-		{27, "TREE_LEVEL"},
-		{28, "DRIVING_BEGIN"},
-		{29, "BEENIE_FACTORY"},
-		{30, "BEENIE_FACTORY_P2"},
-		{31, "BEENIE_JESUS"},
-		{32, "KIT_TEST"},
-		{33, "INSIDE_THE_MACHINE"},
-		{34, "HAPPY_FACTORY"},
-		{35, "PATRICKS_SECRET_PLACE"},
-		{36, "BEENIE_CHAMBER"},
-		{37, "INSIDE_TRAIN"},
-		{38, "FUNKYHEART"},
-		{39, "CENTRAL_STATION"},
-		{40, "HAT_STORE"},
-		{41, "INSIDE_TRAIN_WATERZONE"},
-		{42, "HOWTH"},
-		{43, "TEN_THOUSAND_RACCOONS"},
-		{44, "FRIDGE_WORLD"},
-		{45, "GARDEN_TABLE"},
-		{46, "TYRE_SHOP"},
-		{47, "CAVE"},
-		{48, "INSIDE_TRAIN_TRASCO"},
-		{49, "BLIMBO_FOREST"},
-		{50, "PUB"},
-		{51, "BEENIE_CHURCH"},
-		{52, "DESERT"},
-		{53, "PETROL_STATION"},
-		{54, "BEES"},
-		{55, "WASPS"},
-		{56, "NORWICH_RUINS"},
-		{57, "SALMON_OF_KNOWLEDGE"},
-		{58, "DESERT_CONNECTION"},
-		{59, "GULLY"},
-		{60, "CANYON"},
-		{61, "DRY_ZONE"},
-		{62, "DESERT_BEES"},
-		{63, "PHARMACY"},
-		{64, "PLIMBOS_MIND"},
-		{65, "BEHRMAN_RACETRACK"},
-		{66, "ENDING_ALL_ITEMS"},
-		{67, "CREDITS_LEVEL"},
-		{68, "TIME_TRAVEL"},
-		{69, "ORB_ENDING"},
-		{70, "SERVER_ROOM"},
-		{71, "BEENIE_BRANCH"},
-		{72, "MIKKBARGE"},
-		{73, "OUTSIDE_SERVER_CENTER"},
-		{74, "FINALE_TRANSITION"},
-		{75, "HYPERCUBE_TREE_ENDING"},
-		{76, "CELTIC_RUINS"},
-		{77, "PACHINKO"},
-		{78, "WAITING_ROOM_DEMO"},
-		{79, "GOO_PARADISE"},
-		{80, "INSIDE_TRAIN_CITY"},
-		{81, "WHEAT_FIELD"},
-		{82, "CLIFFS_OF_NOWHER"},
-		{83, "BRAZIL"},
-		{84, "INSIDE_BRAZIL_TRAIN"}
+		{7, "Dumpster"}, // The GDScript calls it "MAIN_MENU", but it's The Dumpster
+		{2, "Norwich"},
+		{5, "Chicken Level"},
+		{27, "Tree Level"},
+		{26, "Fields"},
+		{10, "Evil Factory"},
+		{29, "Beenie Factory"},
+		{30, "Beenie Factory P2"},
+		{25, "Long Office"},
+		{8, "Blimbo City"},
+		{21, "BLMB Reactor Core"},
+		{60, "Canyon"},
+		{59, "Gully"},
+		{69, "Orb Ending Chamber"}, // GDScript name: "ORB_ENDING"
+
+		//{3, "GYM_INSIDE"},
+		//{4, "SECRET_UNDERGROUND"},
+		//{6, "CLEANERS"},
+		//{9, "FISH_INSIDES"},
+		//{11, "MUSEUM"},
+		//{12, "TRAIN_STATION"},
+		//{13, "DREAM_LIKE"},
+		//{14, "OFFICE_START"},
+		//{15, "WATER_ZONE"},
+		//{16, "CLIFF"},
+		//{17, "MONITOR_ROOM"},
+		//{18, "WAITING_ROOM"},
+		//{19, "CRICKET_PITCH"},
+		//{20, "JAPAN_STREET"},
+		//{22, "BLIMBO_VILLAGE"},
+		//{23, "PARKING_LOT"},
+		//{24, "TRASCO_ENTRANCE"},
+		//{28, "DRIVING_BEGIN"},
+		//{31, "BEENIE_JESUS"},
+		//{32, "KIT_TEST"},
+		//{33, "INSIDE_THE_MACHINE"},
+		//{34, "HAPPY_FACTORY"},
+		//{35, "PATRICKS_SECRET_PLACE"},
+		//{36, "BEENIE_CHAMBER"},
+		//{37, "INSIDE_TRAIN"},
+		//{38, "FUNKYHEART"},
+		//{39, "CENTRAL_STATION"},
+		//{40, "HAT_STORE"},
+		//{41, "INSIDE_TRAIN_WATERZONE"},
+		//{42, "HOWTH"},
+		//{43, "TEN_THOUSAND_RACCOONS"},
+		//{44, "FRIDGE_WORLD"},
+		//{45, "GARDEN_TABLE"},
+		//{46, "TYRE_SHOP"},
+		//{47, "CAVE"},
+		//{48, "INSIDE_TRAIN_TRASCO"},
+		//{49, "BLIMBO_FOREST"},
+		//{50, "PUB"},
+		//{51, "BEENIE_CHURCH"},
+		//{52, "DESERT"},
+		//{53, "PETROL_STATION"},
+		//{54, "BEES"},
+		//{55, "WASPS"},
+		//{56, "NORWICH_RUINS"},
+		//{57, "SALMON_OF_KNOWLEDGE"},
+		//{58, "DESERT_CONNECTION"},
+		//{61, "DRY_ZONE"},
+		//{62, "DESERT_BEES"},
+		//{63, "PHARMACY"},
+		//{64, "PLIMBOS_MIND"},
+		//{65, "BEHRMAN_RACETRACK"},
+		//{66, "ENDING_ALL_ITEMS"},
+		//{67, "CREDITS_LEVEL"},
+		//{68, "TIME_TRAVEL"},
+		//{70, "SERVER_ROOM"},
+		//{71, "BEENIE_BRANCH"},
+		//{72, "MIKKBARGE"},
+		//{73, "OUTSIDE_SERVER_CENTER"},
+		//{74, "FINALE_TRANSITION"},
+		//{75, "HYPERCUBE_TREE_ENDING"},
+		//{76, "CELTIC_RUINS"},
+		//{77, "PACHINKO"},
+		//{78, "WAITING_ROOM_DEMO"},
+		//{79, "GOO_PARADISE"},
+		//{80, "INSIDE_TRAIN_CITY"},
+		//{81, "WHEAT_FIELD"},
+		//{82, "CLIFFS_OF_NOWHER"},
+		//{83, "BRAZIL"},
+		//{84, "INSIDE_BRAZIL_TRAIN"}
 	};
 
-	settings.Add("LevelSplits", true, "Level splits");
+	var dict = (Dictionary<int, string>)vars.Levels;
+	vars.LevelsByName = dict.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+
+	settings.Add("End", true, "Endings");
+		settings.Add("OrbEnding", true, "Orb Ending", "End");
+
+	settings.Add("LevelSplits", true, "Split on entering a level:");
 
 	foreach (var levelName in vars.Levels.Values) {
 		settings.Add(levelName, true, levelName, "LevelSplits");
 	}
+
+	settings.Add("Reset", true, "Reset");
+		settings.Add("ResetOnMainMenu", true, "Reset on quitting to the main menu", "Reset");
+		settings.Add("ResetOnExit", true, "Reset on exiting the game", "Reset");
 
 	// SceneTree
 	vars.SCENETREE_ROOT_WINDOW_OFFSET        = 0x298; // Window*                           SceneTree::root
@@ -159,7 +172,7 @@ init {
 		var childCount     = game.ReadValue<int>   ((IntPtr)(node + vars.NODE_CHILDREN_OFFSET));
 		var childArrayPtr  = game.ReadValue<IntPtr>((IntPtr)(node + vars.NODE_CHILDREN_OFFSET + 0x8));
 
-		for (int i = 0; i < childCount; i++) {
+		for (int i = childCount - 1; i >= 0; i--) {
 			var child = game.ReadValue<IntPtr>(childArrayPtr + (0x8 * i));
 			var childName = vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(child + vars.NODE_NAME_OFFSET)));
 
@@ -240,8 +253,8 @@ init {
 	vars.LevelChangerOffsets = vars.GetMemberOffsetsFromNode(vars.LevelChanger);
 
 	vars.MenuController = vars.FindNodeInChildren(vars.Root, "MenuController");
-	vars.menuControllerMembers = vars.GetMemberArrayFromNode(vars.MenuController);
-	vars.menuControllerOffsets = vars.GetMemberOffsetsFromNode(vars.MenuController);
+	vars.MenuControllerMembers = vars.GetMemberArrayFromNode(vars.MenuController);
+	vars.MenuControllerOffsets = vars.GetMemberOffsetsFromNode(vars.MenuController);
 
 	if (vars.MenuController == IntPtr.Zero) {
 		throw new Exception("MenuController not found - trying again!");
@@ -254,14 +267,12 @@ init {
 	current.numberOfMenuNodes = old.numberOfMenuNodes = 0;
 	current.numberOfRootNodes = old.numberOfRootNodes = 0;
 	current.isInMainMenu = old.isInMainMenu = false;
+	vars.OrbEndingAnimationPlayer = IntPtr.Zero;
+	current.orbEndingPlaying = old.orbEndingPlaying = false;
 	vars.CompletedSplits = new HashSet<string>();
 }
 
 update {
-	/*
-	current.isTransitioningLevel = game.ReadValue<bool>((IntPtr)(vars.LevelChangerMembers + vars.LevelChangerOffsets["transisitioning_level"] + 0x8));
-	*/
-
 	if (vars.LevelChangerOffsets.ContainsKey("current_level")) {
 		current.levelPtr = game.ReadValue<IntPtr>((IntPtr)(vars.LevelChangerMembers + vars.LevelChangerOffsets["current_level"] + 0x10));
 	}
@@ -292,8 +303,9 @@ update {
 
 			if (vars.CanvasLayerOffsets.ContainsKey("animation_player")) {
 				var animationPlayer = game.ReadValue<IntPtr>((IntPtr)(vars.CanvasLayerMembers + vars.CanvasLayerOffsets["animation_player"] + 0x10));
+				
 				// https://github.com/godotengine/godot/blob/4.6/scene/animation/animation_player.h#L93
-				current.cutscene = vars.ReadStringName(game.ReadValue<IntPtr>(animationPlayer + 0x4F8));
+				current.cutscene = vars.ReadStringName(game.ReadValue<IntPtr>(animationPlayer + 0x4F8));   // or 0x2E0 ?
 			}
 		}
 		else {
@@ -303,6 +315,32 @@ update {
 
 	if (current.cutscene != old.cutscene && !String.IsNullOrEmpty(current.cutscene)) {
 		vars.Info("cutscene -> " + current.cutscene);
+	}
+	
+
+	if (current.level == vars.LevelsByName["Orb Ending Chamber"]) {
+		if (vars.firstTimeOrbChamber) {
+			var weightSpawner = vars.FindNodeInChildren(current.levelPtr, "WeightSpawner");
+			var weightSpawnerMembers = vars.GetMemberArrayFromNode(weightSpawner);
+			var weightSpawnerOffsets = vars.GetMemberOffsetsFromNode(weightSpawner);
+
+			if (weightSpawnerOffsets.ContainsKey("animation_player")) {
+				vars.OrbEndingAnimationPlayer = game.ReadValue<IntPtr>((IntPtr)(weightSpawnerMembers + weightSpawnerOffsets["animation_player"] + 0x10));
+
+				if (vars.OrbEndingAnimationPlayer != IntPtr.Zero) {
+					vars.firstTimeOrbChamber = false;
+				}
+			}
+		}
+		else {
+			// https://github.com/godotengine/godot/blob/4.6/scene/animation/animation_player.h#L138
+			// mov     byte ptr [rbx+559h], 1
+			current.orbEndingPlaying = game.ReadValue<bool>((IntPtr)vars.OrbEndingAnimationPlayer + 0x559);
+		}
+	}
+	else {
+		vars.OrbEndingAnimationPlayer = IntPtr.Zero;
+		vars.firstTimeOrbChamber = true;
 	}
 }
 
@@ -315,18 +353,20 @@ onStart {
 }
 
 reset {
-	current.numberOfRootNodes = game.ReadValue<int>((IntPtr)(vars.Root + vars.NODE_CHILDREN_OFFSET));
+	if (settings["ResetOnMainMenu"]) {
+		current.numberOfRootNodes = game.ReadValue<int>((IntPtr)(vars.Root + vars.NODE_CHILDREN_OFFSET));
 
-	if (current.numberOfRootNodes != old.numberOfRootNodes) {
-		if (vars.FindNodeInChildren(vars.Root, "MainMenu") != IntPtr.Zero) {
-			current.isInMainMenu = true;
+		if (current.numberOfRootNodes != old.numberOfRootNodes) {
+			if (vars.FindNodeInChildren(vars.Root, "MainMenu") != IntPtr.Zero) {
+				current.isInMainMenu = true;
+			}
+			else {
+				current.isInMainMenu = false;
+			}
 		}
-		else {
-			current.isInMainMenu = false;
-		}
+
+		return (current.isInMainMenu && !old.isInMainMenu);
 	}
-
-	return (current.isInMainMenu != old.isInMainMenu && current.isInMainMenu == true);
 }
 
 split {
@@ -337,11 +377,27 @@ split {
 		if (vars.Levels.TryGetValue(current.level, out levelName)) {
 			if (settings.ContainsKey(levelName) && settings[levelName] && !vars.CompletedSplits.Contains(levelName)) {
 				vars.CompletedSplits.Add(levelName);
+				vars.Info("Triggered Split: Entered Level '" + levelName + "'");
 				return true;
 			}
 		}
 	}
 
 	// ENDING SPLITS
-	// ...
+	if (current.orbEndingPlaying && !old.orbEndingPlaying) {
+		if (settings["OrbEnding"] && !vars.CompletedSplits.Contains("OrbEnding")) {
+			vars.CompletedSplits.Add("OrbEnding");
+			vars.Info("Triggered Split: Triggered Orb Ending");
+			return true;
+		}
+	}
+}
+
+exit {
+	var phase = timer.CurrentPhase;
+	bool reset = settings.ResetEnabled && settings["ResetOnExit"];
+
+	if (phase == TimerPhase.Running && reset) {
+		vars.TimerModel.Reset();
+	}
 }
