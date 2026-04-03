@@ -187,6 +187,13 @@ init {
 		return result;
 	});
 
+	vars.GetLastChild = (Func<IntPtr, IntPtr>) ((node) => {
+		var childCount     = game.ReadValue<int>   ((IntPtr)(node + vars.NODE_CHILDREN_OFFSET));
+		var childArrayPtr  = game.ReadValue<IntPtr>((IntPtr)(node + vars.NODE_CHILDREN_OFFSET + 0x8));
+
+		return game.ReadValue<IntPtr>(childArrayPtr + (0x8 * (childCount - 1)));
+	});
+
 	vars.GetMemberArrayFromNode = (Func<IntPtr, IntPtr>) ((node) => {
 		var scriptInstance = game.ReadValue<IntPtr>((IntPtr)(node + vars.OBJECT_SCRIPT_INSTANCE_OFFSET));
 		var memberArray    = game.ReadValue<IntPtr>((IntPtr)(scriptInstance + vars.SCRIPTINSTANCE_MEMBERS_OFFSET));
@@ -295,8 +302,10 @@ update {
 
 	current.numberOfMenuNodes = game.ReadValue<int>((IntPtr)(vars.MenuController + vars.NODE_CHILDREN_OFFSET));
 
-	if (current.numberOfMenuNodes != old.numberOfMenuNodes) {
-		var canvasLayer = vars.FindNodeInChildren(vars.MenuController, "CanvasLayer");
+	//if (current.numberOfMenuNodes != old.numberOfMenuNodes) {
+		//vars.Info("current.numberOfMenuNodes -> " + current.numberOfMenuNodes);
+		//var canvasLayer = vars.FindNodeInChildren(vars.MenuController, "CanvasLayer");
+		var canvasLayer = vars.GetLastChild(vars.MenuController);
 
 		if (canvasLayer != IntPtr.Zero) {
 			vars.CanvasLayerMembers = vars.GetMemberArrayFromNode(canvasLayer);
@@ -312,9 +321,9 @@ update {
 		else {
 			current.cutscene = "";
 		}
-	}
+	//}
 
-	if (current.cutscene != old.cutscene && !String.IsNullOrEmpty(current.cutscene)) {
+	if (current.cutscene != old.cutscene) { //  && !String.IsNullOrEmpty(current.cutscene)
 		vars.Info("cutscene -> " + current.cutscene);
 	}
 	
