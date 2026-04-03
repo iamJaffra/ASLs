@@ -12,7 +12,7 @@ startup {
 		{5, "Chicken Level"},
 		{27, "Tree Level"},
 		{26, "Fields"},
-		{10, "Evil Factory"},
+		{10, "Beenie HQ"}, // GDScript name: "EVIL_FACTORY"
 		{29, "Beenie Factory"},
 		{30, "Beenie Factory P2"},
 		{25, "Goo Office"},
