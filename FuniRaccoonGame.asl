@@ -6,6 +6,7 @@ startup {
 	vars.Levels = new Dictionary<int, string> {
 		//{0, "DEFAULT"},
 		//{1, "NON_EXIST"},
+
 		{7, "Dumpster"}, // The GDScript calls it "MAIN_MENU", but it's The Dumpster
 		{2, "Norwich"},
 		{5, "Chicken Level"},
@@ -14,7 +15,7 @@ startup {
 		{10, "Evil Factory"},
 		{29, "Beenie Factory"},
 		{30, "Beenie Factory P2"},
-		{25, "Long Office"},
+		{25, "Goo Office"},
 		{8, "Blimbo City"},
 		{21, "BLMB Reactor Core"},
 		{60, "Canyon"},
