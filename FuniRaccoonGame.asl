@@ -340,8 +340,11 @@ update {
 		}
 		else {
 			// https://github.com/godotengine/godot/blob/4.6/scene/animation/animation_player.h#L138
-			// mov     byte ptr [rbx+559h], 1
-			current.orbEndingPlaying = game.ReadValue<bool>((IntPtr)vars.OrbEndingAnimationPlayer + 0x559);
+			// C6 83 ??050000 01     - mov byte ptr [rbx+00000551],01 { 1 }
+			// 4C 89 FA              - mov rdx,r15
+			// 4C 89 E1              - mov rcx,r12
+
+			current.orbEndingPlaying = game.ReadValue<bool>((IntPtr)vars.OrbEndingAnimationPlayer + 0x551); // was 0x559 in 4.6.1
 		}
 	}
 	else {
