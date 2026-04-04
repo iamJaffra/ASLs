@@ -312,7 +312,7 @@ update {
 			var animationPlayer = game.ReadValue<IntPtr>((IntPtr)(vars.CanvasLayerMembers + vars.CanvasLayerOffsets["animation_player"] + 0x10));
 			
 			// https://github.com/godotengine/godot/blob/4.6/scene/animation/animation_player.h#L93
-			current.cutscene = vars.ReadStringName(game.ReadValue<IntPtr>(animationPlayer + 0x4F8));   // or 0x2E0 ?
+			current.cutscene = vars.ReadStringName(game.ReadValue<IntPtr>(animationPlayer + 0x4F0));   // 4.6.1 had it at 0x4F8  >_<
 		}
 	}
 	else {
