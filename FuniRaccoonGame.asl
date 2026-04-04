@@ -99,7 +99,7 @@ startup {
 	settings.Add("End", true, "Endings");
 		settings.Add("OrbEnding", true, "Orb Ending", "End");
 
-	settings.Add("LevelSplits", true, "Split on entering a level:");
+	settings.Add("LevelSplits", true, "Split on entering a level for the first time:");
 
 	foreach (var levelName in vars.Levels.Values) {
 		settings.Add(levelName, true, levelName, "LevelSplits");
@@ -264,7 +264,7 @@ init {
 	vars.MenuControllerMembers = vars.GetMemberArrayFromNode(vars.MenuController);
 	vars.MenuControllerOffsets = vars.GetMemberOffsetsFromNode(vars.MenuController);
 
-	if (vars.MenuController == IntPtr.Zero) {
+	if (vars.MenuController == IntPtr.Zero || vars.MenuControllerMembers == IntPtr.Zero) {
 		throw new Exception("MenuController not found - trying again!");
 	}
 
@@ -300,28 +300,24 @@ update {
 	}
 
 
-	current.numberOfMenuNodes = game.ReadValue<int>((IntPtr)(vars.MenuController + vars.NODE_CHILDREN_OFFSET));
+	// current.numberOfMenuNodes = game.ReadValue<int>((IntPtr)(vars.MenuController + vars.NODE_CHILDREN_OFFSET));
 
-	//if (current.numberOfMenuNodes != old.numberOfMenuNodes) {
-		//vars.Info("current.numberOfMenuNodes -> " + current.numberOfMenuNodes);
-		//var canvasLayer = vars.FindNodeInChildren(vars.MenuController, "CanvasLayer");
-		var canvasLayer = vars.GetLastChild(vars.MenuController);
+	var canvasLayer = vars.GetLastChild(vars.MenuController);
 
-		if (canvasLayer != IntPtr.Zero) {
-			vars.CanvasLayerMembers = vars.GetMemberArrayFromNode(canvasLayer);
-			vars.CanvasLayerOffsets = vars.GetMemberOffsetsFromNode(canvasLayer);
+	if (vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(canvasLayer + vars.NODE_NAME_OFFSET))) == "CanvasLayer") {
+		vars.CanvasLayerMembers = vars.GetMemberArrayFromNode(canvasLayer);
+		vars.CanvasLayerOffsets = vars.GetMemberOffsetsFromNode(canvasLayer);
 
-			if (vars.CanvasLayerOffsets.ContainsKey("animation_player")) {
-				var animationPlayer = game.ReadValue<IntPtr>((IntPtr)(vars.CanvasLayerMembers + vars.CanvasLayerOffsets["animation_player"] + 0x10));
-				
-				// https://github.com/godotengine/godot/blob/4.6/scene/animation/animation_player.h#L93
-				current.cutscene = vars.ReadStringName(game.ReadValue<IntPtr>(animationPlayer + 0x4F8));   // or 0x2E0 ?
-			}
+		if (vars.CanvasLayerOffsets.ContainsKey("animation_player")) {
+			var animationPlayer = game.ReadValue<IntPtr>((IntPtr)(vars.CanvasLayerMembers + vars.CanvasLayerOffsets["animation_player"] + 0x10));
+			
+			// https://github.com/godotengine/godot/blob/4.6/scene/animation/animation_player.h#L93
+			current.cutscene = vars.ReadStringName(game.ReadValue<IntPtr>(animationPlayer + 0x4F8));   // or 0x2E0 ?
 		}
-		else {
-			current.cutscene = "";
-		}
-	//}
+	}
+	else {
+		current.cutscene = "";
+	}
 
 	if (current.cutscene != old.cutscene) { //  && !String.IsNullOrEmpty(current.cutscene)
 		vars.Info("cutscene -> " + current.cutscene);
@@ -355,7 +351,7 @@ update {
 }
 
 start {
-	return (current.cutscene != old.cutscene && current.cutscene == "monitor_loop");
+	return (current.cutscene != old.cutscene && current.cutscene == "monitor_loop" || current.cutscene == "monitor_drop");
 }
 
 onStart {
