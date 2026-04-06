@@ -99,7 +99,7 @@ startup {
 	settings.Add("End", true, "Ending splits. Split on triggering ...");
 		settings.Add("OrbEnding", true, "Orb Ending", "End");
 
-	settings.Add("LevelSplits", true, "Split on entering a level for the first time:");
+	settings.Add("LevelSplits", true, "Split on ENTERING a level for the first time:");
 
 	foreach (var levelName in vars.Levels.Values) {
 		settings.Add(levelName, true, levelName, "LevelSplits");
