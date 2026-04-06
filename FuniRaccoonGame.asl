@@ -96,7 +96,7 @@ startup {
 	var dict = (Dictionary<int, string>)vars.Levels;
 	vars.LevelsByName = dict.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
-	settings.Add("End", true, "Endings");
+	settings.Add("End", true, "Ending splits. Split on triggering ...");
 		settings.Add("OrbEnding", true, "Orb Ending", "End");
 
 	settings.Add("LevelSplits", true, "Split on entering a level for the first time:");
