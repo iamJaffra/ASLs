@@ -98,6 +98,7 @@ startup {
 
 	settings.Add("End", true, "Ending splits. Split on triggering ...");
 		settings.Add("OrbEnding", true, "Orb Ending", "End");
+		settings.Add("GrandOpening", true, "Grand Opening", "End");
 
 	settings.Add("LevelSplits", true, "Split on ENTERING a level for the first time:");
 
@@ -173,7 +174,7 @@ init {
 		var childCount     = game.ReadValue<int>   ((IntPtr)(node + vars.NODE_CHILDREN_OFFSET));
 		var childArrayPtr  = game.ReadValue<IntPtr>((IntPtr)(node + vars.NODE_CHILDREN_OFFSET + 0x8));
 
-		for (int i = childCount - 1; i >= 0; i--) {
+		for (int i = 0; i < childCount; i++) {
 			var child = game.ReadValue<IntPtr>(childArrayPtr + (0x8 * i));
 			var childName = vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(child + vars.NODE_NAME_OFFSET)));
 
@@ -277,10 +278,15 @@ init {
 	current.isInMainMenu = old.isInMainMenu = false;
 	vars.OrbEndingAnimationPlayer = IntPtr.Zero;
 	current.orbEndingPlaying = old.orbEndingPlaying = false;
+	vars.firstTimeOrbChamber = true;
+	vars.firstTimeMuseum = true;
+	vars.MuseumAnimatedSprite = IntPtr.Zero;
+	current.triggeredGrandOpening = old.triggeredGrandOpening = false;
 	vars.CompletedSplits = new HashSet<string>();
 }
 
 update {
+	// LEVEL
 	if (vars.LevelChangerOffsets.ContainsKey("current_level")) {
 		current.levelPtr = game.ReadValue<IntPtr>((IntPtr)(vars.LevelChangerMembers + vars.LevelChangerOffsets["current_level"] + 0x10));
 	}
@@ -300,8 +306,7 @@ update {
 	}
 
 
-	// current.numberOfMenuNodes = game.ReadValue<int>((IntPtr)(vars.MenuController + vars.NODE_CHILDREN_OFFSET));
-
+	// AUTOSTART
 	var canvasLayer = vars.GetLastChild(vars.MenuController);
 
 	if (vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(canvasLayer + vars.NODE_NAME_OFFSET))) == "CanvasLayer") {
@@ -324,6 +329,7 @@ update {
 	}
 	
 
+	// ORB
 	if (current.level == vars.LevelsByName["Orb Ending Chamber"]) {
 		if (vars.firstTimeOrbChamber) {
 			var weightSpawner = vars.FindNodeInChildren(current.levelPtr, "WeightSpawner");
@@ -351,6 +357,37 @@ update {
 		vars.OrbEndingAnimationPlayer = IntPtr.Zero;
 		vars.firstTimeOrbChamber = true;
 	}
+
+
+	// GRAND OPENING
+	if (current.level == 11) {
+		if (vars.firstTimeMuseum) {
+			var endingController = vars.FindNodeInChildren(vars.FindNodeInChildren(current.levelPtr, "Ending"), "EndingController");
+			var endingControllerMembers = vars.GetMemberArrayFromNode(endingController);
+			var endingControllerOffsets = vars.GetMemberOffsetsFromNode(endingController);
+
+			if (endingControllerOffsets.ContainsKey("raccoon_plater")) {
+				vars.MuseumAnimatedSprite = game.ReadValue<IntPtr>((IntPtr)(endingControllerMembers + endingControllerOffsets["raccoon_plater"] + 0x10));
+
+				if (vars.MuseumAnimatedSprite != IntPtr.Zero) {
+					vars.firstTimeMuseum = false;
+				}
+			}
+		}
+		else {
+			// https://github.com/godotengine/godot/blob/4.6/scene/3d/sprite_3d.h#L233
+			// F3 0F10 8C 24 ????0000  - movss xmm1,[rsp+000000E0]
+			// C6 86 ??060000 01       - mov byte ptr [rsi+00000658],01 { 1 }
+			// 48 8B 86 ????0000       - mov rax,[rsi+00000660]
+
+			current.triggeredGrandOpening = game.ReadValue<bool>((IntPtr)(vars.MuseumAnimatedSprite + 0x658));
+		}
+	}
+	else {
+		vars.MuseumAnimatedSprite = IntPtr.Zero;
+		vars.firstTimeMuseum = true;
+	}
+	
 }
 
 start {
@@ -397,6 +434,13 @@ split {
 		if (settings["OrbEnding"] && !vars.CompletedSplits.Contains("OrbEnding")) {
 			vars.CompletedSplits.Add("OrbEnding");
 			vars.Info("Triggered Split: Triggered Orb Ending");
+			return true;
+		}
+	}
+	if (current.triggeredGrandOpening && !old.triggeredGrandOpening) {
+		if (settings["GrandOpening"] && !vars.CompletedSplits.Contains("GrandOpening")) {
+			vars.CompletedSplits.Add("GrandOpening");
+			vars.Info("Triggered Split: Triggered the Grand Opening");
 			return true;
 		}
 	}
