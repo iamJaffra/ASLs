@@ -21,6 +21,7 @@ startup {
 		{60, "Canyon"},
 		{59, "Gully"},
 		{69, "Orb Ending Chamber"}, // GDScript name: "ORB_ENDING"
+		{71, "Beenie Branch"},
 
 		//{3, "GYM_INSIDE"},
 		//{4, "SECRET_UNDERGROUND"},
@@ -77,7 +78,6 @@ startup {
 		//{67, "CREDITS_LEVEL"},
 		//{68, "TIME_TRAVEL"},
 		//{70, "SERVER_ROOM"},
-		//{71, "BEENIE_BRANCH"},
 		//{72, "MIKKBARGE"},
 		//{73, "OUTSIDE_SERVER_CENTER"},
 		//{74, "FINALE_TRANSITION"},
@@ -99,6 +99,7 @@ startup {
 	settings.Add("End", true, "Ending splits. Split on triggering ...");
 		settings.Add("OrbEnding", true, "Orb Ending", "End");
 		settings.Add("GrandOpening", true, "Grand Opening", "End");
+		settings.Add("YouAREOne", true, "You ARE One", "End");
 
 	settings.Add("LevelSplits", true, "Split on ENTERING a level for the first time:");
 
@@ -282,6 +283,7 @@ init {
 	vars.firstTimeMuseum = true;
 	vars.MuseumAnimatedSprite = IntPtr.Zero;
 	current.triggeredGrandOpening = old.triggeredGrandOpening = false;
+	current.triggeredYouAreOne = old.triggeredYouAreOne = false;
 	vars.CompletedSplits = new HashSet<string>();
 }
 
@@ -388,6 +390,17 @@ update {
 		vars.firstTimeMuseum = true;
 	}
 	
+	// You ARE One
+	if (current.level == 71) {
+		var node = vars.GetLastChild(current.levelPtr);
+
+		if (vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(node + vars.NODE_NAME_OFFSET))) == "BeenieTheBirthdayBoy") {
+			current.triggeredYouAreOne = true;
+		}
+	}
+	else {
+		current.triggeredYouAreOne = false;
+	}
 }
 
 start {
@@ -441,6 +454,13 @@ split {
 		if (settings["GrandOpening"] && !vars.CompletedSplits.Contains("GrandOpening")) {
 			vars.CompletedSplits.Add("GrandOpening");
 			vars.Info("Triggered Split: Triggered the Grand Opening");
+			return true;
+		}
+	}
+	if (current.triggeredYouAreOne && !old.triggeredYouAreOne) {
+		if (settings["YouAREOne"] && !vars.CompletedSplits.Contains("YouAREOne")) {
+			vars.CompletedSplits.Add("YouAREOne");
+			vars.Info("Triggered Split: Triggered Beenie The Birthday Boy (You ARE One)");
 			return true;
 		}
 	}
