@@ -7,7 +7,7 @@ startup {
 		//{0, "DEFAULT"},
 		//{1, "NON_EXIST"},
 
-		{7, "Dumpster"}, // The GDScript calls it "MAIN_MENU", but it's The Dumpster
+		{7, "The Dumpster"}, // The GDScript calls it "MAIN_MENU", but it's The Dumpster
 		{2, "Norwich"},
 		{5, "Chicken Farm"},
 		{27, "Smog Room"},
@@ -20,7 +20,7 @@ startup {
 		{21, "BLMB Reactor Core"},
 		{60, "Canyon"},
 		{59, "Gully"},
-		{69, "Orb Ending Chamber"}, // GDScript name: "ORB_ENDING"
+		{69, "Chamber"}, // GDScript name: "ORB_ENDING"
 		{71, "Beenie Branch"},
 		{73, "Outside Hypercube Datacenter"},  
 		{70, "HYPERCENTER"},
