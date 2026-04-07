@@ -22,7 +22,9 @@ startup {
 		{59, "Gully"},
 		{69, "Orb Ending Chamber"}, // GDScript name: "ORB_ENDING"
 		{71, "Beenie Branch"},
-
+		{73, "Outside Hypercube Datacenter"},  
+		{70, "HYPERCENTER"},
+		{75, "Hypercube Tree"},
 		//{3, "GYM_INSIDE"},
 		//{4, "SECRET_UNDERGROUND"},
 		//{6, "CLEANERS"},
@@ -77,11 +79,8 @@ startup {
 		//{66, "ENDING_ALL_ITEMS"},
 		//{67, "CREDITS_LEVEL"},
 		//{68, "TIME_TRAVEL"},
-		//{70, "SERVER_ROOM"},
 		//{72, "MIKKBARGE"},
-		//{73, "OUTSIDE_SERVER_CENTER"},
 		//{74, "FINALE_TRANSITION"},
-		//{75, "HYPERCUBE_TREE_ENDING"},
 		//{76, "CELTIC_RUINS"},
 		//{77, "PACHINKO"},
 		//{78, "WAITING_ROOM_DEMO"},
@@ -100,6 +99,7 @@ startup {
 		settings.Add("OrbEnding", true, "Orb Ending", "End");
 		settings.Add("GrandOpening", true, "Grand Opening", "End");
 		settings.Add("YouAREOne", true, "You ARE One", "End");
+		settings.Add("Decommissioned", true, "Decommissioned", "End");
 
 	settings.Add("LevelSplits", true, "Split on ENTERING a level for the first time:");
 
@@ -284,6 +284,9 @@ init {
 	vars.MuseumAnimatedSprite = IntPtr.Zero;
 	current.triggeredGrandOpening = old.triggeredGrandOpening = false;
 	current.triggeredYouAreOne = old.triggeredYouAreOne = false;
+	vars.firstTimeHypercubeEnding = true;
+	vars.DecommissionedTexture = IntPtr.Zero;
+	current.triggeredDecommissionedEnding = old.triggeredDecommissionedEnding = false;
 	vars.CompletedSplits = new HashSet<string>();
 }
 
@@ -390,6 +393,7 @@ update {
 		vars.firstTimeMuseum = true;
 	}
 	
+
 	// You ARE One
 	if (current.level == 71) {
 		var node = vars.GetLastChild(current.levelPtr);
@@ -397,9 +401,43 @@ update {
 		if (vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(node + vars.NODE_NAME_OFFSET))) == "BeenieTheBirthdayBoy") {
 			current.triggeredYouAreOne = true;
 		}
+		else {
+			current.triggeredYouAreOne = false;
+		}
 	}
 	else {
 		current.triggeredYouAreOne = false;
+	}
+
+	// DECOMMISSIONED
+	if (current.level == 75) {
+		if (vars.firstTimeHypercubeEnding) {
+			var credits = (vars.FindNodeInChildren(current.levelPtr, "EndText"));
+			var creditsMembers = vars.GetMemberArrayFromNode(credits);
+			var creditsOffsets = vars.GetMemberOffsetsFromNode(credits);
+
+			if (creditsOffsets.ContainsKey("texture_background")) {
+				vars.DecommissionedTexture = game.ReadValue<IntPtr>((IntPtr)(creditsMembers + creditsOffsets["texture_background"] + 0x10));
+
+				if (vars.DecommissionedTexture != IntPtr.Zero) {
+					vars.firstTimeHypercubeEnding = false;
+				}
+			}
+		}
+		else {
+			// https://github.com/godotengine/godot/blob/4.6/scene/main/canvas_item.h#L106
+			// 75 ??                 - jne Funi_Raccoon_Game.exe+114A158
+			// 38 91 ????0000        - cmp [rcx+00000350],dl
+			// 0F84 ??000000         - je Funi_Raccoon_Game.exe+114A21B
+			// 88 91 ????0000        - mov [rcx+00000350],dl
+			// 80 B9 ????0000 00     - cmp byte ptr [rcx+00000351],00 { 0 }
+
+			current.triggeredDecommissionedEnding = game.ReadValue<bool>((IntPtr)(vars.DecommissionedTexture + 0x350));
+		}
+	}
+	else {
+		vars.DecommissionedTexture = IntPtr.Zero;
+		vars.firstTimeHypercubeEnding = true;
 	}
 }
 
@@ -461,6 +499,13 @@ split {
 		if (settings["YouAREOne"] && !vars.CompletedSplits.Contains("YouAREOne")) {
 			vars.CompletedSplits.Add("YouAREOne");
 			vars.Info("Triggered Split: Triggered Beenie The Birthday Boy (You ARE One)");
+			return true;
+		}
+	}
+	if (current.triggeredDecommissionedEnding && !old.triggeredDecommissionedEnding) {
+		if (settings["Decommissioned"] && !vars.CompletedSplits.Contains("Decommissioned")) {
+			vars.CompletedSplits.Add("Decommissioned");
+			vars.Info("Triggered Split: Triggered the True Ending (Decommissioned)");
 			return true;
 		}
 	}
