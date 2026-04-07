@@ -39,7 +39,7 @@ startup {
 		//{18, "WAITING_ROOM"},
 		//{19, "CRICKET_PITCH"},
 		//{20, "JAPAN_STREET"},
-		//{22, "BLIMBO_VILLAGE"},
+		{22, "Blimbo Village"},
 		//{23, "PARKING_LOT"},
 		//{24, "TRASCO_ENTRANCE"},
 		//{28, "DRIVING_BEGIN"},
