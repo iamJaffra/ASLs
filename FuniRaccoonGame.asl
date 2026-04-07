@@ -335,7 +335,7 @@ update {
 	
 
 	// ORB
-	if (current.level == vars.LevelsByName["Orb Ending Chamber"]) {
+	if (current.level == 69) {
 		if (vars.firstTimeOrbChamber) {
 			var weightSpawner = vars.FindNodeInChildren(current.levelPtr, "WeightSpawner");
 			var weightSpawnerMembers = vars.GetMemberArrayFromNode(weightSpawner);
