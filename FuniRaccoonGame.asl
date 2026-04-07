@@ -442,7 +442,7 @@ update {
 }
 
 start {
-	return (current.cutscene != old.cutscene && current.cutscene == "monitor_loop" || current.cutscene == "monitor_drop");
+	return (current.cutscene != old.cutscene && (current.cutscene == "monitor_loop" || current.cutscene == "monitor_drop"));
 }
 
 onStart {
