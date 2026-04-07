@@ -10,7 +10,7 @@ startup {
 		{7, "Dumpster"}, // The GDScript calls it "MAIN_MENU", but it's The Dumpster
 		{2, "Norwich"},
 		{5, "Chicken Farm"},
-		{27, "Tree Level"},
+		{27, "Smog Room"},
 		{26, "Fields"},
 		{10, "Beenie HQ"}, // GDScript name: "EVIL_FACTORY"
 		{29, "Beenie Factory"},
