@@ -107,6 +107,12 @@ startup {
 		settings.Add(levelName, true, levelName, "LevelSplits");
 	}
 
+	settings.Add("Cats", false, "Split on collecting cats");
+	for (int i = 0; i < 6; i++) {
+		var number = (i + 1).ToString();
+		settings.Add("Cat" + number, true, number + "/6", "Cats");
+	}
+
 	settings.Add("Reset", true, "Reset");
 		settings.Add("ResetOnMainMenu", true, "Reset on quitting to the main menu", "Reset");
 		settings.Add("ResetOnExit", true, "Reset on exiting the game", "Reset");
@@ -287,6 +293,7 @@ init {
 	vars.firstTimeHypercubeEnding = true;
 	vars.DecommissionedTexture = IntPtr.Zero;
 	current.triggeredDecommissionedEnding = old.triggeredDecommissionedEnding = false;
+	current.cats = old.cats = 0;
 	vars.CompletedSplits = new HashSet<string>();
 }
 
@@ -409,6 +416,7 @@ update {
 		current.triggeredYouAreOne = false;
 	}
 
+
 	// DECOMMISSIONED
 	if (current.level == 75) {
 		if (vars.firstTimeHypercubeEnding) {
@@ -439,6 +447,23 @@ update {
 		vars.DecommissionedTexture = IntPtr.Zero;
 		vars.firstTimeHypercubeEnding = true;
 	}
+
+
+	// Cats
+	var catNode = vars.GetLastChild(current.levelPtr);
+
+	if (vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(catNode + vars.NODE_NAME_OFFSET))) == "FoundCat") {
+		var catMembers = vars.GetMemberArrayFromNode(catNode);
+		var catOffsets = vars.GetMemberOffsetsFromNode(catNode);
+
+		if (catOffsets.ContainsKey("cat_count")) {
+			current.cats = game.ReadValue<int>((IntPtr)(catMembers + catOffsets["cat_count"] + 0x8));
+		}
+	}
+
+	if (current.cats != old.cats) {
+		vars.Info("Cats: " + old.cats + " -> " + current.cats);
+	}
 }
 
 start {
@@ -447,6 +472,7 @@ start {
 
 onStart {
 	vars.CompletedSplits.Clear();
+	current.cats = 0;
 }
 
 reset {
@@ -506,6 +532,16 @@ split {
 		if (settings["Decommissioned"] && !vars.CompletedSplits.Contains("Decommissioned")) {
 			vars.CompletedSplits.Add("Decommissioned");
 			vars.Info("Triggered Split: Triggered the True Ending (Decommissioned)");
+			return true;
+		}
+	}
+
+	// CATS
+	if (current.cats != old.cats) {
+		var cat = "Cat" + current.cats.ToString();
+		if (settings[cat] && !vars.CompletedSplits.Contains(cat)) {
+			vars.CompletedSplits.Add(cat);
+			vars.Info("Triggered Split: Collected cat " + current.cats.ToString() + "/6");
 			return true;
 		}
 	}
