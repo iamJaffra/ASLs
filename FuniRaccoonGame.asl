@@ -3,10 +3,7 @@ state("Funi_Raccoon_Game") {}
 startup {
 	vars.TimerModel = new TimerModel { CurrentState = timer };
 
-	vars.Levels = new Dictionary<int, string> {
-		//{0, "DEFAULT"},
-		//{1, "NON_EXIST"},
-
+	var levels = new Dictionary<int, string> {
 		{7, "The Dumpster"}, // The GDScript calls it "MAIN_MENU", but it's The Dumpster
 		{2, "Norwich"},
 		{5, "Chicken Farm"},
@@ -25,75 +22,96 @@ startup {
 		{73, "Outside Hypercube Datacenter"},  
 		{70, "HYPERCENTER"},
 		{75, "Hypercube Tree"},
-		//{3, "GYM_INSIDE"},
-		//{4, "SECRET_UNDERGROUND"},
-		//{6, "CLEANERS"},
-		//{9, "FISH_INSIDES"},
-		//{11, "MUSEUM"},
-		//{12, "TRAIN_STATION"},
-		//{13, "DREAM_LIKE"},
-		//{14, "OFFICE_START"},
-		//{16, "CLIFF"},
-		//{17, "MONITOR_ROOM"},
-		//{18, "WAITING_ROOM"},
-		//{19, "CRICKET_PITCH"},
-		//{20, "JAPAN_STREET"},
 		{22, "Blimbo Village"},
 		{15, "Water Zone"},
-		//{23, "PARKING_LOT"},
-		//{24, "TRASCO_ENTRANCE"},
-		//{28, "DRIVING_BEGIN"},
-		//{31, "BEENIE_JESUS"},
-		//{32, "KIT_TEST"},
-		//{33, "INSIDE_THE_MACHINE"},
-		//{34, "HAPPY_FACTORY"},
-		//{35, "PATRICKS_SECRET_PLACE"},
-		//{36, "BEENIE_CHAMBER"},
-		//{37, "INSIDE_TRAIN"},
-		//{38, "FUNKYHEART"},
-		//{39, "CENTRAL_STATION"},
-		//{40, "HAT_STORE"},
-		//{41, "INSIDE_TRAIN_WATERZONE"},
-		//{42, "HOWTH"},
-		//{43, "TEN_THOUSAND_RACCOONS"},
-		//{44, "FRIDGE_WORLD"},
-		//{45, "GARDEN_TABLE"},
-		//{46, "TYRE_SHOP"},
-		//{47, "CAVE"},
-		//{48, "INSIDE_TRAIN_TRASCO"},
-		//{49, "BLIMBO_FOREST"},
-		//{50, "PUB"},
-		//{51, "BEENIE_CHURCH"},
-		//{52, "DESERT"},
-		//{53, "PETROL_STATION"},
-		//{54, "BEES"},
-		//{55, "WASPS"},
-		//{56, "NORWICH_RUINS"},
-		//{57, "SALMON_OF_KNOWLEDGE"},
-		//{58, "DESERT_CONNECTION"},
-		//{61, "DRY_ZONE"},
-		//{62, "DESERT_BEES"},
-		//{63, "PHARMACY"},
-		//{64, "PLIMBOS_MIND"},
-		//{65, "BEHRMAN_RACETRACK"},
-		//{66, "ENDING_ALL_ITEMS"},
-		//{67, "CREDITS_LEVEL"},
-		//{68, "TIME_TRAVEL"},
-		//{72, "MIKKBARGE"},
-		//{74, "FINALE_TRANSITION"},
-		//{76, "CELTIC_RUINS"},
-		//{77, "PACHINKO"},
-		//{78, "WAITING_ROOM_DEMO"},
-		//{79, "GOO_PARADISE"},
-		//{80, "INSIDE_TRAIN_CITY"},
-		//{81, "WHEAT_FIELD"},
-		//{82, "CLIFFS_OF_NOWHER"},
-		//{83, "BRAZIL"},
-		//{84, "INSIDE_BRAZIL_TRAIN"}
 	};
 
-	var dict = (Dictionary<int, string>)vars.Levels;
-	vars.LevelsByName = dict.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+	var otherLevels = new Dictionary<int, string> {
+		{3, "GYM_INSIDE"},
+		{4, "SECRET_UNDERGROUND"},
+		{6, "CLEANERS"},
+		{9, "FISH_INSIDES"},
+		{11, "MUSEUM"},
+		{12, "TRAIN_STATION"},
+		{13, "DREAM_LIKE"},
+		{14, "OFFICE_START"},
+		{16, "CLIFF"},
+		{17, "MONITOR_ROOM"},
+		{18, "WAITING_ROOM"},
+		{19, "CRICKET_PITCH"},
+		{20, "JAPAN_STREET"},
+		{23, "PARKING_LOT"},
+		{24, "TRASCO_ENTRANCE"},
+		{28, "DRIVING_BEGIN"},
+		{31, "BEENIE_JESUS"},
+		{32, "KIT_TEST"},
+		{33, "INSIDE_THE_MACHINE"},
+		{34, "HAPPY_FACTORY"},
+		{35, "PATRICKS_SECRET_PLACE"},
+		{36, "BEENIE_CHAMBER"},
+		{37, "INSIDE_TRAIN"},
+		{38, "FUNKYHEART"},
+		{39, "CENTRAL_STATION"},
+		{40, "HAT_STORE"},
+		{41, "INSIDE_TRAIN_WATERZONE"},
+		{42, "HOWTH"},
+		{43, "TEN_THOUSAND_RACCOONS"},
+		{44, "FRIDGE_WORLD"},
+		{45, "GARDEN_TABLE"},
+		{46, "TYRE_SHOP"},
+		{47, "CAVE"},
+		{48, "INSIDE_TRAIN_TRASCO"},
+		{49, "BLIMBO_FOREST"},
+		{50, "PUB"},
+		{51, "BEENIE_CHURCH"},
+		{52, "DESERT"},
+		{53, "PETROL_STATION"},
+		{54, "BEES"},
+		{55, "WASPS"},
+		{56, "NORWICH_RUINS"},
+		{57, "SALMON_OF_KNOWLEDGE"},
+		{58, "DESERT_CONNECTION"},
+		{61, "DRY_ZONE"},
+		{62, "DESERT_BEES"},
+		{63, "PHARMACY"},
+		{64, "PLIMBOS_MIND"},
+		{65, "BEHRMAN_RACETRACK"},
+		{66, "ENDING_ALL_ITEMS"},
+		{67, "CREDITS_LEVEL"},
+		{68, "TIME_TRAVEL"},
+		{72, "MIKKBARGE"},
+		{74, "FINALE_TRANSITION"},
+		{76, "CELTIC_RUINS"},
+		{77, "PACHINKO"},
+		{78, "WAITING_ROOM_DEMO"},
+		{79, "GOO_PARADISE"},
+		{80, "INSIDE_TRAIN_CITY"},
+		{81, "WHEAT_FIELD"},
+		{82, "CLIFFS_OF_NOWHER"},
+		{83, "BRAZIL"},
+		{84, "INSIDE_BRAZIL_TRAIN"}
+	};
+
+	vars.Levels = levels.Concat(otherLevels)
+    	.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+	// enum hat_enum{NONE, SunHat, RaccoonHat, PopeHat, ConeHat, CrownHat, sombrero, Jester, Tophat, PaddyHat}
+	vars.Hats = new Dictionary<int, string> {
+		{1, "Sun Hat"},
+		{2, "Raccoon Hat"},
+		{3, "Pope Hat"},
+		{4, "Cone Hat"},
+		{5, "Crown Hat"},
+		{6, "Sombrero"},
+		{7, "Jester"},
+		{8, "Tophat"},
+		{9, "Paddy Hat"},
+	};
+
+
+	settings.Add("Reset", true, "Reset");
+		settings.Add("ResetOnMainMenu", true, "Reset on quitting to the main menu", "Reset");
+		settings.Add("ResetOnExit", true, "Reset on exiting the game", "Reset");
 
 	settings.Add("End", true, "Ending splits. Split on triggering ...");
 		settings.Add("OrbEnding", true, "Orb Ending", "End");
@@ -103,7 +121,7 @@ startup {
 
 	settings.Add("LevelSplits", true, "Split on ENTERING a level for the first time:");
 
-	foreach (var levelName in vars.Levels.Values) {
+	foreach (var levelName in levels.Values) {
 		settings.Add(levelName, true, levelName, "LevelSplits");
 	}
 
@@ -113,9 +131,18 @@ startup {
 		settings.Add("Cat" + number, true, number + "/6", "Cats");
 	}
 
-	settings.Add("Reset", true, "Reset");
-		settings.Add("ResetOnMainMenu", true, "Reset on quitting to the main menu", "Reset");
-		settings.Add("ResetOnExit", true, "Reset on exiting the game", "Reset");
+	settings.Add("Hats", false, "Split on collecting hats");
+	for (int i = 0; i < 9; i++) {
+		var hat = vars.Hats[i + 1];
+		settings.Add(hat, true, hat, "Hats");
+	}
+
+	settings.Add("OtherLevelSplits", false, "Other levels:");
+
+	foreach (var levelName in otherLevels.Values) {
+		settings.Add(levelName, false, levelName, "OtherLevelSplits");
+	}
+
 
 	// SceneTree
 	vars.SCENETREE_ROOT_WINDOW_OFFSET        = 0x298; // Window*                           SceneTree::root
@@ -133,6 +160,7 @@ startup {
 	// GDScriptInstance
 	vars.SCRIPTINSTANCE_SCRIPT_REF_OFFSET    = 0x018; // Ref<GDScript>                     GDScriptInstance::script
 	vars.SCRIPTINSTANCE_MEMBERS_OFFSET       = 0x050; // Vector<Variant>                   GDScriptInstance::members
+
 
 	vars.Info = (Action<string>)((msg) => {
 		print("[Funi Raccoon Game ASL] " + msg);
@@ -294,6 +322,7 @@ init {
 	vars.DecommissionedTexture = IntPtr.Zero;
 	current.triggeredDecommissionedEnding = old.triggeredDecommissionedEnding = false;
 	current.cats = old.cats = 0;
+	current.hat = old.hat = 0;
 	vars.CompletedSplits = new HashSet<string>();
 }
 
@@ -401,7 +430,7 @@ update {
 	}
 	
 
-	// You ARE One
+	// YOU ARE ONE
 	if (current.level == 71) {
 		var node = vars.GetLastChild(current.levelPtr);
 
@@ -449,7 +478,7 @@ update {
 	}
 
 
-	// Cats
+	// CATS
 	var catNode = vars.GetLastChild(current.levelPtr);
 
 	if (vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(catNode + vars.NODE_NAME_OFFSET))) == "FoundCat") {
@@ -464,6 +493,23 @@ update {
 	if (current.cats != old.cats) {
 		vars.Info("Cats: " + old.cats + " -> " + current.cats);
 	}
+
+
+	// HATS
+	var hatNode = vars.GetLastChild(current.levelPtr);
+
+	if (vars.ReadStringName(game.ReadValue<IntPtr>((IntPtr)(hatNode + vars.NODE_NAME_OFFSET))) == "HatFound") {
+		var hatMembers = vars.GetMemberArrayFromNode(hatNode);
+		var hatOffsets = vars.GetMemberOffsetsFromNode(hatNode);
+
+		if (hatOffsets.ContainsKey("hat_id")) {
+			current.hat = game.ReadValue<int>((IntPtr)(hatMembers + hatOffsets["hat_id"] + 0x8));
+		}
+	}
+
+	if (current.hat != old.hat) {
+		vars.Info("Hat found: " + vars.Hats[current.hat]);
+	}
 }
 
 start {
@@ -473,6 +519,7 @@ start {
 onStart {
 	vars.CompletedSplits.Clear();
 	current.cats = 0;
+	current.hat = 0;
 }
 
 reset {
@@ -542,6 +589,16 @@ split {
 		if (settings[cat] && !vars.CompletedSplits.Contains(cat)) {
 			vars.CompletedSplits.Add(cat);
 			vars.Info("Triggered Split: Collected cat " + current.cats.ToString() + "/6");
+			return true;
+		}
+	}
+
+	// HATS
+	if (current.hat != old.hat) {
+		var hat = vars.Hats[current.hat];
+		if (settings[hat] && !vars.CompletedSplits.Contains(hat)) {
+			vars.CompletedSplits.Add(hat);
+			vars.Info("Triggered Split: Collected " + hat);
 			return true;
 		}
 	}
