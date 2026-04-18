@@ -35,6 +35,7 @@ startup {
 		settings.Add("Any%_Chapter5", true, "Reach Chapter 5", "Any%");
 		settings.Add("Any%_Map", true, "Collect sea map to Irdorath", "Any%");
 		settings.Add("Any%_LighthouseBed", false, "Go to bed in Jack's Lighthouse", "Any%");
+		settings.Add("Any%_Brian", false, "Brian becomes the new Lighthouse officer", "Any%");
 		settings.Add("Any%_Irdorath", true, "Reach Irdorath", "Any%");
 		settings.Add("Any%_UndeadDragon", true, "Kill Undead Dragon", "Any%");
 		settings.Add("Any%_End", true, "Finish game", "Any%");
@@ -71,6 +72,10 @@ startup {
 	vars.timeKeeper = new TimeSpan();
 
 	vars.Sw = new Stopwatch();
+
+	vars.Info = (Action<string>)((msg) => {
+		print("[Gothic 2 NotR ASL] " + msg);
+	});
 }
 
 init {
@@ -85,8 +90,10 @@ init {
 		{ "ICDRAGNISDEAD",      "iceDragon"    },
 		{ "UNDEADDRAGONISDEAD", "undeadDragon" },
 		{ "RAVENISDEAD",        "Raven"        },
+		{ "MIS_JACK_NEWLIGHTHOUSEOFFICER", "newLighthouseOfficer" },
 	};
 
+	// cur_table.table
 	int symtab = new DeepPointer("Gothic2.exe", 0x6B6428, 0x8).Deref<int>(game);
 	int size = new DeepPointer("Gothic2.exe", 0x6B6428, 0x8 + 0x4).Deref<int>(game);
 	
@@ -197,6 +204,7 @@ start {
 }
 
 onStart {
+	vars.Info("STARTED NEW RUN");
 	vars.completedSplits.Clear();
 	vars.snapperWeed = 0;
 	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
@@ -211,6 +219,10 @@ reset {
 			return true;
 		}
 	}
+}
+
+onReset {
+	vars.Info("RESET TIMER");
 }
 
 update {
@@ -265,6 +277,10 @@ split {
 	else if (settings["Any%_LighthouseBed"] && !vars.completedSplits.Contains("LighthouseBed") && vars.globals["chapter"].Current == 5 && current.ani == "T_BEDHIGH_BACK_S0_2_") {
 		print("Split: LighthouseBed");
 		return vars.completedSplits.Add("LighthouseBed");
+	}
+	else if (settings["Any%_Brian"] && !vars.completedSplits.Contains("Brian") && vars.globals["newLighthouseOfficer"].Current == 2) {
+		print("Split: Brian");
+		return vars.completedSplits.Add("Brian");
 	}
 	else if (settings["Any%_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
 		print("Split: Irdorath");
