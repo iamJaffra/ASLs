@@ -59,7 +59,6 @@ init {
 	vars.Events.FunctionFlag("DestructLoadingScreen", "WG_Loading_C", "WG_Loading_C", "Destruct");
 	vars.Events.FunctionFlag("NewGame", "UI_GameMenu_C", "UI_GameMenu_C", "BndEvt__UI_GameMenu_BT_NewGame_K2Node_ComponentBoundEvent_3_OnButtonPressedEvent__DelegateSignature");
 	vars.Events.FunctionFlag("DoorInteract", "BP_Door*", "", "");
-	vars.Events.FunctionFlag("EndOfGame", "BP_Trigger_EndOfGame_C", "BP_Trigger_EndOfGame_C*", "ExecuteUbergraph_BP_Trigger_EndOfGame");
 
 	vars.BeginPlayFlag = false;
 	vars.DestructFlag = false;
@@ -131,6 +130,11 @@ update {
 		vars.Info("Video -> " + current.Video);
 	}
 
+
+	if (current.IsVideoPlaying) {
+		return;
+	}
+
 	// QUEST TRACKING
 	{
 		var questCount = current.CollectedQuestIDsNum;
@@ -156,12 +160,14 @@ update {
 	if (settings["CheatMode"] && current.GameController != IntPtr.Zero) {
 		if (!current.IsCheatMode) {
 			game.WriteBytes((IntPtr)current.GameController + 0x690, new byte[] { 1 });
-			vars.Info("Turned on Cheat Mode.");
+			vars.Info("Activated Cheat Mode!");
 		}
+		/*
 		if (current.IsDemo) {
 			game.WriteBytes((IntPtr)current.GameController + 0x689, new byte[] { 0 });
 			vars.Info("Set IsDemo? To False.");
 		}
+		*/
 	}
 
 	// UNLOCK DOORS
@@ -183,15 +189,20 @@ reset {
 }
 
 start {
-	if (old.IsVideoPlaying && !current.IsVideoPlaying) {
-		return true;
-	}
-	if (current.IsVideoPlaying) {
-		if (vars.DoubleEquals(old.X, vars.StartX) && vars.DoubleEquals(old.Y, vars.StartY) && vars.DoubleEquals(old.Z, vars.StartZ)) {
-			if (!vars.DoubleEquals(current.X, vars.StartX) || !vars.DoubleEquals(current.Y, vars.StartY) || !vars.DoubleEquals(current.Z, vars.StartZ)) {
-				return true;
-			}
+	if (current.IsDemo) {
+		if (old.IsVideoPlaying && !current.IsVideoPlaying) {
+			return true;
 		}
+		if (current.IsVideoPlaying) {
+			if (vars.DoubleEquals(old.X, vars.StartX) && vars.DoubleEquals(old.Y, vars.StartY) && vars.DoubleEquals(old.Z, vars.StartZ)) {
+				if (!vars.DoubleEquals(current.X, vars.StartX) || !vars.DoubleEquals(current.Y, vars.StartY) || !vars.DoubleEquals(current.Z, vars.StartZ)) {
+					return true;
+				}
+			}
+		}	
+	}
+	else {
+		return vars.Resolver.CheckFlag("NewGame");
 	}
 }
 
@@ -217,7 +228,7 @@ split {
 		}
 	}
 
-	if (settings["End"] && current.IsVideoPlaying && !old.IsVideoPlaying && !vars.CompletedSplits.Contains("End")) {
+	if (settings["End"] && current.IsVideoPlaying && !vars.CompletedSplits.Contains("End")) {
 		if (current.Video == "Movies/V_Outro_Bad.bk2" || current.Video == "Movies/V_Outro_Good.bk2") {
 			vars.CompletedSplits.Add("End");
 			vars.Info("Split: Triggered Ending");
