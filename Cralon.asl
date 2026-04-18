@@ -7,6 +7,7 @@ startup {
 
 	settings.Add("Splits", true, "Splits");
 		settings.Add("DemoEnd", true, "End Of Demo Screen", "Splits");
+		settings.Add("End", true, "Trigger Ending Cutscene", "Splits");
 
 	vars.SplittableDoors = new Dictionary<string, string> {
 		{ "BP_DoorSlidingGate",  "Gate to Morass" },
@@ -42,7 +43,7 @@ init {
 
 	IntPtr GameController = vars.Events.InstancePtr("BP_GameController_C", "");
 	vars.Resolver.Watch<bool>("IsEndOfDemo", GameController, 0x599);
-	vars.Resolver.Watch<bool>("IsIntroPlaying", GameController, 0x7B9);
+	vars.Resolver.Watch<bool>("IsVideoPlaying", GameController, 0x7B9);
 	vars.Resolver.Watch<bool>("IsDemo", GameController, 0x689);
 	vars.Resolver.Watch<bool>("IsCheatMode", GameController, 0x690);
 	vars.Resolver.Watch<IntPtr>("GameController", GameController);
@@ -50,11 +51,15 @@ init {
 	vars.Resolver.WatchString("DoorName", vars.Events.FunctionParentPtr("BP_Door*", "", ""), 0x2C0, 0x0);
 	vars.Resolver.Watch<bool>("DoorOpen", vars.Events.FunctionParentPtr("BP_Door*", "", ""), 0x2F0);
 
+	IntPtr VideoPlayer = vars.Events.InstancePtr("WG_VideoPlay_C", "WG_VideoPlay_C");
+	vars.Resolver.WatchString("Video", VideoPlayer, 0x398, 0x98, 0x0);
+
 	vars.Events.FunctionFlag("InitLoadingScreen", "WG_Loading_C", "WG_Loading_C", "OnInitialized");
 	vars.Events.FunctionFlag("ReceiveBeginPlay", "BP_Cralon_C", "BP_Cralon_C", "ReceiveBeginPlay");
 	vars.Events.FunctionFlag("DestructLoadingScreen", "WG_Loading_C", "WG_Loading_C", "Destruct");
 	vars.Events.FunctionFlag("NewGame", "UI_GameMenu_C", "UI_GameMenu_C", "BndEvt__UI_GameMenu_BT_NewGame_K2Node_ComponentBoundEvent_3_OnButtonPressedEvent__DelegateSignature");
 	vars.Events.FunctionFlag("DoorInteract", "BP_Door*", "", "");
+	vars.Events.FunctionFlag("EndOfGame", "BP_Trigger_EndOfGame_C", "BP_Trigger_EndOfGame_C*", "ExecuteUbergraph_BP_Trigger_EndOfGame");
 
 	vars.BeginPlayFlag = false;
 	vars.DestructFlag = false;
@@ -122,6 +127,10 @@ update {
 		vars.Info("DoorName -> " + current.DoorName);
 	}	
 
+	if (old.Video != current.Video) {
+		vars.Info("Video -> " + current.Video);
+	}
+
 	// QUEST TRACKING
 	{
 		var questCount = current.CollectedQuestIDsNum;
@@ -174,10 +183,10 @@ reset {
 }
 
 start {
-	if (old.IsIntroPlaying && !current.IsIntroPlaying) {
+	if (old.IsVideoPlaying && !current.IsVideoPlaying) {
 		return true;
 	}
-	if (current.IsIntroPlaying) {
+	if (current.IsVideoPlaying) {
 		if (vars.DoubleEquals(old.X, vars.StartX) && vars.DoubleEquals(old.Y, vars.StartY) && vars.DoubleEquals(old.Z, vars.StartZ)) {
 			if (!vars.DoubleEquals(current.X, vars.StartX) || !vars.DoubleEquals(current.Y, vars.StartY) || !vars.DoubleEquals(current.Z, vars.StartZ)) {
 				return true;
@@ -202,9 +211,17 @@ split {
 			string name = current.DoorName;
 			if (vars.SplittableDoors.ContainsKey(name) && settings[name] && !vars.CompletedSplits.Contains(name)) {
 				vars.CompletedSplits.Add(name);
-				vars.Info("Triggered split on opening " + name);
+				vars.Info("Split: Opened door '" + name + "'");
 				return true;
 			}
+		}
+	}
+
+	if (settings["End"] && current.IsVideoPlaying && !old.IsVideoPlaying && !vars.CompletedSplits.Contains("End")) {
+		if (current.Video == "Movies/V_Outro_Bad.bk2" || current.Video == "Movies/V_Outro_Good.bk2") {
+			vars.CompletedSplits.Add("End");
+			vars.Info("Split: Triggered Ending");
+			return true;
 		}
 	}
 }
