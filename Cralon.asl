@@ -6,15 +6,20 @@ startup {
 	vars.TimerModel = new TimerModel { CurrentState = timer };
 
 	settings.Add("Splits", true, "Splits");
-		settings.Add("DemoEnd", true, "End Of Demo Screen", "Splits");
-		settings.Add("End", true, "Trigger Ending Cutscene", "Splits");
+		settings.Add("Endings", true, "Endings", "Splits");
+			settings.Add("DemoEnd", true, "End Of Demo Screen", "Endings");
+			settings.Add("End", true, "Trigger Ending Cutscene", "Endings");
+
+		settings.Add("Morass", true, "Leave Orcus", "Splits");
 
 	vars.SplittableDoors = new Dictionary<string, string> {
-		{ "BP_DoorSlidingGate",  "Gate to Morass" },
+		//{ "BP_DoorSlidingGate",  "Gate to Morass" },
+		{ "BP_DoorSlidingGate4", "Gate to Field" },
+		{ "BP_DoorSlidingGate7", "Gate to Crypt" },
 		{ "BP_DoorSlidingGate5", "Gate to Fortress" },
 	};
 
-	settings.Add("DoorSplits", false, "Gates", "Splits");
+	settings.Add("DoorSplits", false, "Split on opening Gates", "Splits");
 	foreach (var door in vars.SplittableDoors) {
 		var doorName = door.Key;
 		var doorDescription = door.Value;
@@ -234,6 +239,12 @@ split {
 			vars.Info("Split: Triggered Ending");
 			return true;
 		}
+	}
+
+	if (settings["Morass"] && current.Floor != old.Floor && current.Floor == "Morast" && !vars.CompletedSplits.Contains("Morass")) {
+		vars.CompletedSplits.Add("Morass");
+		vars.Info("Split: Entered Morass");
+		return true;
 	}
 }
 
