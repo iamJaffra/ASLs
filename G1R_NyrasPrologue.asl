@@ -1,21 +1,79 @@
-/*
-
-   ______      __  __    _          ____                       __             ___   _____ __ 
-  / ____/___  / /_/ /_  (_)____    / __ \___  ____ ___  ____ _/ /_____       /   | / ___// / 
- / / __/ __ \/ __/ __ \/ / ___/   / /_/ / _ \/ __ `__ \/ __ `/ //_/ _ \     / /| | \__ \/ /  
-/ /_/ / /_/ / /_/ / / / / /__    / _, _/  __/ / / / / / /_/ / ,< /  __/    / ___ |___/ / /___
-\____/\____/\__/_/ /_/_/\___/   /_/ |_|\___/_/ /_/ /_/\__,_/_/|_|\___/    /_/  |_/____/_____/
-
-by: Jaffra
-
-*/
-
 state("G1R-Win64-Shipping") {}
 
 startup {
-	#region Splits and Settings
+#region Splits and Settings
+	/* 
+	// Full Game Splits
+
+	vars.splitData = new Dictionary<string, Tuple<string, string, string>> { 
+		{ "Ch1_Beer", 
+			Tuple.Create("Item",         "ItFo_Potion_Beer",            "Collect beer."                      ) 
+		}, 
+		{ "Ch1_Beer_Finish", 
+			Tuple.Create("FinishQuest",  "Quest_Main_G1RDemo_OrryBeer", "Complete Orry's beer quest."        ) 
+		},
+		{ "Ch1_TalkToKirgo", 
+			Tuple.Create("Dialogue",     "G1R_Demo_0050_OC_Kirgo_0050", "Talk to Kirgo."                     ) 
+		}, 
+		{ "Ch1_Kirgo", 
+			Tuple.Create("Kill",         "G1R_Demo_0050_OC_Kirgo_0050", "Kill Kirgo."                        ) 
+		},
+		{ "Ch1_EnterFreeMine", 
+			Tuple.Create("World",        "G1R_FreeMineMap",             "Enter the Free Mine."               ) 
+		},
+		{ "Ch1_ExitFreeMine",
+			Tuple.Create("ExitFreeMine", "",                            "Exit the Free Mine."                ) 
+		},
+	};
+
+	for (int i = 2; i < 7; i++) {
+		string chapterNum = i.ToString();
+		vars.splitData["Ch" + chapterNum + "_StartChapter"] = Tuple.Create(
+			"Chapter", chapterNum, "Start Chapter " + chapterNum + ".");
+	} 
+
+	settings.Add("Main", false, "Main Splits");
+
+	for (int i = 1; i < 7; i++) {
+		string chapter = "Chapter " + i.ToString();
+		settings.Add(chapter, true, chapter, "Main");
+	}
+
+	foreach (var kv in vars.splitData) {
+		var splitName = kv.Key;
+		var splitDesc = kv.Value.Item3;
 		
-	#endregion
+		if (splitName.StartsWith("Ch") && splitName.Length > 2 && char.IsDigit(splitName[2])) {
+			settings.Add(splitName, true, splitDesc, "Chapter " + splitName[2]);
+		}
+	}
+	*/
+	
+	vars.splitData = new Dictionary<string, Tuple<string, string, string>>();
+
+	// Nyras Prologue Splits
+
+	vars.splitDataNyrasPrologue = new Dictionary<string, Tuple<string, string, string>> {
+		{ "Nyras_TalkToDrax", 
+			Tuple.Create("Dialogue",            "G1R_Demo_0040_NC_Drax_0040", "Talk to Drax."             ) 
+		}, 
+		{ "Nyras_MysteriousNote", 
+			Tuple.Create("Item",                "ItWr_Scroll_Mysteriousnote", "Find the mysterious note." ) 
+		},
+		{ "Nyras_End", 
+			Tuple.Create("FinishNyrasPrologue", "",                           "Finish the demo."          ) 
+		},
+	};
+
+	settings.Add("Nyras", false, "Nyras Prologue Splits");
+
+	foreach (var kv in vars.splitDataNyrasPrologue) {
+		var splitName = kv.Key;
+		var splitDesc = kv.Value.Item3;
+		
+		settings.Add(splitName, true, splitDesc, "Nyras");
+	}
+#endregion
 
 	if (timer.CurrentTimingMethod == TimingMethod.RealTime) {
 		var timingMessage = MessageBox.Show (
@@ -41,7 +99,20 @@ startup {
 	vars.completedSplits = new HashSet<string>();
 	vars.timerPaused = false;
 
+	// List of in-world maps
+	vars.worlds = new HashSet<string> {
+		"G1R_MainMap",
+		"G1RNyrasPrologue_MainMap",
+		"G1R_SleeperTemple",
+		"G1R_OrcGraveyard",
+		"G1R_OrcCity",
+		"G1R_OldMine",
+		"G1R_NewMine",
+	};
 
+	// 
+	vars.NyrasPrologue_X =  98555.7733905069d;
+	vars.NyrasPrologue_Y = -56429.3303492728d;
 	vars.X =  98555.7733905069d;
 	vars.Y = -56429.3303492728d;
 }
@@ -70,6 +141,22 @@ init {
 	}
 #endregion
 
+#region Version detection
+	string hash;
+
+	using (var md5 = System.Security.Cryptography.MD5.Create())
+	using (var fs = File.OpenRead(modules.First().FileName))
+		hash = string.Concat(md5.ComputeHash(fs).Select(b => b.ToString("X2")));
+
+	vars.Info("Hash: " + hash);
+
+	if (hash == "DF985F22D3378D74E49995F17500CBDD") { // Nyras Prologue (Steam)
+		vars.NyrasFadeOffset = 0x959946C;
+	}
+	else if (hash == "DF985F22D3378D74E49995F17500CBDD") { // Nyras Prologue (GOG)
+		vars.NyrasFadeOffset = 0x959946C;
+	}
+#endregion
 
 #region Signature scanning
 	var scanner = new SignatureScanner(game, modules[0].BaseAddress, modules[0].ModuleMemorySize);
@@ -259,7 +346,10 @@ init {
 				+ 0x0,     // Target
 				0x18       // NamePrivate
 			))
-		}
+		},
+		{ "NyrasFade",
+			new MemoryWatcher<float>(new DeepPointer("G1R-Win64-Shipping.exe", vars.NyrasFadeOffset))
+		},
 	};
 
 	vars.MainMenuDisplayedWidget = new MemoryWatcher<ulong>(
@@ -506,7 +596,52 @@ init {
 #endregion
 
 #region Splits
+	var splits = new Dictionary<string, Func<bool>>();
 
+	foreach (var kv in vars.splitDataNyrasPrologue) {
+		vars.splitData[kv.Key] = kv.Value;
+	}
+
+	foreach (var kv in (Dictionary<string, Tuple<string, string, string>>)vars.splitData) {
+		var splitName = kv.Key;
+		var type = kv.Value.Item1;
+		var arg = kv.Value.Item2;
+
+		if (type == "StartQuest") {
+			splits[splitName] = () => vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 2;
+		}
+		else if (type == "FinishQuest") {
+			splits[splitName] = () => vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 4;
+		}
+		else if (type == "Item") {
+			splits[splitName] = () => vars.Watchers["ActiveNotifications"].Changed && vars.PlayerHasItem(arg);
+		}
+		else if (type == "Kill") {
+			splits[splitName] = () => vars.Watchers["Exp"].Changed && vars.IsDead(arg);
+		}
+		else if (type == "Dialogue") {
+			splits[splitName] = () => vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation") && 
+									  vars.IsInConversation(arg);
+		}
+		else if (type == "World") {
+			splits[splitName] = () => vars.FNameToString(vars.Watchers["GWorldFName"].Current) == arg;
+		}
+		else if (type == "Chapter") {
+			splits[splitName] = () => vars.Watchers["Chapter"].Current.ToString() == arg;
+		}
+		else if (type == "FinishNyrasPrologue") {
+			splits[splitName] = () => vars.FNameToString(vars.Watchers["ViewTarget"].Current) == "CineCameraActor" && 
+									  vars.Watchers["NyrasFade"].Old < 1.0f && vars.Watchers["NyrasFade"].Current == 1.0f;
+		} 
+		/*
+		else if (type == "ExitFreeMine") {
+			splits[splitName] = () => vars.Watchers["someVar"].Current == 12345 &&
+									  vars.FNameToString(vars.Watchers["GWorldFName"].Current) == "G1R_MainMap";
+		}
+		*/
+	}
+
+	vars.splits = splits;
 #endregion
 
 	current.world = "";
@@ -544,7 +679,7 @@ update {
 }
 
 reset {
-	if (current.world == "G1R_MainMenu_C") {
+	if (current.world == "G1R_MainMenu_C" || current.world == "G1RNyrasPrologue_MenuMap") {
 		vars.MainMenuDisplayedWidget.Update(game);
 
 		if (vars.MainMenuDisplayedWidget.Changed) {
@@ -555,7 +690,7 @@ reset {
 			return true;
 		}
 
-		if (current.world == "G1R_MenuMap" && old.world != "G1R_MenuMap") {
+		if (current.world == "G1RNyrasPrologue_MenuMap" && old.world != "G1RNyrasPrologue_MenuMap") {
 			return true;
 		}
 	}
@@ -565,6 +700,15 @@ start {
 	if (current.world == "G1R_MainMap") {
 		if (Math.Abs(vars.Watchers["X"].Current - vars.X) < 0.000000001 &&
 			Math.Abs(vars.Watchers["Y"].Current - vars.Y) < 0.000000001) {
+			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
+				return true;
+			}
+		}
+	}
+
+	if (current.world == "G1RNyrasPrologue_MainMap") {
+		if (Math.Abs(vars.Watchers["X"].Current - vars.NyrasPrologue_X) < 0.000000001 &&
+			Math.Abs(vars.Watchers["Y"].Current - vars.NyrasPrologue_Y) < 0.000000001) {
 			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
 				return true;
 			}
