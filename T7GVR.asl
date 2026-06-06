@@ -68,7 +68,7 @@ startup {
 
 		settings.Add(splitName, true, splitDesc, "Splits");
 	}
-	settings.Add("End", true, "Fade out after final game", "Splits");
+	settings.Add("End", true, "End", "Splits");
 	
 	vars.Info = (Action<string>)((msg) => {
 		print("[T7G ASL] " + msg);
@@ -107,46 +107,37 @@ init {
 	vars.Resolver.Watch<IntPtr>("GWorldPtr", vars.Utils.GWorld);
 	vars.Resolver.Watch<ulong>("GWorldFName", vars.Utils.GWorld, 0x18);
 
-
-	vars.Resolver.Watch<IntPtr>("Door", vars.Events.FunctionParentPtr("", "", "RoomDoorGRabbed"));
-	vars.Resolver.Watch<bool>("IsRoomLoaded", vars.Events.FunctionParentPtr("", "", "RoomDoorGRabbed"), 0x530);
-
-	// [BP_RitualRoomDoorRight_C] [BP_RitualRoomDoorRight_C] [RoomDoorGRabbed]
-	// [BP_RitualRoomDoorRight_C] [BP_RitualRoomDoorRight_C] [RoomLOaded]
-	vars.Events.FunctionFlag("RoomDoorGrabbed", "", "", "RoomDoorGRabbed");
-	vars.Events.FunctionFlag("RoomLoaded", "", "", "RoomLOaded");
-
-
-	//vars.Events.FunctionFlag("IsIntroStarted", "BP_FlatIntroManager_C", "", "ReceiveBeginPlay");
-	vars.Events.FunctionFlag("IsIntroStarted", "BP_FlatIntroManager_C", "", "UpdateRatio__FinishedFunc");
-
-
-	// [BP_T7GGameMode_C] [BP_T7GGameMode_C] [ChoosePlayerStart]
-	// [WBP_FlatMainMenu_C] [WBP_FlatMainMenu] [WidgetAnimationEvt_FadeBeforePlay_K2Node_WidgetAnimationEvent
-	// WBP_FlatMainMenu_C] [WBP_FlatMainMenu] [BndEvt__WBP_FlatMainMenu_WBP_FlatMainMenuButtons_K2Node_ComponentBoundEvent_4_OnStartNewGameClicked__DelegateSignature
-	vars.Events.FunctionFlag("IsNewGameStarted", "WBP_FlatMainMenu_C", "", "BndEvt__WBP_FlatMainMenu_WBP_FlatMainMenuButtons_K2Node_ComponentBoundEvent_4_OnStartNewGameClicked__DelegateSignature");
-
-
-	//[WBP_FlatInteractionWidget_C] [WBP_FlatInteractionWidget_C] [SetFade]
-	vars.Events.FunctionFlag("SetFade", "WBP_FlatInteractionWidget_C", "", "SetFade");
+	IntPtr currentDoor = 
+		vars.Events.FunctionParentPtr(
+			"", 
+			"", 
+			"BndEvt__BP_Door_BP_FlatHandInteractionComponent*"
+		);
 	
-	
-	
-	vars.RoomDoorGrabbed = false;
-	vars.RoomLoaded = false;
-	vars.IsLoading = false;
+	vars.Resolver.Watch<IntPtr>("Door", currentDoor);
+	vars.Resolver.Watch<bool>("IsRoomLoaded", currentDoor, 0x531);
+	vars.Resolver.Watch<bool>("IsHoldingDoorHandle", currentDoor, 0x8F0);
+	vars.Resolver.Watch<bool>("IsLocked", currentDoor, 0x401);
 
-	vars.DoubleEquals = (Func<double, double, bool>)((double1, double2) => {
-		return Math.Abs(double1 - double2) < 0.00001;
-	});
+	vars.Events.FunctionFlag("IsIntroOver", "BP_FlatIntroManager_C", "", "UpdateRatio__FinishedFunc");
+
+	vars.Events.FunctionFlag(
+		"HasSteppedIntoEndTrigger", 
+		"BP_VO_SOSManager_C", 
+		"", 
+		"BndEvt__BP_PT_VO_PuzzleManager_PlayerDetector_K2Node_ComponentBoundEvent_0_ComponentBeginOverlapSignature__DelegateSignature"
+	);
+	
+	IntPtr SOSManager = vars.Events.InstancePtr("BP_VO_SOSManager_C", "");
+	vars.Resolver.Watch<bool>("IsFinalPuzzleDone", SOSManager, PUZZLE_COMPLETED_OFFSET);
+
+	vars.FadeStopwatch = new Stopwatch();
 
 	current.World = old.World = "";
 }
 
 update {
 	vars.Uhara.Update();
-
-	// DOOR LOAD REMOVAL
 	
 	var world = vars.Utils.FNameToString(current.GWorldFName);
 	if (!string.IsNullOrEmpty(world) && world != "None") {
@@ -157,41 +148,25 @@ update {
 		vars.Info("World: " + old.World + " -> " + current.World);
 	}
 
-
 	if (current.Door != old.Door) {
-		vars.Info("Door Instance: -> 0x" + current.Door.ToString("X"));
-	}
-
-	if (current.IsRoomLoaded != old.IsRoomLoaded) {
-		vars.Info("IsRoomLoaded: ->" + current.IsRoomLoaded);
+		vars.Info("Door: -> " + current.Door.ToString("X"));
 	}
 
 	if (current.Room != old.Room) {
 		vars.Info("Room: " + old.Room + " -> " + current.Room);
 	}
-
-	if (current.GWorldPtr != old.GWorldPtr) {
-		vars.Info("GWorldPtr: -> 0x" + current.GWorldPtr.ToString("X"));
-	}
-	
-	
 }
 
 reset {
-	// Reset on returning to main menu
 	if (current.World != old.World && current.World == "T7G_Title_Flat") {
 		return settings["ResetMainMenu"];
 	}
 }
 
 start {
-	// [BP_FlatIntroManager_C] [BP_FlatIntroManager_C] [ReceiveBeginPlay]
-	if (vars.Resolver.CheckFlag("IsNewGameStarted")) {
+	if (vars.Resolver.CheckFlag("IsIntroOver")) {
 		return true;
 	}
-
-	// ende der Bootsfahrt:
-	// [BP_Gondola_C] [BP_Gondola] [ExitBoat]
 }
 
 onStart {
@@ -224,12 +199,27 @@ split {
 		}
 	}
 
-	if (current.World == "T7G_Void" && vars.Resolver.CheckFlag("SetFade")) {
-		return true;
+	if (current.World == "T7G_Void" && current.IsFinalPuzzleDone && vars.Resolver.CheckFlag("HasSteppedIntoEndTrigger")) {
+		//vars.FadeStopwatch.Restart();
+		return settings["End"];
 	}
+	/*
+	if (vars.FadeStopwatch.IsRunning && vars.FadeStopwatch.Elapsed.TotalSeconds >= 2.6f) {
+		if (settings["End"] && !vars.CompletedSplits.Contains("End")) {
+			vars.FadeStopwatch.Reset();
+			vars.Info("Split: End of run.");
+			vars.CompletedSplits.Add("End");
+			return true;
+		}		
+	}
+	*/
 }
 
 isLoading {
+	if (current.IsHoldingDoorHandle && !current.IsLocked && !current.IsRoomLoaded) {
+		return true;
+	}
+
 	return current.GWorldPtr == IntPtr.Zero;
 }
 
