@@ -200,11 +200,9 @@ split {
 	}
 
 	if (current.World == "T7G_Void" && current.IsFinalPuzzleDone && vars.Resolver.CheckFlag("HasSteppedIntoEndTrigger")) {
-		//vars.FadeStopwatch.Restart();
-		return settings["End"];
+		vars.FadeStopwatch.Restart();
 	}
-	/*
-	if (vars.FadeStopwatch.IsRunning && vars.FadeStopwatch.Elapsed.TotalSeconds >= 2.6f) {
+	if (vars.FadeStopwatch.IsRunning && vars.FadeStopwatch.Elapsed.TotalSeconds >= 2.467f) {
 		if (settings["End"] && !vars.CompletedSplits.Contains("End")) {
 			vars.FadeStopwatch.Reset();
 			vars.Info("Split: End of run.");
@@ -212,7 +210,6 @@ split {
 			return true;
 		}		
 	}
-	*/
 }
 
 isLoading {
