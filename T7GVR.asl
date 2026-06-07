@@ -134,6 +134,7 @@ init {
 	vars.FadeStopwatch = new Stopwatch();
 
 	current.World = old.World = "";
+	vars.HasTriggeredEnding = false;
 }
 
 update {
@@ -171,6 +172,7 @@ start {
 
 onStart {
 	vars.CompletedSplits.Clear();
+	vars.HasTriggeredEnding = false;
 }
 
 split {
@@ -199,8 +201,9 @@ split {
 		}
 	}
 
-	if (current.World == "T7G_Void" && current.IsFinalPuzzleDone && vars.Resolver.CheckFlag("HasSteppedIntoEndTrigger")) {
+	if (!vars.HasTriggeredEnding && current.World == "T7G_Void" && current.IsFinalPuzzleDone && vars.Resolver.CheckFlag("HasSteppedIntoEndTrigger")) {
 		vars.FadeStopwatch.Restart();
+		vars.HasTriggeredEnding = true;
 	}
 	if (vars.FadeStopwatch.IsRunning && vars.FadeStopwatch.Elapsed.TotalSeconds >= 2.467f) {
 		if (settings["End"] && !vars.CompletedSplits.Contains("End")) {
