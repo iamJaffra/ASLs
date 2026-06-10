@@ -52,7 +52,7 @@ startup {
 		
 		Tuple.Create("Hänno",                        "Kill",          "State_NC_SLD_Haenno"),
 
-		Tuple.Create("End",                          "Cinematic",     "SleeperCinematic"),
+		Tuple.Create("End",                          "Cinematic",     "ExtroCinematic"),
 	};
 
 	settings.Add("Splits", true, "Splits");	
