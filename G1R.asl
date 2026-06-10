@@ -56,8 +56,8 @@ startup {
 	};
 
 	settings.Add("Reset", true, "Reset");
-		settings.Add("ResetNewGame", true, "Reset on New Game screen", "Reset");
-		settings.Add("ResetMainMenu", true, "Reset on returning to the Main Menu", "Reset");
+		settings.Add("ResetNewGame", false, "Reset on New Game screen", "Reset");
+		settings.Add("ResetMainMenu", false, "Reset on returning to the Main Menu", "Reset");
 
 	settings.Add("Splits", true, "Splits");	
 		settings.Add("End", true, "End", "Splits");
