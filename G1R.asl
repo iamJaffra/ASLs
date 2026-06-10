@@ -795,7 +795,7 @@ split {
 			shouldSplit = vars.Watchers["Chapter"].Changed && vars.Watchers["Chapter"].Current == chapter;
 		}
 		else if (type == "Kill") {
-			shouldSplit = vars.Watchers["Exp"].Changed && vars.IsDead(arg);
+			shouldSplit = vars.Watchers["Exp"].Changed && vars.Watchers["Exp"].Current != 0 && vars.IsDead(arg);
 		}
 
 		if (shouldSplit) {
