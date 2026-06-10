@@ -55,6 +55,10 @@ startup {
 		Tuple.Create("End",                          "Cinematic",     "ExtroCinematic"),
 	};
 
+	settings.Add("Reset", true, "Reset");
+		settings.Add("ResetNewGame", true, "Reset on New Game screen", "Reset");
+		settings.Add("ResetMainMenu", true, "Reset on returning to the Main Menu", "Reset");
+
 	settings.Add("Splits", true, "Splits");	
 		settings.Add("End", true, "End", "Splits");
 		settings.Add("ChapterSplits", true, "Chapters", "Splits");
@@ -335,23 +339,22 @@ init {
 				+ 0x0,     // Target
 				0x18       // NamePrivate
 			))
-		}
-	};
-
-	vars.MainMenuDisplayedWidget = new MemoryWatcher<ulong>(
-		new DeepPointer(
+		},
+		{ "MainMenuDisplayedWidget",
+			new MemoryWatcher<ulong>(new DeepPointer(
 			gWorld, 
 			0x30,      // PersistentLevel
 			0xF0,      // LevelScriptActor
 			0x2B0,     // MainMenu
-			0x448,     // Stack_FrontEnd
+			0x430,     // Stack_FrontEnd
 			0x1A0,     // WidgetList
 			0 * 0x8,   // [0] (CommonActivatableWidget)
-			0x548,     // Stack_Parent
+			0x588,     // Stack_Parent
 			0x1B0,     // DisplayedWidget
 			0x18       // NamePrivate
-		)
-	);
+			))
+		}
+	};
 
 	vars.Watchers["CinematicFName"].FailAction = MemoryWatcher.ReadFailAction.SetZeroOrNull;
 #endregion
@@ -696,8 +699,9 @@ init {
 
 #endregion
 
-	current.world = "";
-	current.cinematic = "";
+	current.world = old.world = "";
+	current.cinematic = old.cinematic = "";
+	current.mainMenuDisplayedWidget = current.mainMenuDisplayedWidget = "";
 }
 
 update {
@@ -729,30 +733,29 @@ update {
 	}
 
 	current.cinematic = vars.FNameToString(vars.Watchers["CinematicFName"].Current);
-	if (old.cinematic != current.cinematic) {
+	if (current.cinematic != old.cinematic) {
 		vars.Info("Cinematic: -> " + current.cinematic);
 	}
 
 	if (vars.Watchers["Exp"].Changed) {
 		vars.Info("Exp -> " + vars.Watchers["Exp"].Current);
 	}
+
+	current.mainMenuDisplayedWidget = vars.FNameToString(vars.Watchers["MainMenuDisplayedWidget"].Current);
+	if (current.mainMenuDisplayedWidget != old.mainMenuDisplayedWidget) {
+		vars.Info("Menu -> " + current.mainMenuDisplayedWidget);
+	}
 }
 
 reset {
-	if (current.world == "G1R_MainMenu_C") {
-		vars.MainMenuDisplayedWidget.Update(game);
+	if (current.world == "MenuMap") {
+		if (current.mainMenuDisplayedWidget != old.mainMenuDisplayedWidget) {
+			return settings["ResetNewGame"];
+		}
+	}
 
-		if (vars.MainMenuDisplayedWidget.Changed) {
-			vars.Info("Menu -> " + vars.FNameToString(vars.MainMenuDisplayedWidget.Current));
-		}
-		
-		if (vars.FNameToString(vars.MainMenuDisplayedWidget.Current) == "NewGame") {
-			return true;
-		}
-
-		if (current.world == "G1R_MenuMap" && old.world != "G1R_MenuMap") {
-			return true;
-		}
+	if (current.world != old.world && current.world == "MenuMap") {
+		return settings["ResetMainMenu"];
 	}
 }
 
