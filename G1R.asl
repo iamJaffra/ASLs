@@ -14,7 +14,76 @@ state("G1R-Win64-Shipping") {}
 
 startup {
 	#region Splits and Settings
+	
+	vars.Splits = new List<Tuple<string, string, string>> {
+		//           name,                           type,            className / number
+		Tuple.Create("Scavenger Whistle",            "Item",          "ItMs_ScavengerWhistle"),
+
+		Tuple.Create("Focus 1",                      "Item",          "ItMs_Focus_01"),
+		Tuple.Create("Focus 2",                      "Item",          "ItMs_Focus_02"),
+		Tuple.Create("Focus 3",                      "Item",          "ItMs_Focus_03"),
+		Tuple.Create("Focus 4",                      "Item",          "ItMs_Focus_04"),
+		Tuple.Create("Focus 5",                      "Item",          "ItMs_Focus_05"),
+
+		Tuple.Create("Prime Tongue of Fire",         "Item",          "ItAt_Firelizard_05"),
+		Tuple.Create("Horn of a Great Shadowbeast",  "Item",          "ItAt_Shadow_05"),
+		Tuple.Create("Teeth of a Swampshark Mother", "Item",          "ItAt_Swampshark_04"),
+		Tuple.Create("Prime Troll Tusk",             "Item",          "ItAt_Troll_03"),
+
+		Tuple.Create("Ulu-Mulu",                     "Item",          "ItMw_2H_Staff_Ulumulu"),
 		
+		Tuple.Create("Uriziel Gem 1",                "Item",          "ItMi_UrizielGem_01"),
+		Tuple.Create("Uriziel Gem 2",                "Item",          "ItMi_UrizielGem_02"),
+		Tuple.Create("Uriziel Gem 3",                "Item",          "ItMi_UrizielGem_03"),
+		Tuple.Create("Uriziel Gem 4",                "Item",          "ItMi_UrizielGem_04"),
+		Tuple.Create("Uriziel Gem 5",                "Item",          "ItMi_UrizielGem_05"),
+
+		Tuple.Create("Strange Sword",                "Item",          "ItMw_2H_Sword_Uriziel_01"),
+
+		Tuple.Create("Chapter 2",                    "Chapter",       "2"),
+		Tuple.Create("Chapter 3",                    "Chapter",       "3"),
+		Tuple.Create("Chapter 4",                    "Chapter",       "4"),
+		Tuple.Create("Chapter 5",                    "Chapter",       "5"),
+		Tuple.Create("Chapter 6",                    "Chapter",       "6"),
+
+		Tuple.Create("Whistler's Sword (Start)",     "QuestStart",    "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
+		Tuple.Create("Whistler's Sword (Complete)",  "QuestComplete", "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
+		Tuple.Create("Chromanin",                    "QuestComplete", "Instance_Quest_ValleyOfMines_CHROMANIN"),
+		
+		Tuple.Create("Hänno",                        "Kill",          "State_NC_SLD_Haenno"),
+
+		Tuple.Create("End",                          "Cinematic",     "SleeperCinematic"),
+	};
+
+	settings.Add("Splits", true, "Splits");	
+		settings.Add("End", true, "End", "Splits");
+		settings.Add("ChapterSplits", true, "Chapters", "Splits");
+		settings.Add("ItemSplits", true, "Items", "Splits");
+		settings.Add("QuestSplits", true, "Quests", "Splits");
+		settings.Add("KillSplits", true, "Kill", "Splits");
+
+	foreach (var split in vars.Splits) {
+		string name = split.Item1;
+		string type = split.Item2;
+		string arg  = split.Item3;
+
+		if (type == "Item") {
+			settings.Add(name, false, name, "ItemSplits");
+		} 
+		else if (type == "QuestStart") {
+			settings.Add(name, false, name, "QuestSplits");
+		}
+		else if (type == "QuestComplete") {
+			settings.Add(name, false, name, "QuestSplits");
+		}
+		else if (type == "Chapter") {
+			settings.Add(name, false, name, "ChapterSplits");
+		}
+		else if (type == "Kill") {
+			settings.Add(name, false, name, "KillSplits");
+		}
+	}
+	
 	#endregion
 
 	if (timer.CurrentTimingMethod == TimingMethod.RealTime) {
@@ -40,10 +109,6 @@ startup {
 	// Flags
 	vars.completedSplits = new HashSet<string>();
 	vars.timerPaused = false;
-
-
-	vars.X =  98555.7733905069d;
-	vars.Y = -56429.3303492728d;
 }
 
 init {
@@ -69,7 +134,6 @@ init {
 		return;
 	}
 #endregion
-
 
 #region Signature scanning
 	var scanner = new SignatureScanner(game, modules[0].BaseAddress, modules[0].ModuleMemorySize);
@@ -111,8 +175,7 @@ init {
 #region FNameToString()
 	var gNamesCache = new Dictionary<ulong, string>() {{0, "None"}};
 
-	vars.FNameToString = (Func<ulong, string>)(fName =>
-	{
+	vars.FNameToString = (Func<ulong, string>)(fName => {
 		var number     = (fName & 0xFFFFFFFF00000000) >> 0x20;
 		var nameLookup = (fName & 0x00000000FFFFFFFF) >> 0x00;
 
@@ -179,10 +242,10 @@ init {
 			new MemoryWatcher<int>(new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
-				0x1F8,    // ~GameState Subsystems~
+				0x218,    // ~GameState Subsystems~
 				0 * 0x8,  // [0] (GameStateSubsystemComponent)
 				0xA8,     // ??TMap
-				8 * 0x18  // [8] 
+				11 * 0x18 // [11] 
 				+ 0x8,    // Value (StorySubSystem)
 				0x50      // Chapter
 			))
@@ -191,10 +254,10 @@ init {
 			new MemoryWatcher<int>(new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
-				0x1F8,    // ~GameState Subsystems~
+				0x218,    // ~GameState Subsystems~
 				0 * 0x8,  // [0] (GameStateSubsystemComponent)
 				0xA8,     // ??TMap
-				8 * 0x18  // [8] 
+				11 * 0x18 // [11] 
 				+ 0x8,    // Value (StorySubSystem)
 				0x144     // KIRGO_REMATCH_RUNNING
 			))
@@ -205,7 +268,7 @@ init {
 				0x160,    // GameState
 				0x2A8,    // PlayerArray
 				0 * 0x8,  // [0] (CharacterState)
-				0x370,    // AbilitySystemComponent
+				0x378,    // AbilitySystemComponent
 				0x1090,   // SpawnedAttributes
 				2 * 0x8,  // [2] (AttributeSet_LevelProgression)
 				0x50      // Experience
@@ -216,12 +279,12 @@ init {
 			new MemoryWatcher<byte>(new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
-				0x1F8,    // ~GameState Subsystems~ 
+				0x218,    // ~GameState Subsystems~ 
 				0 * 0x8,  // [0] (GameStateSubsystemComponent) 
 				0xA8,     // ??TMap 
-				0 * 0x18  // [0] 
-				+ 0x8,    // Value (GothicCinematicManagerSubsystem)
-				0x30      // m_CinematicState
+				10 * 0x18 // [10] 
+				+ 0x8,    // .Value (GothicCinematicManagerSubsystem)
+				0x61      // m_CurrentCinematicState
 
 			// Possible values:
 			// None = 0
@@ -231,19 +294,32 @@ init {
 			// Unloading = 4
 			))
 		},
+		{ "CinematicFName",
+			new MemoryWatcher<ulong>(new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x218,    // ~GameState Subsystems~ 
+				0 * 0x8,  // [0] (GameStateSubsystemComponent) 
+				0xA8,     // ??TMap 
+				10 * 0x18 // [10] 
+				+ 0x8,    // .Value (GothicCinematicManagerSubsystem)
+				0x70,     // m_Cinematic
+				0x18      // NamePrivate
+			))
+		},
 		{ "ActiveNotifications",
 			new MemoryWatcher<int>(new DeepPointer(
 				gWorld, 
 				0x158,     // AuthorityGameMode
-				0x3B0,     // m_PlayerControllers
+				0x3C0,     // m_PlayerControllers
 				0 * 0x8,   // [0] (PlayerController)
 				0x340,     // MyHUD
 				0x380,     // m_Controllers
 				14 * 0x38  // [14] 
 				+ 0x28,    // Value (UHUDNotificationController)
-				0x38,      // m_NotificationMainWidget
-				0x450,     // m_AreaWidgets
-				3 * 0x8,   // [3] (W_NotificationArea_Right)
+				0x60,      // m_NotificationMainWidget
+				0x468,     // m_AreaWidgets
+				4 * 0x8,   // [4] (W_NotificationArea_Right)
 				0x370      // m_ActiveNotifications
 				+ 0x8      // ArrayNum
 			))
@@ -252,7 +328,7 @@ init {
 			new MemoryWatcher<ulong>(new DeepPointer(
 				gWorld, 
 				0x158,     // AuthorityGameMode
-				0x3B0,     // m_PlayerControllers
+				0x3C0,     // m_PlayerControllers
 				0 * 0x8,   // [0] (PlayerController)
 				0x348,     // PlayerCameraManager
 				0x320      // ViewTarget
@@ -276,19 +352,21 @@ init {
 			0x18       // NamePrivate
 		)
 	);
+
+	vars.Watchers["CinematicFName"].FailAction = MemoryWatcher.ReadFailAction.SetZeroOrNull;
 #endregion
 
 #region Inventory
-	vars.PlayerHasItem = (Func<string, bool>)((item) => {		
+	vars.PlayerHasItem = (Func<string, bool>)((item) => {
 		IntPtr itemsPtr = (IntPtr)
 			new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
 				0x2A8,    // PlayerArray
 				0 * 0x8,  // [0] (CharacterState)
-				0x378,    // DataModuleComponent
+				0x380,    // DataModuleComponent
 				0xA0,     // m_DataModules
-				5 * 0x8,  // [5] (DataModule_Container)
+				4 * 0x8,  // [4] (DataModule_Container)
 				0x40      // m_Inventory 
 				+ 0x20    // m_Values
 				+ 0x108   // Items
@@ -298,14 +376,14 @@ init {
 		IntPtr inventoryPtr = (IntPtr)
 			game.ReadValue<ulong>(
 				itemsPtr    // Items
-				+ 1 * 0x88  // [1] (main inventory)
+				+ 6 * 0x88  // [6] (main inventory)
 				+ 0x48      // m_Slots
 			);
 		
 		var inventorySize = 
 			game.ReadValue<int>(
 				itemsPtr    // Items
-				+ 1 * 0x88  // [1] (main inventory)
+				+ 6 * 0x88  // [6] (main inventory)
 				+ 0x48      // m_Slots
 				+ 0xC       // ArrayMax
 			);
@@ -323,6 +401,49 @@ init {
 		}
 
 		return false;
+	});
+
+	vars.PrintCarriedItems = (Action)(() => {
+		IntPtr itemsPtr = (IntPtr)
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8,    // PlayerArray
+				0 * 0x8,  // [0] (CharacterState)
+				0x380,    // DataModuleComponent
+				0xA0,     // m_DataModules
+				4 * 0x8,  // [4] (DataModule_Container)
+				0x40      // m_Inventory 
+				+ 0x20    // m_Values
+				+ 0x108   // Items
+			)
+			.Deref<ulong>(game);
+		
+		IntPtr inventoryPtr = (IntPtr)
+			game.ReadValue<ulong>(
+				itemsPtr    // Items
+				+ 6 * 0x88  // [6] (main inventory)
+				+ 0x48      // m_Slots
+			);
+		
+		var inventorySize = 
+			game.ReadValue<int>(
+				itemsPtr    // Items
+				+ 6 * 0x88  // [6] (main inventory)
+				+ 0x48      // m_Slots
+				+ 0xC       // ArrayMax
+			);
+
+		vars.Info("Listing currently carried items:");
+		for (int i = 0; i < inventorySize; i++) {
+			IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (i * 0xB0) + 0x8);
+			if (slotPtr == IntPtr.Zero) continue;
+
+			var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
+			var id = vars.FNameToString(idFName);
+
+			vars.Info(" - " + id);
+		}
 	});
 
 	/*
@@ -356,10 +477,10 @@ init {
 			new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
-				0x208,    // ??Array
+				0x218,    // ??Array
 				0 * 0x8,  // [0] (GameStateSubsystemComponent)
 				0xA8,     // ??TMap
-				6 * 0x18  // [6] 
+				8 * 0x18  // [6] 
 				+ 0x8,    // Value (QuestSubsystem)
 				0x90      // AllQuestInstances
 			)
@@ -369,10 +490,10 @@ init {
 			new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
-				0x208,    // ??Array
+				0x218,    // ??Array
 				0 * 0x8,  // [0] (GameStateSubsystemComponent)
 				0xA8,     // ??TMap
-				6 * 0x18  // [6] 
+				8 * 0x18  // [6] 
 				+ 0x8,    // Value (QuestSubsystem)
 				0x90      // AllQuestInstances
 				+ 0x8     // Num
@@ -385,12 +506,51 @@ init {
 			var idFName = new DeepPointer(questPtr + 0x18).Deref<ulong>(game);
 			var id = vars.FNameToString(idFName);
 
-			if (id == "Instance_" + quest) {
+			if (id == quest) {
 				return new DeepPointer(questPtr + 0x50).Deref<byte>(game);
 			}
 		}
 
 		return -1;
+	});
+
+	vars.PrintAllQuests = (Action)(() => {
+		IntPtr questInstancesArrayPtr = (IntPtr)
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x218,    // ??Array
+				0 * 0x8,  // [0] (GameStateSubsystemComponent)
+				0xA8,     // ??TMap
+				8 * 0x18  // [6] 
+				+ 0x8,    // Value (QuestSubsystem)
+				0x90      // AllQuestInstances
+			)
+			.Deref<ulong>(game);
+
+		var questInstancesArraySize = 
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x218,    // ??Array
+				0 * 0x8,  // [0] (GameStateSubsystemComponent)
+				0xA8,     // ??TMap
+				8 * 0x18  // [6] 
+				+ 0x8,    // Value (QuestSubsystem)
+				0x90      // AllQuestInstances
+				+ 0x8     // Num
+			)
+			.Deref<int>(game);
+
+		vars.Info("Listing every quest:");
+		for (int i = 0; i < questInstancesArraySize; i++) { 
+			IntPtr questPtr = (IntPtr)game.ReadValue<ulong>(questInstancesArrayPtr + (i * 0x8));
+
+			var idFName = new DeepPointer(questPtr + 0x18).Deref<ulong>(game);
+			var id = vars.FNameToString(idFName);
+
+			vars.Info(" - " + id);
+		}
 	});
 #endregion
 
@@ -420,7 +580,7 @@ init {
 			var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
 			var id = vars.FNameToString(idFName);
 
-			if (id == "State_" + npc) {
+			if (id == npc) {
 				var hp = 
 					new DeepPointer(
 						npcPtr 
@@ -443,7 +603,7 @@ init {
 						new DeepPointer(
 							npcPtr 
 							+ 0x480,   // AIAbility
-							0x540      // CurrentStateStack
+							0x568      // CurrentStateStack
 						)
 						.Deref<ulong>(game);
 
@@ -503,13 +663,41 @@ init {
 		
 		return false;
 	});
-#endregion
 
-#region Splits
+	vars.PrintAllNPCs = (Action)(() => {
+		IntPtr npcArrayPtr = (IntPtr)
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8     // PlayerArray
+			)
+			.Deref<ulong>(game);
+
+		var npcArraySize = 
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8     // PlayerArray
+				+ 0xC     // ArrayMax
+			)
+			.Deref<int>(game);
+
+		vars.Info("Listing every NPC:");
+		for (int i = 1; i < npcArraySize; i++) { 
+			IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (i * 0x8));
+			if (npcPtr == IntPtr.Zero) continue;
+
+			var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
+			var id = vars.FNameToString(idFName);
+
+			vars.Info(" - " + id);	
+		}
+	});
 
 #endregion
 
 	current.world = "";
+	current.cinematic = "";
 }
 
 update {
@@ -526,8 +714,8 @@ update {
 		vars.Info("World: " + old.world + " -> " + current.world);
 	}
 
-	if (vars.Watchers["ActiveNotifications"].Current == vars.Watchers["ActiveNotifications"].Old + 1) {
-		vars.Info("Notification");
+	if (vars.Watchers["ActiveNotifications"].Changed) {
+		vars.Info("Active Notifications: -> " + vars.Watchers["ActiveNotifications"].Current);
 	}
 
 	if (vars.Watchers["ViewTarget"].Changed) {
@@ -535,11 +723,18 @@ update {
 	}
 
 	if (vars.timerPaused) {
-		if (vars.worlds.Contains(current.world)) { 	
-			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
-				vars.timerPaused = false;
-			}
+		if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
+			vars.timerPaused = false;
 		}
+	}
+
+	current.cinematic = vars.FNameToString(vars.Watchers["CinematicFName"].Current);
+	if (old.cinematic != current.cinematic) {
+		vars.Info("Cinematic: -> " + current.cinematic);
+	}
+
+	if (vars.Watchers["Exp"].Changed) {
+		vars.Info("Exp -> " + vars.Watchers["Exp"].Current);
 	}
 }
 
@@ -562,14 +757,9 @@ reset {
 }
 
 start {
-	if (current.world == "G1R_MainMap") {
-		if (Math.Abs(vars.Watchers["X"].Current - vars.X) < 0.000000001 &&
-			Math.Abs(vars.Watchers["Y"].Current - vars.Y) < 0.000000001) {
-			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
-				return true;
-			}
-		}
-	}
+	if (old.cinematic == "IntroPt2Cinematic" && current.cinematic == "None") {
+		return true;
+	}	
 }
 
 onStart {
@@ -577,21 +767,48 @@ onStart {
 }
 
 split {
-	foreach (var kv in vars.splits) {
-		var splitName = kv.Key;
-		var condition = kv.Value;
+	foreach (var split in vars.Splits) {
+		string name = split.Item1;
+		string type = split.Item2;
+		string arg  = split.Item3;
 
-		if (settings[splitName] && !vars.completedSplits.Contains(splitName) && condition()) {
-			vars.completedSplits.Add(splitName);
-			vars.Info("SPLIT: " + splitName);
+		if (!settings[name] || vars.completedSplits.Contains(name)) continue;
+
+		bool shouldSplit = false;
+		if (type == "Item") {
+			shouldSplit = vars.Watchers["ActiveNotifications"].Changed && vars.PlayerHasItem(arg);
+		} 
+		else if (type == "QuestStart") {
+			shouldSplit = vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 2;
+		}
+		else if (type == "QuestComplete") {
+			shouldSplit = vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 4;
+		}
+		else if (type == "Cinematic") {
+			shouldSplit = current.cinematic != old.cinematic && current.cinematic == arg;
+		}
+		else if (type == "Chapter") {
+			int chapter = int.Parse(arg);
+			shouldSplit = vars.Watchers["Chapter"].Changed && vars.Watchers["Chapter"].Current == chapter;
+		}
+		
+
+		if (shouldSplit) {
+			vars.Info("Split: " + name + " " + arg);
+			vars.completedSplits.Add(name);
 			return true;
 		}
 	}
 }
 
+onSplit {
+	//vars.PrintAllQuests();
+	//vars.PrintCarriedItems();
+	//vars.PrintAllNPCs();
+}
+
 isLoading {
 	return vars.Watchers["LoadingScreen"].Current || 
-		   vars.Watchers["CinematicState"].Current == 3 || 
 		   vars.timerPaused;
 }
 
