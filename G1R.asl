@@ -50,7 +50,7 @@ startup {
 		Tuple.Create("Whistler's Sword (Complete)",  "QuestComplete", "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
 		Tuple.Create("Chromanin",                    "QuestComplete", "Instance_Quest_ValleyOfMines_CHROMANIN"),
 		
-		Tuple.Create("Hänno",                        "Kill",          "State_NC_SLD_Haenno"),
+		Tuple.Create("Hänno",                        "Kill",          "State_NC_SLD_Haenno"), // State_NC_SLD_Haenno
 
 		Tuple.Create("End",                          "Cinematic",     "ExtroCinematic"),
 	};
@@ -605,7 +605,7 @@ init {
 					var statePtr = (IntPtr)
 						new DeepPointer(
 							npcPtr 
-							+ 0x480,   // AIAbility
+							+ 0x4D8,   // AIAbility
 							0x568      // CurrentStateStack
 						)
 						.Deref<ulong>(game);
@@ -795,7 +795,7 @@ split {
 			shouldSplit = vars.Watchers["Chapter"].Changed && vars.Watchers["Chapter"].Current == chapter;
 		}
 		else if (type == "Kill") {
-			shouldSplit = vars.Watchers["Exp"].Changed && vars.Watchers["Exp"].Current != 0 && vars.IsDead(arg);
+			shouldSplit = vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old && vars.IsDead(arg);
 		}
 
 		if (shouldSplit) {
