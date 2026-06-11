@@ -584,33 +584,31 @@ init {
 			var id = vars.FNameToString(idFName);
 
 			if (id == npc) {
-				var hp = 
+				var gameplayEffectsPtr = (IntPtr)
 					new DeepPointer(
 						npcPtr 
-						+ 0x370,   // AbilitySystemComponent
-						0x1090,    // SpawnedAttributes
-						0 * 0x8,   // [0] (AttributeSet_Health)
-						0x40       // Health
-						+ 0xC      // CurrentValue
+						+ 0x378,   // AbilitySystemComponent
+						0x9A8      // ActiveGameplayEffects
 					)
-					.Deref<float>(game);
+					.Deref<ulong>(game);
 
-				if (hp == 0) {
-					// Human NPCs don't die when their health reaches zero.
-					// They are only knocked out for a while. 
-					// Therefore, we perform an additional check:
-					// The pointer to an NPC's AI states becomes zero when they are fully dead. 
-					// I haven't found a simpler isDead flag so far.
+				var gameplayEffectsNum =
+					new DeepPointer(
+						npcPtr 
+						+ 0x378,   // AbilitySystemComponent
+						0x9A8      // ActiveGameplayEffects
+						+ 0x8      // ArrayNum
+					)
+					.Deref<int>(game);
 
-					var statePtr = (IntPtr)
-						new DeepPointer(
-							npcPtr 
-							+ 0x4D8,   // AIAbility
-							0x568      // CurrentStateStack
-						)
-						.Deref<ulong>(game);
+				for (int j = 0; j < gameplayEffectsNum; j++) {
+					IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(gameplayEffectsPtr + (j * 0x360 + 0x18));
+					if (gameplayEffectPtr == IntPtr.Zero) continue;
 
-					if (statePtr == IntPtr.Zero) {
+					var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
+					var gameplayEffect = vars.FNameToString(gameplayEffectFName);
+					
+					if (gameplayEffect == "Default__GE_Death") {
 						return true;
 					}
 				}
@@ -795,7 +793,10 @@ split {
 			shouldSplit = vars.Watchers["Chapter"].Changed && vars.Watchers["Chapter"].Current == chapter;
 		}
 		else if (type == "Kill") {
-			shouldSplit = vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old && vars.IsDead(arg);
+			shouldSplit = 
+				vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old 
+				&& vars.Watchers["Exp"].Old != 0 
+				&& vars.IsDead(arg);
 		}
 
 		if (shouldSplit) {
