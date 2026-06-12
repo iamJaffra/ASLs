@@ -376,30 +376,38 @@ init {
 			)
 			.Deref<ulong>(game);
 		
-		IntPtr inventoryPtr = (IntPtr)
-			game.ReadValue<ulong>(
-				itemsPtr    // Items
-				+ 6 * 0x88  // [6] (main inventory)
-				+ 0x48      // m_Slots
-			);
+		int itemsArrayNum =
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8,    // PlayerArray
+				0 * 0x8,  // [0] (CharacterState)
+				0x380,    // DataModuleComponent
+				0xA0,     // m_DataModules
+				4 * 0x8,  // [4] (DataModule_Container)
+				0x40      // m_Inventory 
+				+ 0x20    // m_Values
+				+ 0x108   // Items
+				+ 0x8     // ArrayNum
+			)
+			.Deref<int>(game);
 		
-		var inventorySize = 
-			game.ReadValue<int>(
-				itemsPtr    // Items
-				+ 6 * 0x88  // [6] (main inventory)
-				+ 0x48      // m_Slots
-				+ 0xC       // ArrayMax
-			);
+		for (int i = 0; i < itemsArrayNum; i++) {
+			byte inventoryType = game.ReadValue<byte>(itemsPtr + (i * 0x88) + 0x58);
 
-		for (int i = 0; i < inventorySize; i++) {
-			IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (i * 0xB0) + 0x8);
-			if (slotPtr == IntPtr.Zero) continue;
+			IntPtr inventoryPtr = (IntPtr)game.ReadValue<ulong>(itemsPtr + (i * 0x88) + 0x48);
+			int inventorySize = game.ReadValue<int>(itemsPtr + (i * 0x88) + 0x48 + 0xC);
 
-			var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
-			var id = vars.FNameToString(idFName);
+			for (int j = 0; j < inventorySize; j++) {
+				IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (j * 0xB0) + 0x8);
+				if (slotPtr == IntPtr.Zero) continue;
 
-			if (item == id) {
-				return true;
+				var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
+				var id = vars.FNameToString(idFName);
+
+				if (item == id) {
+					return true;
+				}
 			}
 		}
 
@@ -422,52 +430,41 @@ init {
 			)
 			.Deref<ulong>(game);
 		
-		IntPtr inventoryPtr = (IntPtr)
-			game.ReadValue<ulong>(
-				itemsPtr    // Items
-				+ 6 * 0x88  // [6] (main inventory)
-				+ 0x48      // m_Slots
-			);
+		int itemsArrayNum =
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8,    // PlayerArray
+				0 * 0x8,  // [0] (CharacterState)
+				0x380,    // DataModuleComponent
+				0xA0,     // m_DataModules
+				4 * 0x8,  // [4] (DataModule_Container)
+				0x40      // m_Inventory 
+				+ 0x20    // m_Values
+				+ 0x108   // Items
+				+ 0x8     // ArrayNum
+			)
+			.Deref<int>(game);
 		
-		var inventorySize = 
-			game.ReadValue<int>(
-				itemsPtr    // Items
-				+ 6 * 0x88  // [6] (main inventory)
-				+ 0x48      // m_Slots
-				+ 0xC       // ArrayMax
-			);
+		for (int i = 0; i < itemsArrayNum; i++) {
+			byte inventoryType = game.ReadValue<byte>(itemsPtr + (i * 0x88) + 0x58);
+			
+			vars.Info("Inventory " + inventoryType);
 
-		vars.Info("Listing currently carried items:");
-		for (int i = 0; i < inventorySize; i++) {
-			IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (i * 0xB0) + 0x8);
-			if (slotPtr == IntPtr.Zero) continue;
+			IntPtr inventoryPtr = (IntPtr)game.ReadValue<ulong>(itemsPtr + (i * 0x88) + 0x48);
+			int inventorySize = game.ReadValue<int>(itemsPtr + (i * 0x88) + 0x48 + 0xC);
 
-			var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
-			var id = vars.FNameToString(idFName);
+			for (int j = 0; j < inventorySize; j++) {
+				IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (j * 0xB0) + 0x8);
+				if (slotPtr == IntPtr.Zero) continue;
 
-			vars.Info(" - " + id);
+				var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
+				var id = vars.FNameToString(idFName);
+
+				vars.Info(" - " + id);
+			}
 		}
 	});
-
-	/*
-	## Mission Items
-	- ItMs_Axe_Bran
-	- ItMs_ExplosionBarrel
-	- ItMs_ExplosionScroll
-	- ItMs_FakeDiggerClothes
-	- ItMs_Focus_01
-	- ItMs_Focus_02
-	- ItMs_Focus_03
-	- ItMs_Focus_04
-	- ItMs_Focus_05
-	- ItMs_Plants_OrcSpore
-	- ItMs_Lightbringer
-	- ItMs_Demonprank
-	- ItMs_Spellblade
-	- ItMs_Timeblade
-	- ItMs_Worldsplitter
-	- ItMs_Uriziel
-	*/
 #endregion
 
 #region Quests
@@ -601,8 +598,12 @@ init {
 					)
 					.Deref<int>(game);
 
-				for (int j = 0; j < gameplayEffectsNum; j++) {
-					IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(gameplayEffectsPtr + (j * 0x360 + 0x18));
+				for (int j = 0; j < gameplayEffectsNum; j++) {					
+					IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
+						gameplayEffectsPtr 
+						+ (j * 0x360 + 0x18   // GameplayEffects_Internal.Spec.Def
+					)); 
+
 					if (gameplayEffectPtr == IntPtr.Zero) continue;
 
 					var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
