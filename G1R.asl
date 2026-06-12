@@ -16,43 +16,46 @@ startup {
 	#region Splits and Settings
 	
 	vars.Splits = new List<Tuple<string, string, string>> {
-		//           name,                           type,            className / number
-		Tuple.Create("Scavenger Whistle",            "Item",          "ItMs_ScavengerWhistle"),
+		//           name,                              type,            className / number
+		Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
-		Tuple.Create("Focus 1",                      "Item",          "ItMs_Focus_01"),
-		Tuple.Create("Focus 2",                      "Item",          "ItMs_Focus_02"),
-		Tuple.Create("Focus 3",                      "Item",          "ItMs_Focus_03"),
-		Tuple.Create("Focus 4",                      "Item",          "ItMs_Focus_04"),
-		Tuple.Create("Focus 5",                      "Item",          "ItMs_Focus_05"),
+		Tuple.Create("Focus 1",                         "Item",          "ItMs_Focus_01"),
+		Tuple.Create("Focus 2",                         "Item",          "ItMs_Focus_02"),
+		Tuple.Create("Focus 3",                         "Item",          "ItMs_Focus_03"),
+		Tuple.Create("Focus 4",                         "Item",          "ItMs_Focus_04"),
+		Tuple.Create("Focus 5",                         "Item",          "ItMs_Focus_05"),
 
-		Tuple.Create("Prime Tongue of Fire",         "Item",          "ItAt_Firelizard_05"),
-		Tuple.Create("Horn of a Great Shadowbeast",  "Item",          "ItAt_Shadow_05"),
-		Tuple.Create("Teeth of a Swampshark Mother", "Item",          "ItAt_Swampshark_04"),
-		Tuple.Create("Prime Troll Tusk",             "Item",          "ItAt_Troll_03"),
+		Tuple.Create("Prime Tongue of Fire",            "Item",          "ItAt_Firelizard_05"),
+		Tuple.Create("Horn of a Great Shadowbeast",     "Item",          "ItAt_Shadow_05"),
+		Tuple.Create("Teeth of a Swampshark Mother",    "Item",          "ItAt_Swampshark_04"),
+		Tuple.Create("Prime Troll Tusk",                "Item",          "ItAt_Troll_03"),
 
-		Tuple.Create("Ulu-Mulu",                     "Item",          "ItMw_2H_Staff_Ulumulu"),
+		Tuple.Create("Ulu-Mulu",                        "Item",          "ItMw_2H_Staff_Ulumulu"),
 		
-		Tuple.Create("Uriziel Gem 1",                "Item",          "ItMi_UrizielGem_01"),
-		Tuple.Create("Uriziel Gem 2",                "Item",          "ItMi_UrizielGem_02"),
-		Tuple.Create("Uriziel Gem 3",                "Item",          "ItMi_UrizielGem_03"),
-		Tuple.Create("Uriziel Gem 4",                "Item",          "ItMi_UrizielGem_04"),
-		Tuple.Create("Uriziel Gem 5",                "Item",          "ItMi_UrizielGem_05"),
+		Tuple.Create("Uriziel Gem 1",                   "Item",          "ItMi_UrizielGem_01"),
+		Tuple.Create("Uriziel Gem 2",                   "Item",          "ItMi_UrizielGem_02"),
+		Tuple.Create("Uriziel Gem 3",                   "Item",          "ItMi_UrizielGem_03"),
+		Tuple.Create("Uriziel Gem 4",                   "Item",          "ItMi_UrizielGem_04"),
+		Tuple.Create("Uriziel Gem 5",                   "Item",          "ItMi_UrizielGem_05"),
 
-		Tuple.Create("Strange Sword",                "Item",          "ItMw_2H_Sword_Uriziel_01"),
+		Tuple.Create("Strange Sword",                   "Item",          "ItMw_2H_Sword_Uriziel_01"),
 
-		Tuple.Create("Chapter 2",                    "Chapter",       "2"),
-		Tuple.Create("Chapter 3",                    "Chapter",       "3"),
-		Tuple.Create("Chapter 4",                    "Chapter",       "4"),
-		Tuple.Create("Chapter 5",                    "Chapter",       "5"),
-		Tuple.Create("Chapter 6",                    "Chapter",       "6"),
+		Tuple.Create("Chapter 2",                       "Chapter",       "2"),
+		Tuple.Create("Chapter 3",                       "Chapter",       "3"),
+		Tuple.Create("Chapter 4",                       "Chapter",       "4"),
+		Tuple.Create("Chapter 5",                       "Chapter",       "5"),
+		Tuple.Create("Chapter 6",                       "Chapter",       "6"),
 
-		Tuple.Create("Whistler's Sword (Start)",     "QuestStart",    "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
-		Tuple.Create("Whistler's Sword (Complete)",  "QuestComplete", "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
-		Tuple.Create("Chromanin",                    "QuestComplete", "Instance_Quest_ValleyOfMines_CHROMANIN"),
+		Tuple.Create("Whistler's Sword (Start)",        "QuestStart",    "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
+		Tuple.Create("Whistler's Sword (Complete)",     "QuestComplete", "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
+		Tuple.Create("Chromanin",                       "QuestComplete", "Instance_Quest_ValleyOfMines_CHROMANIN"),
 		
-		Tuple.Create("Hänno",                        "Kill",          "State_NC_SLD_Haenno"), // State_NC_SLD_Haenno
+		Tuple.Create("Hänno",                           "Kill",          "State_NC_SLD_Haenno"),
 
-		Tuple.Create("End",                          "Cinematic",     "ExtroCinematic"),
+		Tuple.Create("Sleeper Temple Entrance Barrier", "Cinematic",     "SleeperTempleOpeningCinematic"),
+		Tuple.Create("Sleeper Temple Final Barrier",    "ViewTarget",    "Interactive_DestroyFinalBarrier_C_UAID_30D042EE632F23B802"),
+
+		Tuple.Create("End",                             "Cinematic",     "ExtroCinematic"),
 	};
 
 	settings.Add("Reset", true, "Reset");
@@ -62,6 +65,9 @@ startup {
 	settings.Add("Splits", true, "Splits");	
 		settings.Add("End", true, "End", "Splits");
 		settings.Add("ChapterSplits", true, "Chapters", "Splits");
+		settings.Add("BarrierSplits", true, "Barriers", "Splits");
+			settings.Add("Sleeper Temple Entrance Barrier", false, "Sleeper Temple Entrance Barrier", "BarrierSplits");
+			settings.Add("Sleeper Temple Final Barrier", false, "Sleeper Temple Final Barrier", "BarrierSplits");
 		settings.Add("ItemSplits", true, "Items", "Splits");
 		settings.Add("QuestSplits", true, "Quests", "Splits");
 		settings.Add("KillSplits", true, "Kill", "Splits");
@@ -798,6 +804,9 @@ split {
 				vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old 
 				&& vars.Watchers["Exp"].Old != 0 
 				&& vars.IsDead(arg);
+		}
+		else if (type == "ViewTarget") {
+			shouldSplit = vars.FNameToString(vars.Watchers["ViewTarget"].Current) == arg;
 		}
 
 		if (shouldSplit) {
