@@ -17,6 +17,8 @@ startup {
 	
 	vars.Splits = new List<Tuple<string, string, string>> {
 		//           name,                              type,            className / number
+		Tuple.Create("Storm Of Fire Scroll",            "Item",          "ItAr_Scroll_StormOfFire"),
+		Tuple.Create("Bloodfly Scroll",                 "Item",          "ItAr_Scroll_TransformBloodfly"),
 		Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
 		Tuple.Create("Focus 1",                         "Item",          "ItMs_Focus_01"),
@@ -46,14 +48,27 @@ startup {
 		Tuple.Create("Chapter 5",                       "Chapter",       "5"),
 		Tuple.Create("Chapter 6",                       "Chapter",       "6"),
 
-		Tuple.Create("Whistler's Sword (Start)",        "QuestStart",    "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
-		Tuple.Create("Whistler's Sword (Complete)",     "QuestComplete", "Instance_Quest_OldCamp_OCCHAPTER1_WHISTLER_BUYMYSWORD"),
-		Tuple.Create("Chromanin",                       "QuestComplete", "Instance_Quest_ValleyOfMines_CHROMANIN"),
+		Tuple.Create("<Placeholder> (tell me which quests you'd like)",  
+		                                                "QuestStart",    "Instance_Quest_PLACEHOLDER"),
 		
+		Tuple.Create("Sharky",                          "Talk",          "State_NC_ORG_Sharky"),
+
 		Tuple.Create("Hänno",                           "Kill",          "State_NC_SLD_Haenno"),
+
+		Tuple.Create("Transform into Bloodfly",         "ViewTarget",    "CharacterCanTransformInto_Bloodfly_C"),
 
 		Tuple.Create("Sleeper Temple Entrance Barrier", "Cinematic",     "SleeperTempleOpeningCinematic"),
 		Tuple.Create("Sleeper Temple Final Barrier",    "ViewTarget",    "Interactive_DestroyFinalBarrier_C_UAID_30D042EE632F23B802"),
+
+		Tuple.Create("Harpies",                         "Location",      "82197.8904851777, 116451.914252969"),
+		Tuple.Create("Orcs",                            "Location",      "32259.6609909562, -271337.753909156"),
+		Tuple.Create("Mud",                             "Location",      "241192.734211706, 90228.5344752588"),
+		Tuple.Create("Diego",                           "Location",      "32799.2340540829, -340264.296803568"),
+		Tuple.Create("Gorn",                            "Location",      "257228.480389017, -247995.238136612"),
+		Tuple.Create("Milten",                          "Location",      "18169.1992098076, 113774.093393691"),
+		Tuple.Create("Lester",                          "Location",      "17879.8228228579, 65681.1945283479"),
+		Tuple.Create("Xardas",                          "Location",      "80294.8305271158, -363925.52740662"),
+		Tuple.Create("Cor Kalom",                       "Location",      "147409.323357549, -385632.48318534"),
 
 		Tuple.Create("End",                             "Cinematic",     "ExtroCinematic"),
 	};
@@ -68,8 +83,12 @@ startup {
 		settings.Add("BarrierSplits", true, "Barriers", "Splits");
 			settings.Add("Sleeper Temple Entrance Barrier", false, "Sleeper Temple Entrance Barrier", "BarrierSplits");
 			settings.Add("Sleeper Temple Final Barrier", false, "Sleeper Temple Final Barrier", "BarrierSplits");
+		settings.Add("DreamSplits", true, "Sleeper Fight (splits on entering each phase)", "Splits");
 		settings.Add("ItemSplits", true, "Items", "Splits");
 		settings.Add("QuestSplits", true, "Quests", "Splits");
+		settings.Add("TransformSplits", true, "Transform into ...", "Splits");
+			settings.Add("Transform into Bloodfly", false, "Bloodfly", "TransformSplits");
+		settings.Add("TalkSplits", true, "Talk to ...", "Splits");
 		settings.Add("KillSplits", true, "Kill", "Splits");
 
 	foreach (var split in vars.Splits) {
@@ -91,6 +110,12 @@ startup {
 		}
 		else if (type == "Kill") {
 			settings.Add(name, false, name, "KillSplits");
+		}
+		else if (type == "Talk") {
+			settings.Add(name, false, name, "TalkSplits");
+		}
+		else if (type == "Location") {
+			settings.Add(name, false, name, "DreamSplits");
 		}
 	}
 	
@@ -114,6 +139,10 @@ startup {
 
 	vars.Info = (Action<string>)((msg) => {
 		print("[Gothic 1 Remake ASL] " + msg);
+	});
+
+	vars.DoubleEquals = (Func<double, double, bool>)((double1, double2) => {
+		return Math.Abs(double1 - double2) < 0.00001;
 	});
 
 	// Flags
@@ -230,9 +259,9 @@ init {
 				0x160,    // GameState
 				0x2A8,    // PlayerArray
 				0 * 0x8,  // [0]
-				0x3E8,    // OwnedCharacter
-				0x328,    // CapsuleComponent
-				0x128     // RelativeLocation
+				0x428,    // OwnedCharacter
+				0x1A0,    // RootComponent
+				0x1F0     // RelativeLocation
 				+ 0x0     // X
 			))
 		},
@@ -242,9 +271,9 @@ init {
 				0x160,    // GameState
 				0x2A8,    // PlayerArray
 				0 * 0x8,  // [0]
-				0x3E8,    // OwnedCharacter
-				0x328,    // CapsuleComponent
-				0x128     // RelativeLocation
+				0x428,    // OwnedCharacter
+				0x1A0,    // RootComponent
+				0x1F0     // RelativeLocation
 				+ 0x8     // Y
 			))
 		},
@@ -607,14 +636,14 @@ init {
 				for (int j = 0; j < gameplayEffectsNum; j++) {					
 					IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
 						gameplayEffectsPtr 
-						+ (j * 0x360 + 0x18   // GameplayEffects_Internal.Spec.Def
-					)); 
+						+ (j * 0x360 + 0x18)   // GameplayEffects_Internal.Spec.Def
+					); 
 
 					if (gameplayEffectPtr == IntPtr.Zero) continue;
 
 					var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
 					var gameplayEffect = vars.FNameToString(gameplayEffectFName);
-					
+					vars.Info("GameplayEffect["+j+"] = " + gameplayEffect);
 					if (gameplayEffect == "Default__GE_Death") {
 						return true;
 					}
@@ -650,12 +679,12 @@ init {
 			var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
 			var id = vars.FNameToString(idFName);
 
-			if (id == "State_" + npc) {
+			if (id == npc) {
 				var currentStateFName = 
 					new DeepPointer(
 						npcPtr 
-						+ 0x480,  // GameplayAbility_CharacterAI
-						0x540,    // CurrentStateStack
+						+ 0x4D8,  // AIAbility (GameplayAbility_CharacterAI)
+						0x568,    // CurrentStateStack
 						0 * 0x8,  // [0]
 						0x18      // NamePrivate
 					)
@@ -699,6 +728,122 @@ init {
 			var id = vars.FNameToString(idFName);
 
 			vars.Info(" - " + id);	
+		}
+	});
+
+	vars.PrintPlayerGameplayEffects = (Action)(() => {
+		IntPtr npcArrayPtr = (IntPtr)
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8     // PlayerArray
+			)
+			.Deref<ulong>(game);
+
+		var npcArraySize = 
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8     // PlayerArray
+				+ 0xC     // ArrayMax
+			)
+			.Deref<int>(game);
+
+		IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (0 * 0x8));
+
+		var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
+		var id = vars.FNameToString(idFName);
+
+		var gameplayEffectsPtr = (IntPtr)
+			new DeepPointer(
+				npcPtr 
+				+ 0x378,   // AbilitySystemComponent
+				0x9A8      // ActiveGameplayEffects
+			)
+			.Deref<ulong>(game);
+
+		var gameplayEffectsNum =
+			new DeepPointer(
+				npcPtr 
+				+ 0x378,   // AbilitySystemComponent
+				0x9A8      // ActiveGameplayEffects
+				+ 0x8      // ArrayNum
+			)
+			.Deref<int>(game);
+
+		for (int j = 0; j < gameplayEffectsNum; j++) {					
+			IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
+				gameplayEffectsPtr 
+				+ (j * 0x360 + 0x18)   // GameplayEffects_Internal.Spec.Def
+			); 
+
+			if (gameplayEffectPtr == IntPtr.Zero) continue;
+
+			var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
+			var gameplayEffect = vars.FNameToString(gameplayEffectFName);
+			vars.Info("GameplayEffect["+j+"] = " + gameplayEffect);
+		}
+	});
+
+	vars.PrintPlayerGameplayAbilities = (Action)(() => {
+		IntPtr npcArrayPtr = (IntPtr)
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8     // PlayerArray
+			)
+			.Deref<ulong>(game);
+
+		var npcArraySize = 
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8     // PlayerArray
+				+ 0xC     // ArrayMax
+			)
+			.Deref<int>(game);
+
+		IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (0 * 0x8));
+
+		var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
+		var id = vars.FNameToString(idFName);
+
+		var gameplayEffectsPtr = (IntPtr)
+			new DeepPointer(
+				npcPtr 
+				+ 0x378,   // AbilitySystemComponent
+				0x538      // ActiveGameplayEffects
+			)
+			.Deref<ulong>(game);
+
+		var gameplayEffectsNum =
+			new DeepPointer(
+				npcPtr 
+				+ 0x378,   // AbilitySystemComponent
+				0x538      // ActiveGameplayEffects
+				+ 0x8      // ArrayNum
+			)
+			.Deref<int>(game);
+
+		for (int j = 0; j < gameplayEffectsNum; j++) {					
+			IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
+				gameplayEffectsPtr + (j * 0x8)   // AllReplicatedInstancedAbilities
+			); 
+
+			if (gameplayEffectPtr == IntPtr.Zero) continue;
+
+			var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
+			var gameplayEffect = vars.FNameToString(gameplayEffectFName);
+			vars.Info("GameplayEffect["+j+"] = " + gameplayEffect);
+
+			var tagsArray = new DeepPointer(gameplayEffectPtr + 0xA8).Deref<IntPtr>(game);
+			var tagsArraySize = new DeepPointer(gameplayEffectPtr + 0xB0).Deref<int>(game);
+
+			for (int i = 0; i < tagsArraySize; i++) {
+				var tagFName = game.ReadValue<ulong>(tagsArray + (i * 0x8));
+				var tag = vars.FNameToString(tagFName);
+				vars.Info(" Tag " + i + ": " + tag);
+			}
 		}
 	});
 
@@ -805,8 +950,27 @@ split {
 				&& vars.Watchers["Exp"].Old != 0 
 				&& vars.IsDead(arg);
 		}
+		else if (type == "Talk") {
+			shouldSplit = 
+				vars.Watchers["ViewTarget"].Changed 
+				&& vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation")
+				&& vars.IsInConversation(arg);
+		}
 		else if (type == "ViewTarget") {
 			shouldSplit = vars.FNameToString(vars.Watchers["ViewTarget"].Current) == arg;
+		}
+		else if (type == "Location") {
+			string input = arg;
+			string[] parts = input.Split(',');
+			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+			
+			shouldSplit = 
+				Math.Sqrt(
+					Math.Pow(x - vars.Watchers["X"].Current, 2) + 
+					Math.Pow(y - vars.Watchers["Y"].Current, 2)
+				) 
+				< 500;
 		}
 
 		if (shouldSplit) {
@@ -821,6 +985,9 @@ onSplit {
 	//vars.PrintAllQuests();
 	//vars.PrintCarriedItems();
 	//vars.PrintAllNPCs();
+	//vars.PrintPlayerGameplayEffects();
+	//vars.PrintPlayerGameplayAbilities();
+	//vars.Info("(X, Y): " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
 }
 
 isLoading {
