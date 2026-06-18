@@ -655,45 +655,37 @@ init {
 	});
 
 	vars.IsInConversation = (Func<string, bool>)((npc) => {
-		IntPtr npcArrayPtr = (IntPtr)
+		IntPtr abilitySystemComponentPtr = (IntPtr)
 			new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
-				0x2A8     // PlayerArray
+				0x2A8,    // PlayerArray
+				0x0,      // [0]
+				0x378     // AbilitySystemComponent
 			)
 			.Deref<ulong>(game);
 
-		var npcArraySize = 
-			new DeepPointer(
-				gWorld, 
-				0x160,    // GameState
-				0x2A8     // PlayerArray
-				+ 0xC     // ArrayMax
-			)
-			.Deref<int>(game);
+		IntPtr allReplicatedInstancedAbilitiesPtr = game.ReadValue<IntPtr>(abilitySystemComponentPtr + 0x538);
+		int allReplicatedInstancedAbilitiesNum = game.ReadValue<int>(abilitySystemComponentPtr + 0x538 + 0x8);
 
-		for (int i = 1; i < npcArraySize; i++) { 
-			IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (i * 0x8));
-			if (npcPtr == IntPtr.Zero) continue;
+		for (int i = 0; i < allReplicatedInstancedAbilitiesNum; i++) { 
+			IntPtr gameplayAbilityPtr = game.ReadValue<IntPtr>(allReplicatedInstancedAbilitiesPtr + (i * 0x8));
+			var gameplayAbilityFName = game.ReadValue<ulong>(gameplayAbilityPtr + 0x18);
+			var gameplayAbility = vars.FNameToString(gameplayAbilityFName);
 
-			var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
-			var id = vars.FNameToString(idFName);
+			if (gameplayAbility == "GA_Human_Conversation_WithUI") {
+				IntPtr conversationGroupPtr = game.ReadValue<IntPtr>(gameplayAbilityPtr + 0x530);
+				IntPtr characterIdealTransformMapPtr = game.ReadValue<IntPtr>(conversationGroupPtr + 0x190);
+				int characterIdealTransformMapNum = game.ReadValue<int>(conversationGroupPtr + 0x190 + 0x8);
 
-			if (id == npc) {
-				var currentStateFName = 
-					new DeepPointer(
-						npcPtr 
-						+ 0x4D8,  // AIAbility (GameplayAbility_CharacterAI)
-						0x568,    // CurrentStateStack
-						0 * 0x8,  // [0]
-						0x18      // NamePrivate
-					)
-					.Deref<ulong>(game);
-
-				var currentState = vars.FNameToString(currentStateFName);
-
-				if (currentState == "AIState_Conversation") {
-					return true;
+				for (int j = 0; j < characterIdealTransformMapNum; j++) {
+					IntPtr participantPtr = game.ReadValue<IntPtr>(characterIdealTransformMapPtr + (j * 0x80));
+					var participantFName = new DeepPointer(participantPtr + 0x2B0, 0x18).Deref<ulong>(game);
+					var participant = vars.FNameToString(participantFName);
+					
+					if (participant == npc) {
+						return true;
+					}
 				}
 			}
 		}
@@ -952,8 +944,7 @@ split {
 		}
 		else if (type == "Talk") {
 			shouldSplit = 
-				vars.Watchers["ViewTarget"].Changed 
-				&& vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation")
+				vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation")
 				&& vars.IsInConversation(arg);
 		}
 		else if (type == "ViewTarget") {
