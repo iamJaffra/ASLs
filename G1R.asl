@@ -56,7 +56,8 @@ startup {
 		Tuple.Create("Hänno",                           "Kill",          "State_NC_SLD_Haenno"),
 
 		Tuple.Create("Transform into Bloodfly",         "ViewTarget",    "CharacterCanTransformInto_Bloodfly_C"),
-
+		Tuple.Create("Go to bed",                       "ViewTarget",    "Interactive_Bed"),
+		
 		Tuple.Create("Sleeper Temple Entrance Barrier", "Cinematic",     "SleeperTempleOpeningCinematic"),
 		Tuple.Create("Sleeper Temple Final Barrier",    "ViewTarget",    "Interactive_DestroyFinalBarrier_C_UAID_30D042EE632F23B802"),
 
@@ -90,6 +91,7 @@ startup {
 			settings.Add("Transform into Bloodfly", false, "Bloodfly", "TransformSplits");
 		settings.Add("TalkSplits", true, "Talk to ...", "Splits");
 		settings.Add("KillSplits", true, "Kill", "Splits");
+		settings.Add("Go to bed", false, "Go to bed");
 
 	foreach (var split in vars.Splits) {
 		string name = split.Item1;
@@ -139,10 +141,6 @@ startup {
 
 	vars.Info = (Action<string>)((msg) => {
 		print("[Gothic 1 Remake ASL] " + msg);
-	});
-
-	vars.DoubleEquals = (Func<double, double, bool>)((double1, double2) => {
-		return Math.Abs(double1 - double2) < 0.00001;
 	});
 
 	// Flags
@@ -643,7 +641,7 @@ init {
 
 					var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
 					var gameplayEffect = vars.FNameToString(gameplayEffectFName);
-					vars.Info("GameplayEffect["+j+"] = " + gameplayEffect);
+					
 					if (gameplayEffect == "Default__GE_Death") {
 						return true;
 					}
@@ -948,7 +946,7 @@ split {
 				&& vars.IsInConversation(arg);
 		}
 		else if (type == "ViewTarget") {
-			shouldSplit = vars.FNameToString(vars.Watchers["ViewTarget"].Current) == arg;
+			shouldSplit = vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith(arg);
 		}
 		else if (type == "Location") {
 			string input = arg;
