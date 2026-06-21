@@ -180,12 +180,12 @@ init {
 	var gNamesTrg = new SigScanTarget(7, 
 		"8B D9",                // mov ebx,ecx
 		"74 ??",                // je G1R-Win64-Shipping.exe.+________
-		"48 8D 15 ????????",    // lea rdx,[G1R-Win64-Shipping.exe+________]  <--- GNames
+		"48 8D 15 ????????",    // lea rdx,[G1R-Win64-Shipping.exe+________]    <--- GNames
 		"EB"                    // jmp G1R-Win64-Shipping.exe.+________
 	) { OnFound = onFound };
 
 	var gWorldTrg = new SigScanTarget(3, 
-		"48 8B 1D ????????",    // mov rbx,[G1R-Win64-Shipping.exe+________]  <--- GWorld
+		"48 8B 1D ????????",    // mov rbx,[G1R-Win64-Shipping.exe+________]    <--- GWorld
 		"48 85 DB",             // test rbx,rbx
 		"74 ??",                // je G1R-Win64-Shipping.exe+________
 		"41 B0 01"              // mov r8l,01
@@ -197,15 +197,34 @@ init {
 		"79 D2",                // jns G1R-Win64-Shipping.exe+________
 		"8B 0D ????????",       // mov ecx,[G1R-Win64-Shipping.exe+________]
 		"33 DB",                // xor ebx,ebx
-		"8B 15 ????????"        // mov edx,[G1R-Win64-Shipping.exe+________]  <--- Loading screen
+		"8B 15 ????????"        // mov edx,[G1R-Win64-Shipping.exe+________]    <--- Loading screen
+	) { OnFound = onFound };
+
+	var moviePlayerTrg = new SigScanTarget(21, 
+		"80 3D ???????? 00",    // cmp byte ptr ["G1R-Win64-Shipping.exe"+________],00
+		"74 22",                // je "G1R-Win64-Shipping.exe"+________
+		"80 3D ???????? 00",    // cmp byte ptr ["G1R-Win64-Shipping.exe"+________],00
+		"75 19",                // jne "G1R-Win64-Shipping.exe"+________
+		"48 8B 0D ????????",    // mov rcx,["G1R-Win64-Shipping.exe"+________]  <--- MoviePlayer
+		"33 D2"                 // xor edx,edx
 	) { OnFound = onFound };
 
 	var gNames = scanner.Scan(gNamesTrg);
 	var gWorld = scanner.Scan(gWorldTrg);
 	var loadingScreen = scanner.Scan(loadingScreenTrg);
+	var moviePlayer = scanner.Scan(moviePlayerTrg);
 	
-	if (gNames == IntPtr.Zero || gWorld == IntPtr.Zero || loadingScreen == IntPtr.Zero ) {
-		throw new InvalidOperationException("Not all signatures resolved. Trying again.");
+	if (gNames == IntPtr.Zero) {
+		throw new InvalidOperationException("FNamePool not found. Trying again.");
+	}
+	if (gWorld == IntPtr.Zero) {
+		throw new InvalidOperationException("GWorld not found. Trying again.");
+	}
+	if (loadingScreen == IntPtr.Zero) {
+		throw new InvalidOperationException("Loading screen not found. Trying again.");
+	}
+	if (moviePlayer == IntPtr.Zero) {
+		throw new InvalidOperationException("MoviePlayer not found. Trying again.");
 	}
 #endregion
 
@@ -249,6 +268,12 @@ init {
 		{ "LoadingScreen",
 			new MemoryWatcher<bool>(new DeepPointer(
 				loadingScreen
+			))
+		},
+		{ "SyncMechanism",
+			new MemoryWatcher<IntPtr>(new DeepPointer(
+				moviePlayer,
+				0xA0      // SyncMechanism
 			))
 		},
 		{ "X",
@@ -375,16 +400,16 @@ init {
 		},
 		{ "MainMenuDisplayedWidget",
 			new MemoryWatcher<ulong>(new DeepPointer(
-			gWorld, 
-			0x30,      // PersistentLevel
-			0xF0,      // LevelScriptActor
-			0x2B0,     // MainMenu
-			0x430,     // Stack_FrontEnd
-			0x1A0,     // WidgetList
-			0 * 0x8,   // [0] (CommonActivatableWidget)
-			0x588,     // Stack_Parent
-			0x1B0,     // DisplayedWidget
-			0x18       // NamePrivate
+				gWorld, 
+				0x30,      // PersistentLevel
+				0xF0,      // LevelScriptActor
+				0x2B0,     // MainMenu
+				0x430,     // Stack_FrontEnd
+				0x1A0,     // WidgetList
+				0 * 0x8,   // [0] (CommonActivatableWidget)
+				0x588,     // Stack_Parent
+				0x1B0,     // DisplayedWidget
+				0x18       // NamePrivate
 			))
 		}
 	};
@@ -885,6 +910,10 @@ update {
 	if (current.mainMenuDisplayedWidget != old.mainMenuDisplayedWidget) {
 		vars.Info("Menu -> " + current.mainMenuDisplayedWidget);
 	}
+
+	if (vars.Watchers["SyncMechanism"].Changed) {
+		vars.Info("SyncMechanism -> 0x" + vars.Watchers["SyncMechanism"].Current.ToString("X"));
+	}
 }
 
 reset {
@@ -980,8 +1009,10 @@ onSplit {
 }
 
 isLoading {
-	return vars.Watchers["LoadingScreen"].Current || 
-		   vars.timerPaused;
+	return 
+		vars.Watchers["LoadingScreen"].Current
+		|| vars.Watchers["SyncMechanism"].Current != IntPtr.Zero
+		|| vars.timerPaused;
 }
 
 exit {
