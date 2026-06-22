@@ -21,11 +21,11 @@ startup {
 		Tuple.Create("Bloodfly Scroll",                 "Item",          "ItAr_Scroll_TransformBloodfly"),
 		Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
-		Tuple.Create("Focus 1",                         "Item",          "ItMs_Focus_01"),
-		Tuple.Create("Focus 2",                         "Item",          "ItMs_Focus_02"),
-		Tuple.Create("Focus 3",                         "Item",          "ItMs_Focus_03"),
-		Tuple.Create("Focus 4",                         "Item",          "ItMs_Focus_04"),
-		Tuple.Create("Focus 5",                         "Item",          "ItMs_Focus_05"),
+		Tuple.Create("Focus 1 (Ocean Cliff)",           "Item",          "ItMs_Focus_01"),
+		Tuple.Create("Focus 2 (Troll Canyon)",          "Item",          "ItMs_Focus_02"),
+		Tuple.Create("Focus 3 (Mountain Fortress)",     "Item",          "ItMs_Focus_03"),
+		Tuple.Create("Focus 4 (Monastery Ruins)",       "Item",          "ItMs_Focus_04"),
+		Tuple.Create("Focus 5 (Stone Circle)",          "Item",          "ItMs_Focus_05"),
 
 		Tuple.Create("Prime Tongue of Fire",            "Item",          "ItAt_Firelizard_05"),
 		Tuple.Create("Horn of a Great Shadowbeast",     "Item",          "ItAt_Shadow_05"),
@@ -81,9 +81,6 @@ startup {
 	settings.Add("Splits", true, "Splits");	
 		settings.Add("End", true, "End", "Splits");
 		settings.Add("ChapterSplits", true, "Chapters", "Splits");
-		settings.Add("BarrierSplits", true, "Barriers", "Splits");
-			settings.Add("Sleeper Temple Entrance Barrier", false, "Sleeper Temple Entrance Barrier", "BarrierSplits");
-			settings.Add("Sleeper Temple Final Barrier", false, "Sleeper Temple Final Barrier", "BarrierSplits");
 		settings.Add("DreamSplits", true, "Sleeper Fight (splits on entering each phase)", "Splits");
 		settings.Add("ItemSplits", true, "Items", "Splits");
 		settings.Add("QuestSplits", true, "Quests", "Splits");
@@ -91,7 +88,11 @@ startup {
 			settings.Add("Transform into Bloodfly", false, "Bloodfly", "TransformSplits");
 		settings.Add("TalkSplits", true, "Talk to ...", "Splits");
 		settings.Add("KillSplits", true, "Kill", "Splits");
-		settings.Add("Go to bed", false, "Go to bed");
+		settings.Add("Other", true, "Other", "Splits");
+			settings.Add("Go to bed", false, "Go to bed", "Other");
+		settings.Add("BarrierSplits", true, "Barriers", "Splits");
+			settings.Add("Sleeper Temple Entrance Barrier", false, "Sleeper Temple Entrance Barrier", "BarrierSplits");
+			settings.Add("Sleeper Temple Final Barrier", false, "Sleeper Temple Final Barrier", "BarrierSplits");
 
 	foreach (var split in vars.Splits) {
 		string name = split.Item1;
