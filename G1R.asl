@@ -18,6 +18,8 @@ startup {
 	vars.Splits = new List<Tuple<string, string, string>> {
 		//           name,                              type,            className / number
 		Tuple.Create("Storm Of Fire Scroll",            "Item",          "ItAr_Scroll_StormOfFire"),
+		Tuple.Create("Essence of Spirit",               "Item",          "ItFo_Potion_Mana_Perma_01"),
+		
 		Tuple.Create("Bloodfly Scroll",                 "Item",          "ItAr_Scroll_TransformBloodfly"),
 		Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
@@ -51,6 +53,7 @@ startup {
 		Tuple.Create("<Placeholder> (tell me which quests you'd like)",  
 		                                                "QuestStart",    "Instance_Quest_PLACEHOLDER"),
 		
+		Tuple.Create("Torrez",                          "Talk",          "State_OC_KDF_Torrez"),
 		Tuple.Create("Sharky",                          "Talk",          "State_NC_ORG_Sharky"),
 
 		Tuple.Create("Hänno",                           "Kill",          "State_NC_SLD_Haenno"),
