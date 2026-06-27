@@ -23,6 +23,8 @@ startup {
 		Tuple.Create("Bloodfly Scroll",                 "Item",          "ItAr_Scroll_TransformBloodfly"),
 		Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
+		Tuple.Create("Almanac",                         "Item",          "ItWr_Book_Focus"),
+
 		Tuple.Create("Focus 1 (Ocean Cliff)",           "Item",          "ItMs_Focus_01"),
 		Tuple.Create("Focus 2 (Troll Canyon)",          "Item",          "ItMs_Focus_02"),
 		Tuple.Create("Focus 3 (Mountain Fortress)",     "Item",          "ItMs_Focus_03"),
@@ -51,7 +53,7 @@ startup {
 		Tuple.Create("Chapter 6",                       "Chapter",       "6"),
 
 		Tuple.Create("<Placeholder> (tell me which quests you'd like)",  
-		                                                "QuestStart",    "Instance_Quest_PLACEHOLDER"),
+		                                                "QuestStart",    "Quest_PLACEHOLDER"),
 		
 		Tuple.Create("Torrez",                          "Talk",          "State_OC_KDF_Torrez"),
 		Tuple.Create("Sharky",                          "Talk",          "State_NC_ORG_Sharky"),
@@ -423,7 +425,7 @@ init {
 
 #region Inventory
 	vars.PlayerHasItem = (Func<string, bool>)((item) => {
-		IntPtr itemsPtr = (IntPtr)
+		IntPtr dataModuleContainerPtr =
 			new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
@@ -431,23 +433,25 @@ init {
 				0 * 0x8,  // [0] (CharacterState)
 				0x380,    // DataModuleComponent
 				0xA0,     // m_DataModules
-				4 * 0x8,  // [4] (DataModule_Container)
-				0x40      // m_Inventory 
+				4 * 0x8   // [4] (DataModule_Container)
+			)
+			.Deref<IntPtr>(game);
+
+		if (dataModuleContainerPtr == IntPtr.Zero) return false;
+		
+		IntPtr itemsPtr =
+			new DeepPointer(
+				dataModuleContainerPtr
+				+ 0x40    // m_Inventory 
 				+ 0x20    // m_Values
 				+ 0x108   // Items
 			)
-			.Deref<ulong>(game);
+			.Deref<IntPtr>(game);
 		
 		int itemsArrayNum =
 			new DeepPointer(
-				gWorld, 
-				0x160,    // GameState
-				0x2A8,    // PlayerArray
-				0 * 0x8,  // [0] (CharacterState)
-				0x380,    // DataModuleComponent
-				0xA0,     // m_DataModules
-				4 * 0x8,  // [4] (DataModule_Container)
-				0x40      // m_Inventory 
+				dataModuleContainerPtr
+				+ 0x40    // m_Inventory 
 				+ 0x20    // m_Values
 				+ 0x108   // Items
 				+ 0x8     // ArrayNum
@@ -455,13 +459,15 @@ init {
 			.Deref<int>(game);
 		
 		for (int i = 0; i < itemsArrayNum; i++) {
-			byte inventoryType = game.ReadValue<byte>(itemsPtr + (i * 0x88) + 0x58);
+			IntPtr inventoryPtr = game.ReadValue<IntPtr>(itemsPtr + (i * 0x88) + 0x48);
 
-			IntPtr inventoryPtr = (IntPtr)game.ReadValue<ulong>(itemsPtr + (i * 0x88) + 0x48);
+			if (inventoryPtr == IntPtr.Zero) continue;
+
 			int inventorySize = game.ReadValue<int>(itemsPtr + (i * 0x88) + 0x48 + 0xC);
 
 			for (int j = 0; j < inventorySize; j++) {
 				IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (j * 0xB0) + 0x8);
+
 				if (slotPtr == IntPtr.Zero) continue;
 
 				var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
@@ -477,7 +483,7 @@ init {
 	});
 
 	vars.PrintCarriedItems = (Action)(() => {
-		IntPtr itemsPtr = (IntPtr)
+		IntPtr dataModuleContainerPtr =
 			new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
@@ -485,23 +491,25 @@ init {
 				0 * 0x8,  // [0] (CharacterState)
 				0x380,    // DataModuleComponent
 				0xA0,     // m_DataModules
-				4 * 0x8,  // [4] (DataModule_Container)
-				0x40      // m_Inventory 
+				4 * 0x8   // [4] (DataModule_Container)
+			)
+			.Deref<IntPtr>(game);
+
+		if (dataModuleContainerPtr == IntPtr.Zero) return ;
+		
+		IntPtr itemsPtr =
+			new DeepPointer(
+				dataModuleContainerPtr
+				+ 0x40    // m_Inventory 
 				+ 0x20    // m_Values
 				+ 0x108   // Items
 			)
-			.Deref<ulong>(game);
+			.Deref<IntPtr>(game);
 		
 		int itemsArrayNum =
 			new DeepPointer(
-				gWorld, 
-				0x160,    // GameState
-				0x2A8,    // PlayerArray
-				0 * 0x8,  // [0] (CharacterState)
-				0x380,    // DataModuleComponent
-				0xA0,     // m_DataModules
-				4 * 0x8,  // [4] (DataModule_Container)
-				0x40      // m_Inventory 
+				dataModuleContainerPtr
+				+ 0x40    // m_Inventory 
 				+ 0x20    // m_Values
 				+ 0x108   // Items
 				+ 0x8     // ArrayNum
@@ -509,15 +517,18 @@ init {
 			.Deref<int>(game);
 		
 		for (int i = 0; i < itemsArrayNum; i++) {
+			IntPtr inventoryPtr = game.ReadValue<IntPtr>(itemsPtr + (i * 0x88) + 0x48);
+
+			if (inventoryPtr == IntPtr.Zero) continue;
+
 			byte inventoryType = game.ReadValue<byte>(itemsPtr + (i * 0x88) + 0x58);
-			
 			vars.Info("Inventory " + inventoryType);
 
-			IntPtr inventoryPtr = (IntPtr)game.ReadValue<ulong>(itemsPtr + (i * 0x88) + 0x48);
 			int inventorySize = game.ReadValue<int>(itemsPtr + (i * 0x88) + 0x48 + 0xC);
-
+			
 			for (int j = 0; j < inventorySize; j++) {
 				IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (j * 0xB0) + 0x8);
+
 				if (slotPtr == IntPtr.Zero) continue;
 
 				var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
@@ -534,8 +545,11 @@ init {
 	// Started = 2
 	// Completed = 4
 
-	vars.QuestState = (Func<string, int>)((quest) => {
-		IntPtr questInstancesArrayPtr = (IntPtr)
+	vars.QuestCache = new Dictionary<string, IntPtr>();
+	vars.CachedQuestInstancesPtr = IntPtr.Zero;
+
+	vars.UpdateQuestCache = (Action)(() => {
+		IntPtr questSubsystemPtr =
 			new DeepPointer(
 				gWorld, 
 				0x160,    // GameState
@@ -543,74 +557,62 @@ init {
 				0 * 0x8,  // [0] (GameStateSubsystemComponent)
 				0xA8,     // ??TMap
 				8 * 0x18  // [6] 
-				+ 0x8,    // Value (QuestSubsystem)
-				0x90      // AllQuestInstances
+				+ 0x8     // Value (QuestSubsystem)
 			)
-			.Deref<ulong>(game);
+			.Deref<IntPtr>(game);
+
+		IntPtr questInstancesArrayPtr =
+			new DeepPointer(
+				questSubsystemPtr
+				+ 0x90    // AllQuestInstances
+			)
+			.Deref<IntPtr>(game);
+
+		if (questInstancesArrayPtr == vars.CachedQuestInstancesPtr) return ;
+		if (questInstancesArrayPtr == IntPtr.Zero) return ;
+
+		vars.Info("Quest instances array pointer changed: -> 0x" + questInstancesArrayPtr.ToString("X"));
+		vars.Info("(Re-)building Quest Cache...");
+
+		vars.QuestCache.Clear();
+		vars.CachedQuestInstancesPtr = questInstancesArrayPtr;
 
 		var questInstancesArraySize = 
 			new DeepPointer(
-				gWorld, 
-				0x160,    // GameState
-				0x218,    // ??Array
-				0 * 0x8,  // [0] (GameStateSubsystemComponent)
-				0xA8,     // ??TMap
-				8 * 0x18  // [6] 
-				+ 0x8,    // Value (QuestSubsystem)
-				0x90      // AllQuestInstances
+				questSubsystemPtr
+				+ 0x90    // AllQuestInstances
 				+ 0x8     // Num
 			)
 			.Deref<int>(game);
 
-		for (int i = 0; i < questInstancesArraySize; i++) { 
-			IntPtr questPtr = (IntPtr)game.ReadValue<ulong>(questInstancesArrayPtr + (i * 0x8));
+		for (int i = 0; i < questInstancesArraySize; i++) {
+			IntPtr questPtr = game.ReadValue<IntPtr>(questInstancesArrayPtr + (i * 0x8));
+			if (questPtr == IntPtr.Zero) continue;
 
-			var idFName = new DeepPointer(questPtr + 0x18).Deref<ulong>(game);
+			var idFName = new DeepPointer(questPtr + 0x10, 0x18).Deref<ulong>(game);
 			var id = vars.FNameToString(idFName);
 
-			if (id == quest) {
-				return new DeepPointer(questPtr + 0x50).Deref<byte>(game);
+			if (!string.IsNullOrEmpty(id)) {
+				vars.QuestCache[id] = questPtr;
 			}
 		}
 
-		return -1;
+		vars.Info("  => Built quest dictionary with " + vars.QuestCache.Count + " keys.");
+	});
+
+	vars.QuestState = (Func<string, int>)((quest) => {
+		IntPtr questPtr;
+		if (!vars.QuestCache.TryGetValue(quest, out questPtr)) return -1;
+		return new DeepPointer(questPtr + 0x50).Deref<byte>(game);
 	});
 
 	vars.PrintAllQuests = (Action)(() => {
-		IntPtr questInstancesArrayPtr = (IntPtr)
-			new DeepPointer(
-				gWorld, 
-				0x160,    // GameState
-				0x218,    // ??Array
-				0 * 0x8,  // [0] (GameStateSubsystemComponent)
-				0xA8,     // ??TMap
-				8 * 0x18  // [6] 
-				+ 0x8,    // Value (QuestSubsystem)
-				0x90      // AllQuestInstances
-			)
-			.Deref<ulong>(game);
-
-		var questInstancesArraySize = 
-			new DeepPointer(
-				gWorld, 
-				0x160,    // GameState
-				0x218,    // ??Array
-				0 * 0x8,  // [0] (GameStateSubsystemComponent)
-				0xA8,     // ??TMap
-				8 * 0x18  // [6] 
-				+ 0x8,    // Value (QuestSubsystem)
-				0x90      // AllQuestInstances
-				+ 0x8     // Num
-			)
-			.Deref<int>(game);
-
 		vars.Info("Listing every quest:");
-		for (int i = 0; i < questInstancesArraySize; i++) { 
-			IntPtr questPtr = (IntPtr)game.ReadValue<ulong>(questInstancesArrayPtr + (i * 0x8));
 
-			var idFName = new DeepPointer(questPtr + 0x18).Deref<ulong>(game);
+		foreach (var questPtr in vars.QuestCache.Values) { 
+			var idFName = new DeepPointer(questPtr + 0x10, 0x18).Deref<ulong>(game);
 			var id = vars.FNameToString(idFName);
-
+			
 			vars.Info(" - " + id);
 		}
 	});
@@ -874,6 +876,8 @@ init {
 }
 
 update {
+	vars.UpdateQuestCache();
+
 	foreach (var watcher in vars.Watchers.Values) {
 		watcher.Update(game);
 	}
@@ -952,13 +956,15 @@ split {
 
 		bool shouldSplit = false;
 		if (type == "Item") {
-			shouldSplit = vars.Watchers["ActiveNotifications"].Changed && vars.PlayerHasItem(arg);
+			shouldSplit = vars.PlayerHasItem(arg);
 		} 
 		else if (type == "QuestStart") {
-			shouldSplit = vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 2;
+			shouldSplit = 
+				vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 2;
 		}
 		else if (type == "QuestComplete") {
-			shouldSplit = vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 4;
+			shouldSplit = 
+				vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 4;
 		}
 		else if (type == "Cinematic") {
 			shouldSplit = current.cinematic != old.cinematic && current.cinematic == arg;
@@ -970,7 +976,6 @@ split {
 		else if (type == "Kill") {
 			shouldSplit = 
 				vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old 
-				&& vars.Watchers["Exp"].Old != 0 
 				&& vars.IsDead(arg);
 		}
 		else if (type == "Talk") {
@@ -1010,6 +1015,8 @@ onSplit {
 	//vars.PrintPlayerGameplayEffects();
 	//vars.PrintPlayerGameplayAbilities();
 	//vars.Info("(X, Y): " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
+
+	//vars.SetQuestState("Instance_Quest_SwampCamp_SCCHAPTER2_FINDINGCAINE", 4);
 }
 
 isLoading {
