@@ -75,7 +75,7 @@ startup {
 		"13_mrrobertsscrapbook_03_askfriendsorreturn",
 		"13_mrrobertsscrapbook_04_returnforphoto",
 		"13_mrrobertsscrapbook_05_takegroupphoto",
-		"14_epilogue_01_speaktobarbie",
+		//"14_epilogue_01_speaktobarbie",
 		//"deliverapples_01_talktoladycarson",
 		//"deliverapples_02_takeapples",
 		//"deliverapples_03_deliverapples",
@@ -178,8 +178,9 @@ startup {
 	settings.Add("OtherSplits", true, "Other", "Splits");
 		settings.Add("ShopSplit", false, "Split when opening the shop for the first time", "OtherSplits");
 
-	settings.Add("Debug", true, "Debug");
-		settings.Add("EnableDebugMenu", false, "Enable Debug Menu", "Debug");
+	settings.Add("Utility", true, "Utility");
+		settings.Add("FastCredits", true, "Fast Credits (when Space is held)", "Utility");
+		settings.Add("EnableDebugMenu", false, "Enable Debug Menu", "Utility");
 }
 
 init {
@@ -201,25 +202,29 @@ init {
 	vars.Resolver.Watch<ulong>("DestroyLoadingScreen", DestroyLoadingScreen);
 
 	vars.Helper.TryLoad = (Func<dynamic, bool>)(mono => {
-		var mm = mono["BarbieGame", "MissionManager", 1];
+		var missionManager = mono["BarbieGame", "MissionManager", 1];
 		vars.Helper["Mission"] = mono.MakeString(
-			mm, 
+			missionManager, 
 			"instance",  
 			0x50,        // <trackedMission>k__BackingField
 			0x10,        // missionSO
 			0x18         // id
 		);
 
-		vars.Helper["MissionLog"] = mono.Make<IntPtr>(mm, "instance");
+		vars.Helper["MissionLog"] = mono.Make<IntPtr>(missionManager, "instance");
 
-		var sm = mono["BarbieGame", "ShopMenuManager", 1];
-		vars.Helper["ShopOpen"] = mono.Make<bool>(sm, "instance", 0xC8);
+		var shopManager = mono["BarbieGame", "ShopMenuManager", 1];
+		vars.Helper["ShopOpen"] = mono.Make<bool>(shopManager, "instance", 0xC8);
 
-		var ac = mono["BarbieGame", "ApplicationConfig_SO", 1];
-		vars.Helper["AppConfig"] = mono.Make<IntPtr>(ac, "_instance");
+		var applicationConfig = mono["BarbieGame", "ApplicationConfig_SO", 1];
+		vars.Helper["AppConfig"] = mono.Make<IntPtr>(applicationConfig, "_instance");
 
-		var md = mono["BarbieGame", "MissionDatabase", 1];
-		vars.Helper["MissionDatabase"] = mono.Make<IntPtr>(md, "_instance");
+		var creditsManager = mono["BarbieGame", "CreditsManager", 1];
+		vars.Helper["CreditsManager"] = mono.Make<IntPtr>(creditsManager, "instance");
+		vars.Helper["RollingCredits"] = mono.Make<bool>(creditsManager, "instance", 0x44);
+
+		var missionDatabase = mono["BarbieGame", "MissionDatabase", 1];
+		vars.Helper["MissionDatabase"] = mono.Make<IntPtr>(missionDatabase, "_instance");
 		
 		return true;
 	});
@@ -298,6 +303,18 @@ update {
 			vars.EnabledDebugMenu = true;
 		}
 	}
+
+	if (settings["FastCredits"]) {
+		if (current.RollingCredits) {
+			float creditsScrollSpeedBonus = game.ReadValue<float>((IntPtr)current.CreditsManager + 0x34);
+			if (creditsScrollSpeedBonus == 800.0f) {
+				float newBonus = 100000.0f;
+				byte[] bytes = BitConverter.GetBytes(newBonus);
+				game.WriteBytes((IntPtr)current.CreditsManager + 0x34, bytes);
+				vars.Log("Set credits scroll speed bonus to " + newBonus + ".");
+			}
+		}
+	}
 }
 
 reset {
@@ -318,7 +335,7 @@ onStart {
 
 split {
 	// Credits
-	if (settings["Credits"] && current.StartRollingCredits != old.StartRollingCredits && current.StartRollingCredits != 0) {
+	if (settings["Credits"] && current.RollingCredits && !old.RollingCredits) {
 		return true;
 	}
 
