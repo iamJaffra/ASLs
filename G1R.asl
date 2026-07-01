@@ -909,6 +909,9 @@ update {
 	if (current.cinematic != old.cinematic) {
 		vars.Info("Cinematic: -> " + current.cinematic);
 	}
+	if (vars.Watchers["CinematicState"].Changed) {
+		vars.Info("CinematicState -> " + vars.Watchers["CinematicState"].Current);
+	}
 
 	if (vars.Watchers["Exp"].Changed) {
 		vars.Info("Exp -> " + vars.Watchers["Exp"].Current);
@@ -967,7 +970,7 @@ split {
 				vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 4;
 		}
 		else if (type == "Cinematic") {
-			shouldSplit = current.cinematic != old.cinematic && current.cinematic == arg;
+			shouldSplit = current.cinematic == arg && vars.Watchers["CinematicState"].Current > 1;
 		}
 		else if (type == "Chapter") {
 			int chapter = int.Parse(arg);
