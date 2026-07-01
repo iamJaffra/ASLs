@@ -5,161 +5,161 @@ startup {
 	Assembly.Load(File.ReadAllBytes("Components/uhara9")).CreateInstance("Main");
 	vars.Uhara.EnableDebug();
 
-	vars.MainMissions = new HashSet<string> {
-		"01_gameintro_01_headtostables",
-		"01_gameintro_02_meethorses",
-		"01_gameintro_03_petpepper",
-		"01_gameintro_04_mounthorse",
-		"01_gameintro_05_followladycasron",
-		"01_gameintro_06_followtheranger",
-		"01_gameintro_07_continueriding",
-		"01_gameintro_08_followtheranger",
-		"01_gameintro_09_returntostables",
-		"01_gameintro_09a_groompepper",
-		"01_gameintro_09b_dresspepper",
-		"01_gameintro_09c_feedpepper",
-		"01_gameintro_09d_petlucky",
-		"01_gameintro_10_meetheadranger",
-		"02_scenicphotography101_01_findmrroberts",
-		"02_scenicphotography101_02_cameraintro",
-		"02_scenicphotography101_03_findlocation",
-		"02_scenicphotography101_04_takephoto",
-		"02_scenicphotography101_05_returntomrroberts",
-		"03_headrangertrailmarking_01_speaktoranger",
-		"03_headrangertrailmarking_02_gototrailhead",
-		"03_headrangertrailmarking_03_marktrail",
-		"03_headrangertrailmarking_04_investigatewithhorse",
-		"03_headrangertrailmarking_05_marktrail",
-		"03_headrangertrailmarking_06_returntoranger",
-		"04_archeology101_01_speaktodrpotts",
-		"04_archeology101_02_findartifact",
-		"04_archeology101_03_returnartifact",
-		"04_archeology101_04_minigame",
-		"05_headrangerphoto_01_speaktoranger",
-		"05_headrangerphoto_02_takephoto",
-		"05_headrangerphoto_03_returntoranger",
-		"06_ladycarsonrace_01_speaktoladycarson",
-		"06_ladycarsonrace_02_completetherace",
-		"07_secondartifact_01_speaktodrpotts",
-		"07_secondartifact_02_findartifact",
-		"07_secondartifact_03_returnartifact",
-		"07_secondartifact_04_minigame",
-		"08_backpackquest_01_speaktogeorge",
-		"08_backpackquest_02_searchforitem01",
-		"08_backpackquest_03_searchforitem02",
-		"08_backpackquest_04_searchforitem03",
-		"08_backpackquest_05_returnitems",
-		"09_accessorycollection_01_speaktoladycarson",
-		"09_accessorycollection_02_finditem01",
-		"09_accessorycollection_03_finditem02",
-		"09_accessorycollection_04_finditem03",
-		"09_accessorycollection_05_returntoladycarson",
-		"09_accessorycollection_06_takephotos",
-		"10_thirdartifact_01_speaktodrpotts",
-		"10_thirdartifact_02_findartifact",
-		"10_thirdartifact_03_returnartifact",
-		"10_thirdartifact_04_minigame",
-		"11_findmysteryhorse_01_speaktodrpotts",
-		"11_findmysteryhorse_02_takephoto",
-		"11_findmysteryhorse_03_returntodrpotts",
-		"12_completeapplication_01_speaktoranger",
-		"12_completeapplication_01a_completeprogress",
-		"12_completeapplication_01b_speaktoranger",
-		"12_completeapplication_02_speaktoladycarson",
-		"13_mrrobertsscrapbook_01_speaktomrroberts",
-		"13_mrrobertsscrapbook_02_askfriends",
-		"13_mrrobertsscrapbook_02a_a-askheadranger",
-		"13_mrrobertsscrapbook_02b_b-askladycarson",
-		"13_mrrobertsscrapbook_02c_c-askarcheologist",
-		"13_mrrobertsscrapbook_02d_d-askbarbie",
-		"13_mrrobertsscrapbook_03_askfriendsorreturn",
-		"13_mrrobertsscrapbook_04_returnforphoto",
-		"13_mrrobertsscrapbook_05_takegroupphoto",
-		//"14_epilogue_01_speaktobarbie",
-		//"deliverapples_01_talktoladycarson",
-		//"deliverapples_02_takeapples",
-		//"deliverapples_03_deliverapples",
-		//"placetrailmarkers_01_talktoranger",
-		//"placetrailmarkers_02_ridetothemeadow",
-		//"placetrailmarkers_03_placetrailmarkers"
+	vars.MainMissions = new Dictionary<string, string> {
+		{ "01_gameintro_01_headtostables", "Head to the stable" },
+		{ "01_gameintro_02_meethorses", "Pet the horses" },
+		{ "01_gameintro_03_petpepper", "Pet the horses" },
+		{ "01_gameintro_04_mounthorse", "Mount your horse" },
+		{ "01_gameintro_05_followladycasron", "Follow Lady Carson" },
+		{ "01_gameintro_06_followtheranger", "Follow Ranger Quinn" },
+		{ "01_gameintro_07_continueriding", "Follow Ranger Quinn" },
+		{ "01_gameintro_08_followtheranger", "Follow Ranger Quinn" },
+		{ "01_gameintro_09_returntostables", "Return to the stable" },
+		{ "01_gameintro_09a_groompepper", "Groom Pepper" },
+		{ "01_gameintro_09b_dresspepper", "Dress Pepper at the Hitching Post" },
+		{ "01_gameintro_09c_feedpepper", "Feed Pepper a Snack" },
+		{ "01_gameintro_09d_petlucky", "Pet Lucky" },
+		{ "01_gameintro_10_meetheadranger", "Meet the Head Ranger" },
+		{ "02_scenicphotography101_01_findmrroberts", "Find Mr. Roberts" },
+		{ "02_scenicphotography101_02_cameraintro", "Take a photo of Barbie" },
+		{ "02_scenicphotography101_03_findlocation", "Find the photo location" },
+		{ "02_scenicphotography101_04_takephoto", "Take a photo of the lake" },
+		{ "02_scenicphotography101_05_returntomrroberts", "Return to Mr. Roberts" },
+		{ "03_headrangertrailmarking_01_speaktoranger", "Speak to Ranger Annalise" },
+		{ "03_headrangertrailmarking_02_gototrailhead", "Go to the trailhead" },
+		{ "03_headrangertrailmarking_03_marktrail", "Place trail markers along the trail" },
+		{ "03_headrangertrailmarking_04_investigatewithhorse", "Investigate with Lucky" },
+		{ "03_headrangertrailmarking_05_marktrail", "Place trail markers along the trail" },
+		{ "03_headrangertrailmarking_06_returntoranger", "Return to Ranger Annalise" },
+		{ "04_archeology101_01_speaktodrpotts", "Speak to Dr. Potts" },
+		{ "04_archeology101_02_findartifact", "Find an artifact on Manzanita Bluff's winding ridge" },
+		{ "04_archeology101_03_returnartifact", "Return the artifact to Dr. Potts" },
+		{ "04_archeology101_04_minigame", "Put the artifact pieces together" },
+		{ "05_headrangerphoto_01_speaktoranger", "Speak to Ranger Annalise" },
+		{ "05_headrangerphoto_02_takephoto", "Take a photo of a Green Anole Lizard during the day" },
+		{ "05_headrangerphoto_03_returntoranger", "Return to Ranger Annalise" },
+		{ "06_ladycarsonrace_01_speaktoladycarson", "Speak to Lady Carson" },
+		{ "06_ladycarsonrace_02_completetherace", "Complete the race" },
+		{ "07_secondartifact_01_speaktodrpotts", "Speak to Dr. Potts" },
+		{ "07_secondartifact_02_findartifact", "Find the artifact in the Sequoia Valley mountain region" },
+		{ "07_secondartifact_03_returnartifact", "Return the artifact to Dr. Potts" },
+		{ "07_secondartifact_04_minigame", "Put the artifact pieces together" },
+		{ "08_backpackquest_01_speaktogeorge", "Speak to Mr. Roberts" },
+		{ "08_backpackquest_02_searchforitem01", "Look around the trail entrance for Mr. Roberts' backpack" },
+		{ "08_backpackquest_03_searchforitem02", "Look around the trail entrance for Mr. Roberts' backpack" },
+		{ "08_backpackquest_04_searchforitem03", "Look around the trail entrance for Mr. Roberts' backpack" },
+		{ "08_backpackquest_05_returnitems", "Return to Mr. Roberts" },
+		{ "09_accessorycollection_01_speaktoladycarson", "Speak to Lady Carson" },
+		{ "09_accessorycollection_02_finditem01", "Look around the Fernbrush Grove Campsite for the bridle" },
+		{ "09_accessorycollection_03_finditem02", "Look around the general store for the saddle" },
+		{ "09_accessorycollection_04_finditem03", "Look around the Lupine Dell Cabins for the saddle blanket" },
+		{ "09_accessorycollection_05_returntoladycarson", "Speak to Lady Carson" },
+		{ "09_accessorycollection_06_takephotos", "Take photos of Lucky, Tornado, and Pepper" },
+		{ "10_thirdartifact_01_speaktodrpotts", "Speak to Dr. Potts" },
+		{ "10_thirdartifact_02_findartifact", "Find an artifact in Manzanita Bluff's northwest mountain region" },
+		{ "10_thirdartifact_03_returnartifact", "Return the artifact to Dr. Potts" },
+		{ "10_thirdartifact_04_minigame", "Put the artifact pieces together" },
+		{ "11_findmysteryhorse_01_speaktodrpotts", "Speak to Dr. Potts" },
+		{ "11_findmysteryhorse_02_takephoto", "Take a photo of the Silver Canyon Mustang" },
+		{ "11_findmysteryhorse_03_returntodrpotts", "Show the photo of the Silver Canyon Mustang to Dr. Potts" },
+		{ "12_completeapplication_01_speaktoranger", "Speak to Ranger Annalise about your packet progress" },
+		{ "12_completeapplication_01a_completeprogress", "Complete side quests and catalog the park to finish the preserve packet" },
+		{ "12_completeapplication_01b_speaktoranger", "Speak to Ranger Annalise about your packet progress" },
+		{ "12_completeapplication_02_speaktoladycarson", "Speak to Lady Carson about the nature preserve certificate" },
+		{ "13_mrrobertsscrapbook_01_speaktomrroberts", "Speak to Mr. Roberts" },
+		{ "13_mrrobertsscrapbook_02_askfriends", "Ask friends to join the group photo" },
+		{ "13_mrrobertsscrapbook_02a_a-askheadranger", "Speak to Ranger Annalise" },
+		{ "13_mrrobertsscrapbook_02b_b-askladycarson", "Speak to Lady Carson" },
+		{ "13_mrrobertsscrapbook_02c_c-askarcheologist", "Speak to Dr. Potts" },
+		{ "13_mrrobertsscrapbook_02d_d-askbarbie", "Speak to Barbie" },
+		{ "13_mrrobertsscrapbook_03_askfriendsorreturn", "Ask more friends to join or take the group photo" },
+		{ "13_mrrobertsscrapbook_04_returnforphoto", "Return to take the group photo" },
+		{ "13_mrrobertsscrapbook_05_takegroupphoto", "Take a group selfie" },
+		//{ "14_epilogue_01_speaktobarbie", "Speak to Barbie" },
+		//{ "deliverapples_01_talktoladycarson", "Speak to Lady Carson" },
+		//{ "deliverapples_02_takeapples", "Take the bucket of apples" },
+		//{ "deliverapples_03_deliverapples", "Deliver the bucket of apples to the stable" },
+		//{ "placetrailmarkers_01_talktoranger", "Speak to Ranger Quinn" },
+		//{ "placetrailmarkers_02_ridetothemeadow", "Ride to the meadow" },
+		//{ "placetrailmarkers_03_placetrailmarkers", "Place trail markers along the hiking trail" },
 	};
 
-	vars.SideMissions = new HashSet<string> {
-		"daisylofimix_00-meetdaisy",
-		"daisylofimix_01-recordsound01",
-		"daisylofimix_02-returntodaisy01",
-		"daisylofimix_03-recordsound02",
-		"daisylofimix_04-returntodaisy02",
-		"daisylofimix_05-recordsound03",
-		"daisylofimix_06-returntodaisy03",
-		"kenurgentdelivery_00-meetken",
-		"kenurgentdelivery_01-pickupkit",
-		"kenurgentdelivery_02-returntoken",
-		"lettycamping_00-meetletty",
-		"lettycamping_01-visitcampsite1",
-		"lettycamping_02_visitcampsite2",
-		"lettycamping_03-returntoletty",
-		"nikkifashionphotography_00-meetnikki",
-		"nikkifashionphotography_01-takephotos",
-		"nikkifashionphotography_02-returntonikki",
-		"reneesnackattack_00-meetrenee",
-		"reneesnackattack_01-pickupsnack",
-		"reneesnackattack_02-returntorenee",
-		"teresastickerswap_00-meetteresa",
-		"teresastickerswap_01-getsticker01",
-		"teresastickerswap_02-returntoteresa01",
-		"teresastickerswap_03-getsticker02",
-		"teresastickerswap_04-returntoteresa02",
-		"teresastickerswap_05-getsticker03",
-		"teresastickerswap_06-returntoteresa03",
-		"photographalizard_01_takephoto",
-		"photographalizard_02_returntoranger",
-		"photographlake_01_takephoto",
-		"photographlake_02_returntogerorge",
-		"astronomer_01_constellations_00-meetstella",
-		"astronomer_01_constellations_01-minigame",
-		"astronomer_02_constellations_01-findastronomer",
-		"astronomer_02_constellations_02-minigame",
-		"astronomer_03_constellations_01-findastronomer",
-		"astronomer_03_constellations_02-minigame",
-		"astronomer_04_constellations_01-talktoastronomer",
-		"astronomer_04_constellations_02-takemeteorphoto",
-		"astronomer_04_constellations_03-returnphoto",
-		"astronomer_05_constellations_01-talktoastronomer",
-		"astronomer_05_constellations_02-pickuppackage",
-		"astronomer_05_constellations_03-returnpackage",
-		"botanist_01_samplesnafu_00_meetdrgreen",
-		"botanist_01_samplesnafu_01_findsample",
-		"botanist_01_samplesnafu_02_returnsample",
-		"botanist_02_plantsorting01_01_talktodrgreen",
-		"botanist_02_plantsorting01_02_sortminigame01",
-		"botanist_03_plantsorting02-01_talktodrgreen",
-		"botanist_03_plantsorting02-02_sortminigame02",
-		"botanist_04_plantsorting03-01_talktodrgreen",
-		"botanist_04_plantsorting03-02_sortminigame03",
-		"botanist_05_samplephoto_01_talktodrgreen",
-		"botanist_05_samplephoto_02_takephoto",
-		"botanist_05_samplephoto_03_returnphoto",
-		"sideranger_01_trailmarking_00_meetsideranger1",
-		"sideranger_01_trailmarking_01_gototrailhead",
-		"sideranger_01_trailmarking_02_marktrail",
-		"sideranger_01_trailmarking_03_marktrail_part2",
-		"sideranger_01_trailmarking_04_returntoranger",
-		"sideranger_02_sunfallphoto_01-talktoranger",
-		"sideranger_02_sunfallphoto_02-takephoto",
-		"sideranger_02_sunfallphoto_03-returntoranger",
-		"sideranger_03_trailmarking_01_talktoranger",
-		"sideranger_03_trailmarking_02_gototrailhead",
-		"sideranger_03_trailmarking_03_marktrail",
-		"sideranger_03_trailmarking_04_marktrail-part2",
-		"sideranger_03_trailmarking_05_takescenicphoto",
-		"sideranger_03_trailmarking_06_returntoranger",
-		"sideranger_04_fireflylake_01-talktoranger",
-		"sideranger_04_fireflylake_02-takephoto",
-		"sideranger_04_fireflylake_03-returntoranger",
-		"sideranger_05_birdphoto_01-talktoranger",
-		"sideranger_05_birdphoto_02-takephoto",
-		"sideranger_05_birdphoto_03-returntoranger"
+	vars.SideMissions = new Dictionary<string, string> {
+		{ "daisylofimix_00-meetdaisy", "Speak to Daisy" },
+		{ "daisylofimix_01-recordsound01", "Record the first sound at the waterfall in Manzanita Bluff" },
+		{ "daisylofimix_02-returntodaisy01", "Return to Daisy" },
+		{ "daisylofimix_03-recordsound02", "Record the second sound at the Starside Lake shore" },
+		{ "daisylofimix_04-returntodaisy02", "Return to Daisy" },
+		{ "daisylofimix_05-recordsound03", "Record the third sound of the owl in Fernbrush Grove at night" },
+		{ "daisylofimix_06-returntodaisy03", "Return to Daisy" },
+		{ "kenurgentdelivery_00-meetken", "Speak to Ken" },
+		{ "kenurgentdelivery_01-pickupkit", "Retrieve the first aid kit from Sequoia Valley" },
+		{ "kenurgentdelivery_02-returntoken", "Return the first aid kit to Ken" },
+		{ "lettycamping_00-meetletty", "Speak to Letty" },
+		{ "lettycamping_01-visitcampsite1", "Visit the Fernbrush Grove Campsite" },
+		{ "lettycamping_02_visitcampsite2", "Visit the Manzanita Bluff Campsite" },
+		{ "lettycamping_03-returntoletty", "Report your campsite conclusions to Letty" },
+		{ "nikkifashionphotography_00-meetnikki", "Talk to Nikki" },
+		{ "nikkifashionphotography_01-takephotos", "Take photos in different outfits for Nikki" },
+		{ "nikkifashionphotography_02-returntonikki", "Talk to Nikki" },
+		{ "reneesnackattack_00-meetrenee", "Speak to Renee" },
+		{ "reneesnackattack_01-pickupsnack", "Pick up almond butter at the general store" },
+		{ "reneesnackattack_02-returntorenee", "Return to Renee" },
+		{ "teresastickerswap_00-meetteresa", "Speak to Teresa" },
+		{ "teresastickerswap_01-getsticker01", "Look for a park logo sticker at the park entrance" },
+		{ "teresastickerswap_02-returntoteresa01", "Swap your new sticker with Teresa" },
+		{ "teresastickerswap_03-getsticker02", "Look for a horse sticker at the stables" },
+		{ "teresastickerswap_04-returntoteresa02", "Swap your new sticker with Teresa" },
+		{ "teresastickerswap_05-getsticker03", "Look for a vintage scenic spot sticker at the overlook" },
+		{ "teresastickerswap_06-returntoteresa03", "Swap your new sticker with Teresa" },
+		{ "photographalizard_01_takephoto", "Photograph a lizard" },
+		{ "photographalizard_02_returntoranger", "Return to Ranger Riley" },
+		{ "photographlake_01_takephoto", "Photograph your horse by the lake at night" },
+		{ "photographlake_02_returntogerorge", "Return to Mr. Roberts" },
+		{ "astronomer_01_constellations_00-meetstella", "Speak to Stella" },
+		{ "astronomer_01_constellations_01-minigame", "Talk to Stella at night and help her look for constellations" },
+		{ "astronomer_02_constellations_01-findastronomer", "Find Stella at night and help her look for more constellations" },
+		{ "astronomer_02_constellations_02-minigame", "Find Stella at night and help her look for more constellations" },
+		{ "astronomer_03_constellations_01-findastronomer", "Find Stella at night and help her look for more constellations" },
+		{ "astronomer_03_constellations_02-minigame", "Find Stella at night and help her look for more constellations" },
+		{ "astronomer_04_constellations_01-talktoastronomer", "Speak to Stella" },
+		{ "astronomer_04_constellations_02-takemeteorphoto", "Take a photo of the meteor shower from Manzanita Bluff's lookout spot at night" },
+		{ "astronomer_04_constellations_03-returnphoto", "Return to Stella with the photo" },
+		{ "astronomer_05_constellations_01-talktoastronomer", "Speak to Stella" },
+		{ "astronomer_05_constellations_02-pickuppackage", "Pick up the package at the general store" },
+		{ "astronomer_05_constellations_03-returnpackage", "Return to Stella with the package" },
+		{ "botanist_01_samplesnafu_00_meetdrgreen", "Talk to Dr. Green" },
+		{ "botanist_01_samplesnafu_01_findsample", "Head to Fernbrush Grove to find the sample collection" },
+		{ "botanist_01_samplesnafu_02_returnsample", "Return the samples to Dr. Green" },
+		{ "botanist_02_plantsorting01_01_talktodrgreen", "Sort the leaf samples for Dr. Green" },
+		{ "botanist_02_plantsorting01_02_sortminigame01", "Sort the leaf samples for Dr. Green" },
+		{ "botanist_03_plantsorting02-01_talktodrgreen", "Sort the leaf samples for Dr. Green" },
+		{ "botanist_03_plantsorting02-02_sortminigame02", "Sort the leaf samples for Dr. Green" },
+		{ "botanist_04_plantsorting03-01_talktodrgreen", "Sort the leaf samples for Dr. Green" },
+		{ "botanist_04_plantsorting03-02_sortminigame03", "Sort the leaf samples for Dr. Green" },
+		{ "botanist_05_samplephoto_01_talktodrgreen", "Talk to Dr. Green" },
+		{ "botanist_05_samplephoto_02_takephoto", "Take a photo of the pink monkeyflower for Dr. Green" },
+		{ "botanist_05_samplephoto_03_returnphoto", "Return to Dr. Green with the photo" },
+		{ "sideranger_01_trailmarking_00_meetsideranger1", "Talk to Ranger Rory" },
+		{ "sideranger_01_trailmarking_01_gototrailhead", "Head to the Sequoia Valley River trailhead" },
+		{ "sideranger_01_trailmarking_02_marktrail", "Place trail markers along the trail" },
+		{ "sideranger_01_trailmarking_03_marktrail_part2", "Place trail markers along the trail" },
+		{ "sideranger_01_trailmarking_04_returntoranger", "Return to Ranger Rory" },
+		{ "sideranger_02_sunfallphoto_01-talktoranger", "Talk to Ranger Rory" },
+		{ "sideranger_02_sunfallphoto_02-takephoto", "Take a photo of Saddletail Falls at sunset" },
+		{ "sideranger_02_sunfallphoto_03-returntoranger", "Show the photo to Ranger Rory" },
+		{ "sideranger_03_trailmarking_01_talktoranger", "Talk to Ranger Quinn" },
+		{ "sideranger_03_trailmarking_02_gototrailhead", "Head to the trailhead in Fernbrush Grove" },
+		{ "sideranger_03_trailmarking_03_marktrail", "Place trail markers along the trail" },
+		{ "sideranger_03_trailmarking_04_marktrail-part2", "Place trail markers along the trail" },
+		{ "sideranger_03_trailmarking_05_takescenicphoto", "Take a photo of the scenic view" },
+		{ "sideranger_03_trailmarking_06_returntoranger", "Return to Ranger Quinn" },
+		{ "sideranger_04_fireflylake_01-talktoranger", "Talk to Ranger Quinn" },
+		{ "sideranger_04_fireflylake_02-takephoto", "Take a photo of fireflies above the lake during the evening" },
+		{ "sideranger_04_fireflylake_03-returntoranger", "Show the photo to Ranger Quinn" },
+		{ "sideranger_05_birdphoto_01-talktoranger", "Talk to Ranger Quinn" },
+		{ "sideranger_05_birdphoto_02-takephoto", "Take a photo of house finches in Fernbrush Grove during the day" },
+		{ "sideranger_05_birdphoto_03-returntoranger", "Show the photo to Ranger Quinn" },
 	};
 
 	settings.Add("Reset", true, "Reset");
@@ -170,16 +170,26 @@ startup {
 		settings.Add("MainQuests", true, "Main Quests", "Splits");
 		settings.Add("SideQuests", true, "Side Quests", "Splits");
 
-    foreach (var mission in vars.MainMissions)
-        settings.Add(mission, false, mission, "MainQuests");
-    foreach (var mission in vars.SideMissions)
-        settings.Add(mission, false, mission, "SideQuests");
+    foreach (var mission in vars.MainMissions) {
+		string id = mission.Key;
+		string text = mission.Value;
+
+		settings.Add(id, false, id, "MainQuests");
+		settings.SetToolTip(id, text);
+	}
+    foreach (var mission in vars.SideMissions) {
+		string id = mission.Key;
+		string text = mission.Value;
+
+		settings.Add(id, false, id, "SideQuests");
+		settings.SetToolTip(id, text);
+	}
 	
 	settings.Add("OtherSplits", true, "Other", "Splits");
 		settings.Add("ShopSplit", false, "Split when opening the shop for the first time", "OtherSplits");
 
 	settings.Add("Utility", true, "Utility");
-		settings.Add("FastCredits", true, "Fast Credits (when Space is held)", "Utility");
+		settings.Add("FastCredits", false, "Fast Credits (when Space is held)", "Utility");
 		settings.Add("EnableDebugMenu", false, "Enable Debug Menu", "Utility");
 }
 
@@ -254,6 +264,23 @@ init {
 			)
 			.DerefString(game, 100);
 
+			IntPtr titleTexto = new DeepPointer(mission + 0x38).Deref<IntPtr>(game);
+			IntPtr titleLines = new DeepPointer(titleTexto + 0x68, 0x10).Deref<IntPtr>(game);
+			int titleLineCount = game.ReadValue<int>(titleLines + 0x18);
+
+			string title = "";
+			for (int j = 0; j < titleLineCount; j++) {
+				IntPtr textoLine = game.ReadValue<IntPtr>(titleLines + 0x20 + (j * 0x8));
+				int language = game.ReadValue<int>(textoLine + 0x18);
+				if (language == 1) {
+					title = new DeepPointer(textoLine + 0x10, 0x14).DerefString(game, 256);
+					break;
+				}
+			}
+
+			if (title == "")
+				title = "[NO ENGLISH]";
+
 			string missionType = new DeepPointer(
 				mission
 				+ 0x28,   // missionCollection
@@ -262,7 +289,7 @@ init {
 			)
 			.DerefString(game, 100);
 
-			vars.Log(id + " - " + missionType);
+			print("[]" + id + " : " + title + " - " + missionType);
 		}
 	});
 
@@ -364,20 +391,7 @@ split {
 }
 
 onSplit {
-	/*
-	IntPtr missionsPtr = new DeepPointer((IntPtr)current.MissionLog + 0x58, 0x10).Deref<IntPtr>(game);
-	int count = game.ReadValue<int>(missionsPtr + 0x18);
-	
-	for (int i = 0; i < count; i++) {
-		IntPtr missionLogEntry = game.ReadValue<IntPtr>(missionsPtr + 0x20 + (i * 0x8));
-		if (missionLogEntry == IntPtr.Zero) continue;
-
-		string id = new DeepPointer(missionLogEntry + 0x10, 0x18, 0x14).DerefString(game, 100);
-		bool completed = game.ReadValue<bool>(missionLogEntry + 0x21);
-
-		vars.Log(id + ": completed = " + completed);
-	}
-	*/
+	//vars.PrintAllMissions();
 }
 
 isLoading {
