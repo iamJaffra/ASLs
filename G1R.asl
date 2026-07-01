@@ -421,6 +421,7 @@ init {
 	};
 
 	vars.Watchers["CinematicFName"].FailAction = MemoryWatcher.ReadFailAction.SetZeroOrNull;
+	vars.Watchers["CinematicState"].FailAction = MemoryWatcher.ReadFailAction.SetZeroOrNull;
 #endregion
 
 #region Inventory
