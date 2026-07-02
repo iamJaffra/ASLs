@@ -330,6 +330,13 @@ update {
 			vars.EnabledDebugMenu = true;
 		}
 	}
+	if (vars.EnabledDebugMenu && !settings["EnableDebugMenu"]) {
+		if (current.AppConfig != IntPtr.Zero) {
+			vars.Log("Disabling Debug Menu!");
+			game.WriteBytes((IntPtr)current.AppConfig + 0x19, new byte[] { 0 });
+			vars.EnabledDebugMenu = false;
+		}
+	}
 
 	if (settings["FastCredits"]) {
 		if (current.RollingCredits) {
