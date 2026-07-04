@@ -183,10 +183,10 @@ init {
 
 	SigScanTarget.OnFoundCallback onFound = (p, _, addr) => addr + 0x4 + p.ReadValue<int>(addr);
 	
-	var gNamesTrg = new SigScanTarget(7, 
+	var fNamePoolTrg = new SigScanTarget(7, 
 		"8B D9",                // mov ebx,ecx
 		"74 ??",                // je G1R-Win64-Shipping.exe.+________
-		"48 8D 15 ????????",    // lea rdx,[G1R-Win64-Shipping.exe+________]    <--- GNames
+		"48 8D 15 ????????",    // lea rdx,[G1R-Win64-Shipping.exe+________]    <--- FNamePool
 		"EB"                    // jmp G1R-Win64-Shipping.exe.+________
 	) { OnFound = onFound };
 
@@ -215,12 +215,12 @@ init {
 		"33 D2"                 // xor edx,edx
 	) { OnFound = onFound };
 
-	var gNames = scanner.Scan(gNamesTrg);
+	var fNamePool = scanner.Scan(fNamePoolTrg);
 	var gWorld = scanner.Scan(gWorldTrg);
 	var loadingScreen = scanner.Scan(loadingScreenTrg);
 	var moviePlayer = scanner.Scan(moviePlayerTrg);
 	
-	if (gNames == IntPtr.Zero) {
+	if (fNamePool == IntPtr.Zero) {
 		throw new InvalidOperationException("FNamePool not found. Trying again.");
 	}
 	if (gWorld == IntPtr.Zero) {
@@ -235,27 +235,27 @@ init {
 #endregion
 
 #region FNameToString()
-	var gNamesCache = new Dictionary<ulong, string>() {{0, "None"}};
+	var fNamePoolCache = new Dictionary<ulong, string>() {{0, "None"}};
 
 	vars.FNameToString = (Func<ulong, string>)(fName => {
 		var number     = (fName & 0xFFFFFFFF00000000) >> 0x20;
 		var nameLookup = (fName & 0x00000000FFFFFFFF) >> 0x00;
 
 		string name;
-		if (gNamesCache.ContainsKey(nameLookup)) {
-			name = gNamesCache[nameLookup];
+		if (fNamePoolCache.ContainsKey(nameLookup)) {
+			name = fNamePoolCache[nameLookup];
 		} 
 		else {
 			var chunkIdx = (fName & 0x00000000FFFF0000) >> 0x10;
 			var nameIdx  = (fName & 0x000000000000FFFF) >> 0x00;
 
-			var chunk = game.ReadPointer(gNames + 0x10 + (int)chunkIdx * 0x8);
+			var chunk = game.ReadPointer(fNamePool + 0x10 + (int)chunkIdx * 0x8);
 			var nameEntry = chunk + (int)nameIdx * 0x2;
 
 			var length = game.ReadValue<short>(nameEntry) >> 6;
 			name = game.ReadString(nameEntry + 0x2, length);
 
-			gNamesCache[nameLookup] = name;
+			fNamePoolCache[nameLookup] = name;
 		}
 
 		return name;
@@ -402,6 +402,16 @@ init {
 				0x320      // ViewTarget
 				+ 0x0,     // Target
 				0x18       // NamePrivate
+			))
+		},
+		{ "FadeAmount",
+			new MemoryWatcher<float>(new DeepPointer(
+				gWorld, 
+				0x158,     // AuthorityGameMode
+				0x3C0,     // m_PlayerControllers
+				0 * 0x8,   // [0] (PlayerController)
+				0x348,     // PlayerCameraManager
+				0x2CC      // FadeAmount 
 			))
 		},
 		{ "MainMenuDisplayedWidget",
@@ -971,7 +981,11 @@ split {
 				vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 4;
 		}
 		else if (type == "Cinematic") {
-			shouldSplit = current.cinematic == arg && vars.Watchers["CinematicState"].Current > 1;
+			shouldSplit = 
+				current.cinematic == arg 
+				// && vars.Watchers["CinematicState"].Current > 1
+				&& vars.Watchers["FadeAmount"].Old < 1.0f
+				&& vars.Watchers["FadeAmount"].Current == 1.0f;
 		}
 		else if (type == "Chapter") {
 			int chapter = int.Parse(arg);
