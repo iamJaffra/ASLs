@@ -274,18 +274,6 @@ init {
 				0x50      // Chapter
 			))
 		},
-		{ "KIRGO_REMATCH_RUNNING", // See if any of the story variables are useful
-			new MemoryWatcher<int>(new DeepPointer(
-				gWorld, 
-				0x160,    // GameState
-				0x1F8,    // ~GameState Subsystems~
-				0 * 0x8,  // [0] (GameStateSubsystemComponent)
-				0xA8,     // ??TMap
-				8 * 0x18  // [8] 
-				+ 0x8,    // Value (StorySubSystem)
-				0x144     // KIRGO_REMATCH_RUNNING
-			))
-		},
 		{ "Exp",
 			new MemoryWatcher<float>(new DeepPointer(
 				gWorld, 
@@ -347,9 +335,16 @@ init {
 				0x18       // NamePrivate
 			))
 		},
-		{ "NyrasFade",
-			new MemoryWatcher<float>(new DeepPointer("G1R-Win64-Shipping.exe", vars.NyrasFadeOffset))
-		},
+		{ "FadeAmount",
+			new MemoryWatcher<float>(new DeepPointer(
+				gWorld, 
+				0x158,     // AuthorityGameMode
+				0x3B0,     // m_PlayerControllers
+				0 * 0x8,   // [0] (PlayerController)
+				0x348,     // PlayerCameraManager
+				0x2CC      // ViewTarget
+			))
+		}
 	};
 
 	vars.MainMenuDisplayedWidget = new MemoryWatcher<ulong>(
@@ -415,25 +410,6 @@ init {
 		return false;
 	});
 
-	/*
-	## Mission Items
-	- ItMs_Axe_Bran
-	- ItMs_ExplosionBarrel
-	- ItMs_ExplosionScroll
-	- ItMs_FakeDiggerClothes
-	- ItMs_Focus_01
-	- ItMs_Focus_02
-	- ItMs_Focus_03
-	- ItMs_Focus_04
-	- ItMs_Focus_05
-	- ItMs_Plants_OrcSpore
-	- ItMs_Lightbringer
-	- ItMs_Demonprank
-	- ItMs_Spellblade
-	- ItMs_Timeblade
-	- ItMs_Worldsplitter
-	- ItMs_Uriziel
-	*/
 #endregion
 
 #region Quests
@@ -630,8 +606,9 @@ init {
 			splits[splitName] = () => vars.Watchers["Chapter"].Current.ToString() == arg;
 		}
 		else if (type == "FinishNyrasPrologue") {
-			splits[splitName] = () => vars.FNameToString(vars.Watchers["ViewTarget"].Current) == "CineCameraActor" && 
-									  vars.Watchers["NyrasFade"].Old < 1.0f && vars.Watchers["NyrasFade"].Current == 1.0f;
+			splits[splitName] = () => vars.FNameToString(vars.Watchers["ViewTarget"].Current) == "CineCameraActor"
+									  && vars.Watchers["FadeAmount"].Old < 1.0f 
+									  && vars.Watchers["FadeAmount"].Current == 1.0f;
 		} 
 		/*
 		else if (type == "ExitFreeMine") {
