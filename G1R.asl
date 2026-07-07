@@ -435,6 +435,64 @@ init {
 #endregion
 
 #region Inventory
+	vars.OwnedItems = new HashSet<string>();
+
+	vars.UpdateOwnedItems = (Action)(() => {
+		vars.OwnedItems.Clear();
+
+		IntPtr dataModuleContainerPtr =
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8,    // PlayerArray
+				0 * 0x8,  // [0] (CharacterState)
+				0x380,    // DataModuleComponent
+				0xA0,     // m_DataModules
+				4 * 0x8   // [4] (DataModule_Container)
+			)
+			.Deref<IntPtr>(game);
+
+		if (dataModuleContainerPtr == IntPtr.Zero) return ;
+		
+		IntPtr itemsPtr =
+			new DeepPointer(
+				dataModuleContainerPtr
+				+ 0x40    // m_Inventory 
+				+ 0x20    // m_Values
+				+ 0x108   // Items
+			)
+			.Deref<IntPtr>(game);
+		
+		int itemsArrayNum =
+			new DeepPointer(
+				dataModuleContainerPtr
+				+ 0x40    // m_Inventory 
+				+ 0x20    // m_Values
+				+ 0x108   // Items
+				+ 0x8     // ArrayNum
+			)
+			.Deref<int>(game);
+		
+		for (int i = 0; i < itemsArrayNum; i++) {
+			IntPtr inventoryPtr = game.ReadValue<IntPtr>(itemsPtr + (i * 0x88) + 0x48);
+
+			if (inventoryPtr == IntPtr.Zero) continue;
+
+			int inventorySize = game.ReadValue<int>(itemsPtr + (i * 0x88) + 0x48 + 0xC);
+
+			for (int j = 0; j < inventorySize; j++) {
+				IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (j * 0xB0) + 0x8);
+
+				if (slotPtr == IntPtr.Zero) continue;
+
+				var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
+				var id = vars.FNameToString(idFName);
+
+				vars.OwnedItems.Add(id);
+			}
+		}
+	});
+
 	vars.PlayerHasItem = (Func<string, bool>)((item) => {
 		IntPtr dataModuleContainerPtr =
 			new DeepPointer(
@@ -887,6 +945,7 @@ init {
 }
 
 update {
+	vars.UpdateOwnedItems();
 	vars.UpdateQuestCache();
 
 	foreach (var watcher in vars.Watchers.Values) {
@@ -970,7 +1029,7 @@ split {
 
 		bool shouldSplit = false;
 		if (type == "Item") {
-			shouldSplit = vars.PlayerHasItem(arg);
+			shouldSplit = vars.OwnedItems.Contains(arg);
 		} 
 		else if (type == "QuestStart") {
 			shouldSplit = 
