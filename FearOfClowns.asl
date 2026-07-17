@@ -1,6 +1,7 @@
 state("Fear of Clowns") { 
 	string16 level: "EnhancementsFREE.dll", 0xCDD13;
 	bool someByte: "DBProAnimationDebug.dll", 0x1C5CC;
+	bool isMoviePlaying: "wmvdecod.dll", 0x214B40;
 }
 
 startup {
@@ -44,6 +45,18 @@ init {
 
 update {
 	vars.isLoading.Update(game);
+
+	if (vars.isLoading.Changed) {
+		print("isLoading -> " + vars.isLoading.Current);
+	}
+
+	if (current.level != old.level) {
+		print("level: " + old.level + " -> " + current.level);
+	}
+
+	if (current.isMoviePlaying != old.isMoviePlaying) {
+		print("isMoviePlaying -> " + current.isMoviePlaying);
+	}
 }
 
 isLoading {
@@ -69,7 +82,7 @@ start {
 }
 
 split {
-	if (settings["end"] && current.level == "level20.zip" && current.someByte) {
+	if (settings["end"] && current.level == "level20.zip" && current.isMoviePlaying) {
 		vars.completedLevels.Add(current.level);
 		return true;
 	} 
