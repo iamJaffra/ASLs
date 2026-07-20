@@ -79,7 +79,39 @@ startup {
 }
 
 init {
-	// Find global variables
+	#region Offsets
+	
+	// Statics
+	const int GAME_MANAGER = 0x004C2958;
+	const int PLAYER       = 0x002B2684;
+
+	// VideoPlayer
+	const int VIDEO_PLAYER_OFFSET     = 0x78;
+		const int M_VIDEO_FILENAME_OFFSET = 0x04;
+		const int M_PLAYING_OFFSET        = 0x20;
+	
+	#endregion
+	
+	vars.GetCurrentCutscene = (Func<string>)(() => {
+		IntPtr videoPlayer = (IntPtr) new DeepPointer("Gothic2.exe", GAME_MANAGER, VIDEO_PLAYER_OFFSET).Deref<int>(game);
+		if (videoPlayer == IntPtr.Zero) return "";
+		
+		bool isVideoPlaying = new DeepPointer((IntPtr)videoPlayer + M_PLAYING_OFFSET).Deref<bool>(game);
+
+		if (isVideoPlaying) {
+			string cutscenePath = new DeepPointer((IntPtr)videoPlayer + M_VIDEO_FILENAME_OFFSET + 0x8, 0x0)
+				.DerefString(game, 1000);
+
+			string cutscene = Path.GetFileNameWithoutExtension(cutscenePath);
+
+			return cutscene;			
+		}
+		
+		return "";
+	});
+
+	#region Global Symbol Table
+
 	vars.globals = new Dictionary<string, MemoryWatcher>();
 
 	var globalsDict = new Dictionary<string, string> {
@@ -113,9 +145,11 @@ init {
 
 	foreach (var global in globalsDict) {
 		if (!vars.globals.ContainsKey(global.Value)) {
-			throw new InvalidOperationException("Not all globals found. Trying again.");
+			throw new InvalidOperationException("Global " + global + "not found. Trying again.");
 		}
 	}
+
+	#endregion
 
 	// Starting coordinates
 	vars.startX = -15710.02637; 
@@ -126,6 +160,13 @@ init {
 	vars.IGNAZ = 498;
 	vars.RAVEN = 1090;
 	vars.UNDEAD_DRAGON = 12377;
+
+	vars.EndingCutscenes = new HashSet<string> {
+		"EXTRO_KDF",
+		"EXTRO_XARDAS",
+		"CREDITS_EXTRO",
+		"CREDITS2"
+	};
 
 	// Functions
 
@@ -233,6 +274,16 @@ update {
 	if (!vars.canReset && current.igt > 500000) {
 		vars.canReset = true;
 	}
+	
+	current.cutscene = vars.GetCurrentCutscene();
+	if (current.cutscene != old.cutscene) {
+		if (!string.IsNullOrEmpty(current.cutscene)) {
+			vars.Info("Cutscene -> " + current.cutscene);
+		}
+		else {
+			vars.Info("Cutscene ended.");
+		}
+	}
 }
 
 split {
@@ -290,7 +341,7 @@ split {
 		print("Split: UndeadDragon");
 		return vars.completedSplits.Add("UndeadDragon");
 	}
-	else if (settings["Any%_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
+	else if (settings["Any%_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && vars.EndingCutscenes.Contains(current.cutscene)) {
 		print("Split: End");
 		return vars.completedSplits.Add("End");
 	}
@@ -357,7 +408,7 @@ split {
 	else if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
 		return vars.completedSplits.Add("UndeadDragon");
 	}
-	else if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
+	else if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && vars.EndingCutscenes.Contains(current.cutscene)) {
 		return vars.completedSplits.Add("End");
 	}
 }
