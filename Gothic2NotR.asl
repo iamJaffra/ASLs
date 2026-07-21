@@ -1,84 +1,108 @@
 state("Gothic2") {
-	long igt:           "ZSPEEDRUNTIMER.DLL", 0x19FE0;
+	long igt:               "ZSPEEDRUNTIMER.DLL", 0x19FE0;
 
 	// POS VECTOR
-	float x:            "Gothic2.exe", 0x4CEF4C;
-	float y:            "Gothic2.exe", 0x4CEF44;
+	float x:                "Gothic2.exe", 0x4CEF4C;
+	float y:                "Gothic2.exe", 0x4CEF44;
 
 	// WORLD
-	int world:          "Gothic2.exe", 0x4CECC0, 0x920;
-	string10 worldname: "Gothic2.exe", 0x6B0884, 0x8, 0x6274, 0x0;
+	string20 world:         "Gothic2.exe", 0x6B0884, 0x8, 0x6274, 0x0;
 
 	// PLAYER
-	int guild:          "Gothic2.exe", 0x6B2684, 0x230;
-	int exp:            "Gothic2.exe", 0x6B2684, 0x42C;
-	int inDialogue:     "Gothic2.exe", 0x6B2684, 0x298;
-	// player.visual.activeAniList.protoAni.aniName
-	string20 ani:       "Gothic2.exe", 0x6B2684, 0xC8, 0x50, 0x0, 0x2C, 0x0;
-	// player.timedOverlays[0].mdsOverlayName
-	string20 overlay:   "Gothic2.exe", 0x6B2684, 0x564, 0x0, 0x8, 0x0;
-	
-	// MISC
-	int inCutscene:     "Gothic2.exe", 0x4D1F18;
-	int inventoryOpen:  "Gothic2.exe", 0x5A43F0;
+	int guild:              "Gothic2.exe", 0x6B2684, 0x230;
+	int exp:                "Gothic2.exe", 0x6B2684, 0x42C;
+	int isPlayerInDialogue: "Gothic2.exe", 0x6B2684, 0x298;
+	                        // player.visual.activeAniList.protoAni.aniName
+	string32 ani:           "Gothic2.exe", 0x6B2684, 0xC8, 0x50, 0x0, 0x2C, 0x0;
+	                        // player.timedOverlays[0].mdsOverlayName
+	string32 overlay:       "Gothic2.exe", 0x6B2684, 0x564, 0x0, 0x8, 0x0;
 }
 
 startup {
-	settings.Add("Any%", false, "Any%");
-		settings.Add("Any%_Zuris", true, "Talk to Zuris", "Any%");
-		settings.Add("Any%_Ignaz", false, "Talk to Ignaz", "Any%");
-		settings.Add("Any%_EnterValley", true, "Enter valley", "Any%");
-		settings.Add("Any%_FireDragon", true, "Kill Fire Dragon", "Any%");
-		settings.Add("Any%_RockDragon", true, "Kill Rock Dragon", "Any%");
-		settings.Add("Any%_SwampDragon", true, "Kill Swamp Dragon", "Any%");
-		settings.Add("Any%_IceDragon", false, "Kill Ice Dragon (Any% No Flying)", "Any%");
-		settings.Add("Any%_Chapter5", true, "Reach Chapter 5", "Any%");
-		settings.Add("Any%_Map", true, "Collect sea map to Irdorath", "Any%");
-		settings.Add("Any%_LighthouseBed", false, "Go to bed in Jack's Lighthouse", "Any%");
-		settings.Add("Any%_Brian", false, "Brian becomes the new Lighthouse officer", "Any%");
-		settings.Add("Any%_Irdorath", true, "Reach Irdorath", "Any%");
-		settings.Add("Any%_UndeadDragon", true, "Kill Undead Dragon", "Any%");
-		settings.Add("Any%_End", true, "Finish game", "Any%");
-
-	settings.Add("AllChapters", false, "All Chapters");
-		settings.Add("AllChapters_SnapperWeed", false, "Eat snapper weed", "AllChapters");
-		settings.Add("AllChapters_Ore", false, "Collect black ore", "AllChapters");
-		settings.Add("AllChapters_Zuris", true, "Talk to Zuris", "AllChapters");
-		settings.Add("AllChapters_Chapter2", true, "Reach chapter 2", "AllChapters");
-		settings.Add("AllChapters_EnterValley", true, "Enter valley of mines", "AllChapters");
-		settings.Add("AllChapters_CastleRune", true, "Collect teleport rune to castle", "AllChapters");
-		settings.Add("AllChapters_FireDragon", true, "Kill Fire Dragon", "AllChapters");
-		settings.Add("AllChapters_RockDragon", true, "Kill Rock Dragon", "AllChapters");
-		settings.Add("AllChapters_Chapter3", true, "Reach chapter 3", "AllChapters");
-		settings.Add("AllChapters_EnterJharkendar", true, "Enter Jharkendar", "AllChapters");
-		settings.Add("AllChapters_Raven", true, "Kill Raven", "AllChapters");
-		settings.Add("AllChapters_LeaveJharkendar", false, "Leave Jharkendar", "AllChapters");
-		settings.Add("AllChapters_JoinMilitia", true, "Join militia", "AllChapters");
-		settings.Add("AllChapters_Eye", true, "Collect broken Eye of Innos", "AllChapters");
-		settings.Add("AllChapters_OnarRune", true, "Get teleport rune from Lee", "AllChapters");
-		settings.Add("AllChapters_Chapter4", true, "Reach chapter 4", "AllChapters");
-		settings.Add("AllChapters_SwampDragon", true, "Kill Swamp Dragon", "AllChapters");
-		settings.Add("AllChapters_Chapter5", true, "Reach chapter 5", "AllChapters");
-		settings.Add("AllChapters_Irdorath", true, "Enter Irdorath", "AllChapters");
-		settings.Add("AllChapters_UndeadDragon", true, "Kill Undead Dragon", "AllChapters");
-		settings.Add("AllChapters_End", true, "Finish game", "AllChapters");
-
+	vars.Splits = new List<Tuple<string, string, string, string, string[]>> {
+		//           name,                 type,         arg,                      description,                        categories
+		Tuple.Create("SnapperWeed",        "Overlay",    "HUMANS_SPRINT.MDS",      "Eat Snapperweed",                  new[] { "All Chapters" }),
+		Tuple.Create("BlackOre",           "Item",       "ITMI_ZEITSPALT_ADDON",   "Collect Black Ore",                new[] { "All Chapters" }),
+		Tuple.Create("Zuris",              "Talk",       "Zuris",                  "Talk to Zuris",                    new[] { "Any%", "All Chapters" }),
+		Tuple.Create("Ignaz",              "Talk",       "Ignaz",                  "Talk to Ignaz",                    new[] { "Any%" }),
+		Tuple.Create("Chapter2",           "Chapter",    "2",                      "Reach Chapter 2",                  new[] { "All Chapters" }),
+		Tuple.Create("EnterValley",        "EnterWorld", "OLDWORLD",               "Enter the Valley of Mines",        new[] { "Any%", "All Chapters" }),
+		Tuple.Create("RuneTeleportCastle", "Item",       "ITRU_TELEPORTOC",        "Collect teleport rune to castle",  new[] { "All Chapters" }),
+		Tuple.Create("FireDragon",         "Global",     "FREDRAGNISDEAD",         "Kill the Fire Dragon",             new[] { "Any%", "All Chapters" }),
+		Tuple.Create("RockDragon",         "Global",     "RCKDRAGNISDEAD",         "Kill the Rock Dragon",             new[] { "Any%", "All Chapters" }),
+		Tuple.Create("Chapter3",           "Chapter",    "3",                      "Reach Chapter 3",                  new[] { "All Chapters" }),
+		Tuple.Create("EnterJharkendar",    "EnterWorld", "ADDONWORLD",             "Enter Jharkendar",                 new[] { "All Chapters" }),
+		Tuple.Create("Raven",              "Global",     "RAVENISDEAD",            "Kill Raven",                       new[] { "All Chapters" }),
+		Tuple.Create("LeaveJharkendar",    "LeaveWorld", "ADDONWORLD",             "Leave Jharkendar",                 new[] { "All Chapters" }),
+		Tuple.Create("JoinMilitia",        "Guild",      "2",                      "Join the Militia",                 new[] { "All Chapters" }),
+		Tuple.Create("BrokenEyeOfInnos",   "Item",       "ITMI_INNOSEYE_BROKEN",   "Collect broken Eye of Innos",      new[] { "All Chapters" }),
+		Tuple.Create("RuneOnar",           "Item",       "ITRU_TELEPORTFARM",      "Get teleport rune from Lee",       new[] { "All Chapters" }),
+		Tuple.Create("Chapter4",           "Chapter",    "4",                      "Reach Chapter 4",                  new[] { "All Chapters" }),
+		Tuple.Create("SwampDragon",        "Global",     "SWAPDRAGNISDEAD",        "Kill the Swamp Dragon",            new[] { "Any%", "All Chapters" }),
+		Tuple.Create("IceDragon",          "Global",     "ICDRAGNISDEAD",          "Kill the Ice Dragon",              new[] { "Any%" }),
+		Tuple.Create("Chapter5",           "Chapter",    "5",                      "Reach Chapter 5",                  new[] { "Any%", "All Chapters" }),
+		Tuple.Create("SeaMap",             "Item",       "ITWR_SEAMAP_IRDORATH",   "Collect the sea map to Irdorath",  new[] { "Any%" }),
+		Tuple.Create("Bed",                "Animation",  "T_BEDHIGH_BACK_S0_2_S1", "Go to bed",                        new[] { "Any%" }),
+		//Tuple.Create("BrianLighthouse",    "Lighthouse", "2",                    "Brian becomes Lighthouse officer", new[] { "Any%" }),
+		Tuple.Create("EnterIrdorath",      "EnterWorld", "DRAGONISLAND",           "Enter Irdorath",                   new[] { "Any%", "All Chapters" }),
+		Tuple.Create("UndeadDragon",       "EnterWorld", "UNDEADDRAGONISDEAD",     "Kill the Undead Dragon",           new[] { "Any%", "All Chapters" }),
+		Tuple.Create("End",                "End",        "",                       "Finish the game",                  new[] { "Any%", "All Chapters" }),
+	};
+	
 	settings.Add("NewGame", true, "Reset+Start timer on New Game");
 
-	// Flags
-	vars.completedSplits = new HashSet<string>();
+	settings.Add("Splits", true, "Splits");
+		settings.Add("Any%", true, "Any%", "Splits");
+		settings.Add("All Chapters", true, "All Chapters", "Splits");
 
-	// Variable to save IGT in case the game crashes
-	vars.timeKeeper = new TimeSpan();
-
-	vars.Sw = new Stopwatch();
+	foreach (var split in vars.Splits) {
+		string name         = split.Item1;
+		string description  = split.Item4;
+		string[] categories = split.Item5;
+		
+		foreach (var category in categories) {
+			settings.Add(category + ":" + name, false, description, category);
+		}
+	}
 
 	vars.Info = (Action<string>)((msg) => {
 		print("[Gothic 2 NotR ASL] " + msg);
 	});
+
+	// Variable to save IGT in case the game crashes or softlocks
+	vars.TimeKeeper = new TimeSpan();
+
+	// Flags
+	vars.CompletedSplits = new HashSet<string>();
 }
 
 init {
+	// Starting coordinates
+	vars.startX = -15710.02637; 
+	vars.startY =  29912.93750;
+
+	// NPC IDs
+	vars.NPCs = new Dictionary<string, int> {
+		{ "Zuris",        409 }, 
+		{ "Ignaz",        498 }, 
+		{ "Raven",        1090 }, 
+		{ "UndeadDragon", 12377 }, 
+	};
+	
+	vars.EndingCutscenes = new HashSet<string> {
+		"EXTRO_KDF",
+		"EXTRO_XARDAS",
+		"CREDITS_EXTRO",
+		"CREDITS2"
+	};
+
+	vars.Worlds = new HashSet<string> {
+		"OLDWORLD",
+		"NEWWORLD",
+		"ADDONWORLD",
+		"DRAGONISLAND"
+	};
+
 	#region Offsets
 	
 	// Statics
@@ -92,6 +116,8 @@ init {
 	
 	#endregion
 	
+	#region VideoPlayer
+
 	vars.GetCurrentCutscene = (Func<string>)(() => {
 		IntPtr videoPlayer = (IntPtr) new DeepPointer("Gothic2.exe", GAME_MANAGER, VIDEO_PLAYER_OFFSET).Deref<int>(game);
 		if (videoPlayer == IntPtr.Zero) return "";
@@ -104,25 +130,27 @@ init {
 
 			string cutscene = Path.GetFileNameWithoutExtension(cutscenePath);
 
-			return cutscene;			
+			return cutscene;
 		}
 		
 		return "";
 	});
 
+	#endregion
+
 	#region Global Symbol Table
 
-	vars.globals = new Dictionary<string, MemoryWatcher>();
+	vars.Globals = new Dictionary<string, MemoryWatcher>();
 
-	var globalsDict = new Dictionary<string, string> {
-		{ "KAPITEL",            "chapter"      },
-		{ "RCKDRAGNISDEAD",     "rockDragon"   },
-		{ "FREDRAGNISDEAD",     "fireDragon"   },
-		{ "SWAPDRAGNISDEAD",    "swampDragon"  },
-		{ "ICDRAGNISDEAD",      "iceDragon"    },
-		{ "UNDEADDRAGONISDEAD", "undeadDragon" },
-		{ "RAVENISDEAD",        "Raven"        },
-		{ "MIS_JACK_NEWLIGHTHOUSEOFFICER", "newLighthouseOfficer" },
+	var requiredGlobals = new List<string> {
+		{ "KAPITEL" },
+		{ "RCKDRAGNISDEAD" },
+		{ "FREDRAGNISDEAD" },
+		{ "SWAPDRAGNISDEAD" },
+		{ "ICDRAGNISDEAD" },
+		{ "UNDEADDRAGONISDEAD" },
+		{ "RAVENISDEAD" },
+		{ "MIS_JACK_NEWLIGHTHOUSEOFFICER" },
 	};
 
 	// cur_table.table
@@ -134,41 +162,24 @@ init {
 		string name = new DeepPointer((IntPtr)symbol + 0x8, 0x0).DerefString(game, 100); 
 		int address = symbol + 0x18;
 
-		foreach (var global in globalsDict) {
-			if (name == global.Key) {
-				print(name + " = table[" + i + "] at 0x" + address.ToString("X"));
+		foreach (var global in requiredGlobals) {
+			if (name == global) {
+				vars.Info(name + " = table[" + i + "] at 0x" + address.ToString("X"));
 
-				vars.globals[global.Value] = new MemoryWatcher<int>(new DeepPointer((IntPtr)address));
+				vars.Globals[global] = new MemoryWatcher<int>(new DeepPointer((IntPtr)address));
 			}
 		} 
 	}
 
-	foreach (var global in globalsDict) {
-		if (!vars.globals.ContainsKey(global.Value)) {
-			throw new InvalidOperationException("Global " + global + "not found. Trying again.");
+	foreach (var global in requiredGlobals) {
+		if (!vars.Globals.ContainsKey(global)) {
+			throw new InvalidOperationException("Global " + global + " not found. Trying again.");
 		}
 	}
 
 	#endregion
 
-	// Starting coordinates
-	vars.startX = -15710.02637; 
-	vars.startY =  29912.93750;
-
-	// NPC IDs
-	vars.ZURIS = 409;
-	vars.IGNAZ = 498;
-	vars.RAVEN = 1090;
-	vars.UNDEAD_DRAGON = 12377;
-
-	vars.EndingCutscenes = new HashSet<string> {
-		"EXTRO_KDF",
-		"EXTRO_XARDAS",
-		"CREDITS_EXTRO",
-		"CREDITS2"
-	};
-
-	// Functions
+	#region NPCs
 
 	vars.IsDead = (Func<int, bool>)((npcID) => {
 		// ogame.world.voblist_npc.data
@@ -208,28 +219,32 @@ init {
 		return false;
 	});
 
-	vars.PlayerHasItem = (Func<string, bool>)(TargetItemName => {
+	#endregion
+
+	#region Inventory
+
+	vars.OwnedItems = new HashSet<string>();
+
+	vars.UpdateOwnedItems = (Action)(() => {
+		vars.OwnedItems.Clear();
+
 		// player.inventory2.contents
 		IntPtr item = (IntPtr) new DeepPointer("Gothic2.exe", 0x006B2684, 0x66C, 0x8).Deref<int>(game);
 		
 		while (item != IntPtr.Zero) {
 			var itemData = game.ReadPointer(item + 0x4);
-	
 			string itemName = game.ReadString(game.ReadPointer(itemData + 0x18), 20);
 			
-			if (itemName == TargetItemName) {
-				return true;
-			}
+			vars.OwnedItems.Add(itemName);
 	
 			item = game.ReadPointer(item + 0x8);
 		}
-		return false;
 	});
 
-	vars.snapperWeed = 0;
-	vars.canReset = true;
+	#endregion
 
-	vars.globalsFound = false;
+	vars.canReset = true;
+	current.cutscene = old.cutscene = "";
 }
 
 start {
@@ -245,10 +260,10 @@ start {
 }
 
 onStart {
-	vars.Info("STARTED NEW RUN");
-	vars.completedSplits.Clear();
-	vars.snapperWeed = 0;
+	vars.CompletedSplits.Clear();
 	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
+
+	vars.Info("--- START ---");
 }
 
 reset {
@@ -263,13 +278,15 @@ reset {
 }
 
 onReset {
-	vars.Info("RESET TIMER");
+	vars.Info("--- RESET ---");
 }
 
 update {
-	foreach (var watcher in vars.globals.Values) {
+	foreach (var watcher in vars.Globals.Values) {
 		watcher.Update(game);
 	}
+
+	vars.UpdateOwnedItems();
 
 	if (!vars.canReset && current.igt > 500000) {
 		vars.canReset = true;
@@ -284,132 +301,80 @@ update {
 			vars.Info("Cutscene ended.");
 		}
 	}
+
+	if (current.world != old.world) {
+		vars.Info("World: " + old.world + " -> " + current.world);
+	}
+
+	/*
+	if (current.ani != old.ani) {
+		if (!string.IsNullOrEmpty(current.ani)) {
+			vars.Info("Ani -> " + current.ani);
+		}
+		else {
+			vars.Info("Ani -> none");
+		}
+	}
+	*/
 }
 
 split {
-	// ANY%
+	foreach (var split in vars.Splits) {
+		string name         = split.Item1;
+		string type         = split.Item2;
+		string arg          = split.Item3;
+		string[] categories = split.Item5;
 
-	if (settings["Any%_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.inDialogue == 1 && vars.IsInDialogue(vars.ZURIS)) {
-		print("Split: Zuris");
-		return vars.completedSplits.Add("Zuris");
-	}
-	else if (settings["Any%_Ignaz"] && !vars.completedSplits.Contains("Ignaz") && current.inDialogue == 1 && vars.IsInDialogue(vars.IGNAZ)) {
-		print("Split: Ignaz");
-		return vars.completedSplits.Add("Ignaz");
-	}
-	else if (settings["Any%_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
-		print("Split: EnterValley");
-		return vars.completedSplits.Add("EnterValley");
-	}
-	else if (settings["Any%_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && vars.globals["fireDragon"].Current == 1) {
-		print("Split: FireDragon");
-		return vars.completedSplits.Add("FireDragon");
-	}
-	else if (settings["Any%_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && vars.globals["rockDragon"].Current == 1) {
-		print("Split: RockDragon");
-		return vars.completedSplits.Add("RockDragon");
-	}
-	else if (settings["Any%_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && vars.globals["swampDragon"].Current == 1) {
-		print("Split: SwampDragon");
-		return vars.completedSplits.Add("SwampDragon");
-	}
-	else if (settings["Any%_IceDragon"] && !vars.completedSplits.Contains("IceDragon") && vars.globals["iceDragon"].Current == 1) {
-		print("Split: IceDragon");
-		return vars.completedSplits.Add("IceDragon");
-	}
-	else if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
-		print("Split: Chapter5");
-		return vars.completedSplits.Add("Chapter5");
-	}
-	else if (settings["Any%_Map"] && !vars.completedSplits.Contains("Map") && current.world == 1 && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH") && current.inventoryOpen == 0) {
-		print("Split: Map");
-		return vars.completedSplits.Add("Map");
-	}
-	else if (settings["Any%_LighthouseBed"] && !vars.completedSplits.Contains("LighthouseBed") && vars.globals["chapter"].Current == 5 && current.ani == "T_BEDHIGH_BACK_S0_2_") {
-		print("Split: LighthouseBed");
-		return vars.completedSplits.Add("LighthouseBed");
-	}
-	else if (settings["Any%_Brian"] && !vars.completedSplits.Contains("Brian") && vars.globals["newLighthouseOfficer"].Current == 2) {
-		print("Split: Brian");
-		return vars.completedSplits.Add("Brian");
-	}
-	else if (settings["Any%_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
-		print("Split: Irdorath");
-		return vars.completedSplits.Add("Irdorath");
-	}
-	else if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
-		print("Split: UndeadDragon");
-		return vars.completedSplits.Add("UndeadDragon");
-	}
-	else if (settings["Any%_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && vars.EndingCutscenes.Contains(current.cutscene)) {
-		print("Split: End");
-		return vars.completedSplits.Add("End");
-	}
+		foreach (var category in categories) {
+			string setting = category + ":" + name;
 
-	// ALL CHAPTERS
+			if (!settings[setting] || vars.CompletedSplits.Contains(name)) continue;
 
-	if (settings["AllChapters_SnapperWeed"] && !vars.completedSplits.Contains("SnapperWeed") && current.overlay == "HUMANS_SPRINT.MDS") {
-		return vars.completedSplits.Add("SnapperWeed");
-	}
-	else if (settings["AllChapters_Ore"] && !vars.completedSplits.Contains("Ore") && current.world == 1 && vars.PlayerHasItem("ITMI_ZEITSPALT_ADDON") && current.inventoryOpen == 0) {
-		return vars.completedSplits.Add("Ore");
-	}
-	else if (settings["AllChapters_Zuris"] && !vars.completedSplits.Contains("Zuris") && current.inDialogue == 1 && vars.IsInDialogue(vars.ZURIS)) {
-		return vars.completedSplits.Add("Zuris");
-	}
-	else if (settings["AllChapters_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.globals["chapter"].Current == 2) {
-		return vars.completedSplits.Add("Chapter2");
-	}
-	else if (settings["AllChapters_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
-		return vars.completedSplits.Add("EnterValley");
-	}
-	else if (settings["AllChapters_CastleRune"] && !vars.completedSplits.Contains("CastleRune") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC") && current.inventoryOpen == 0) {
-		return vars.completedSplits.Add("CastleRune");
-	}
-	else if (settings["AllChapters_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && vars.globals["fireDragon"].Current == 1) {
-		return vars.completedSplits.Add("FireDragon");
-	}
-	else if (settings["AllChapters_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && vars.globals["rockDragon"].Current == 1) {
-		return vars.completedSplits.Add("RockDragon");
-	}
-	else if (settings["AllChapters_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.globals["chapter"].Current == 3) {
-		return vars.completedSplits.Add("Chapter3");
-	}
-	else if (settings["AllChapters_EnterJharkendar"] && !vars.completedSplits.Contains("EnterJharkendar") && current.worldname == "ADDONWORLD") {
-		return vars.completedSplits.Add("EnterJharkendar");
-	}
-	else if (settings["AllChapters_Raven"] && !vars.completedSplits.Contains("Raven") && vars.globals["Raven"].Current == 1) {
-		return vars.completedSplits.Add("Raven");
-	}
-	else if (settings["AllChapters_LeaveJharkendar"] && !vars.completedSplits.Contains("LeaveJharkendar") && old.worldname == "ADDONWORLD" && current.worldname == "NEWWORLD") {
-		return vars.completedSplits.Add("LeaveJharkendar");
-	}
-	else if (settings["AllChapters_JoinMilitia"] && !vars.completedSplits.Contains("JoinMilitia") && current.guild == 2) {
-		return vars.completedSplits.Add("JoinMilitia");
-	}
-	else if (settings["AllChapters_Eye"] && !vars.completedSplits.Contains("Eye") && current.world == 1 && vars.PlayerHasItem("ITMI_INNOSEYE_BROKEN") && current.inventoryOpen == 0) {
-		return vars.completedSplits.Add("Eye");
-	}
-	else if (settings["AllChapters_OnarRune"] && !vars.completedSplits.Contains("OnarRune") && current.world == 1 && vars.PlayerHasItem("ITRU_TELEPORTFARM") && current.inventoryOpen == 0) {
-		return vars.completedSplits.Add("OnarRune");
-	}
-	else if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.globals["chapter"].Current == 4) {
-		return vars.completedSplits.Add("Chapter4");
-	}
-	else if (settings["AllChapters_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && vars.globals["swampDragon"].Current == 1) {
-		return vars.completedSplits.Add("SwampDragon");
-	}
-	else if (settings["AllChapters_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
-		return vars.completedSplits.Add("Chapter5");
-	}
-	else if (settings["AllChapters_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
-		return vars.completedSplits.Add("Irdorath");
-	}
-	else if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
-		return vars.completedSplits.Add("UndeadDragon");
-	}
-	else if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && vars.EndingCutscenes.Contains(current.cutscene)) {
-		return vars.completedSplits.Add("End");
+			bool shouldSplit = false;
+
+			switch (type) {
+				case "Overlay": 
+					shouldSplit = current.overlay == arg;
+					break;
+				case "Item": 
+					shouldSplit = vars.OwnedItems.Contains(arg);
+					break;
+				case "Talk":
+					shouldSplit = 
+						current.isPlayerInDialogue == 1 && vars.IsInDialogue(vars.NPCs[arg]);
+					break;
+				case "Chapter":
+					int chapter = int.Parse(arg);
+					shouldSplit = vars.Globals["KAPITEL"].Current == chapter;
+					break;
+				case "EnterWorld": 
+					shouldSplit = current.world != old.world && current.world == arg;
+					break;
+				case "LeaveWorld": 
+					shouldSplit = current.world != old.world && old.world == arg
+						&& vars.Worlds.Contains(current.world);
+					break;
+				case "Global":
+					shouldSplit = vars.Globals[arg].Current == 1;
+					break;
+				case "Guild":
+					int guild = int.Parse(arg);
+					shouldSplit = current.guild == guild;
+					break;
+				case "Animation":
+					shouldSplit = current.ani == arg;
+					break;
+				case "End":
+					shouldSplit = vars.EndingCutscenes.Contains(current.cutscene);
+					break;
+			}
+
+			if (shouldSplit) {
+				vars.Info("Split: " + name + " (" + arg + ")");
+				vars.CompletedSplits.Add(name);
+				return true;
+			}
+		}
 	}
 }
 
@@ -418,9 +383,9 @@ isLoading {
 }
 
 gameTime {
-	return (vars.timeKeeper + TimeSpan.FromMilliseconds(current.igt / 1000));
+	return (vars.TimeKeeper + TimeSpan.FromMilliseconds(current.igt / 1000));
 }
 
 exit {
-	vars.timeKeeper = timer.CurrentTime.GameTime;
+	vars.TimeKeeper = timer.CurrentTime.GameTime;
 }
