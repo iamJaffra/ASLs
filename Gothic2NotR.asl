@@ -21,39 +21,39 @@ state("Gothic2") {
 startup {
 	vars.Splits = new List<Tuple<string, string, string, string, string[]>> {
 		//           name,                 type,         arg,                      description,                        categories
-		Tuple.Create("SnapperWeed",        "Overlay",    "HUMANS_SPRINT.MDS",      "Eat Snapperweed",                  new[] { "All Chapters" }),
-		Tuple.Create("BlackOre",           "Item",       "ITMI_ZEITSPALT_ADDON",   "Collect Black Ore",                new[] { "All Chapters" }),
-		Tuple.Create("Zuris",              "Talk",       "Zuris",                  "Talk to Zuris",                    new[] { "Any%", "All Chapters" }),
+		Tuple.Create("SnapperWeed",        "Overlay",    "HUMANS_SPRINT.MDS",      "Eat Snapperweed",                  new[] { "AllChapters" }),
+		Tuple.Create("BlackOre",           "Item",       "ITMI_ZEITSPALT_ADDON",   "Collect Black Ore",                new[] { "AllChapters" }),
+		Tuple.Create("Zuris",              "Talk",       "Zuris",                  "Talk to Zuris",                    new[] { "Any%", "AllChapters" }),
 		Tuple.Create("Ignaz",              "Talk",       "Ignaz",                  "Talk to Ignaz",                    new[] { "Any%" }),
-		Tuple.Create("Chapter2",           "Chapter",    "2",                      "Reach Chapter 2",                  new[] { "All Chapters" }),
-		Tuple.Create("EnterValley",        "EnterWorld", "OLDWORLD",               "Enter the Valley of Mines",        new[] { "Any%", "All Chapters" }),
-		Tuple.Create("RuneTeleportCastle", "Item",       "ITRU_TELEPORTOC",        "Collect teleport rune to castle",  new[] { "All Chapters" }),
-		Tuple.Create("FireDragon",         "Global",     "FREDRAGNISDEAD",         "Kill the Fire Dragon",             new[] { "Any%", "All Chapters" }),
-		Tuple.Create("RockDragon",         "Global",     "RCKDRAGNISDEAD",         "Kill the Rock Dragon",             new[] { "Any%", "All Chapters" }),
-		Tuple.Create("Chapter3",           "Chapter",    "3",                      "Reach Chapter 3",                  new[] { "All Chapters" }),
-		Tuple.Create("EnterJharkendar",    "EnterWorld", "ADDONWORLD",             "Enter Jharkendar",                 new[] { "All Chapters" }),
-		Tuple.Create("Raven",              "Global",     "RAVENISDEAD",            "Kill Raven",                       new[] { "All Chapters" }),
-		Tuple.Create("LeaveJharkendar",    "LeaveWorld", "ADDONWORLD",             "Leave Jharkendar",                 new[] { "All Chapters" }),
-		Tuple.Create("JoinMilitia",        "Guild",      "2",                      "Join the Militia",                 new[] { "All Chapters" }),
-		Tuple.Create("BrokenEyeOfInnos",   "Item",       "ITMI_INNOSEYE_BROKEN",   "Collect broken Eye of Innos",      new[] { "All Chapters" }),
-		Tuple.Create("RuneOnar",           "Item",       "ITRU_TELEPORTFARM",      "Get teleport rune from Lee",       new[] { "All Chapters" }),
-		Tuple.Create("Chapter4",           "Chapter",    "4",                      "Reach Chapter 4",                  new[] { "All Chapters" }),
-		Tuple.Create("SwampDragon",        "Global",     "SWAPDRAGNISDEAD",        "Kill the Swamp Dragon",            new[] { "Any%", "All Chapters" }),
+		Tuple.Create("Chapter2",           "Chapter",    "2",                      "Reach Chapter 2",                  new[] { "AllChapters" }),
+		Tuple.Create("EnterValley",        "EnterWorld", "OLDWORLD",               "Enter the Valley of Mines",        new[] { "Any%", "AllChapters" }),
+		Tuple.Create("RuneTeleportCastle", "Item",       "ITRU_TELEPORTOC",        "Collect teleport rune to castle",  new[] { "AllChapters" }),
+		Tuple.Create("FireDragon",         "Global",     "FREDRAGNISDEAD",         "Kill the Fire Dragon",             new[] { "Any%", "AllChapters" }),
+		Tuple.Create("RockDragon",         "Global",     "RCKDRAGNISDEAD",         "Kill the Rock Dragon",             new[] { "Any%", "AllChapters" }),
+		Tuple.Create("Chapter3",           "Chapter",    "3",                      "Reach Chapter 3",                  new[] { "AllChapters" }),
+		Tuple.Create("EnterJharkendar",    "EnterWorld", "ADDONWORLD",             "Enter Jharkendar",                 new[] { "AllChapters" }),
+		Tuple.Create("Raven",              "Global",     "RAVENISDEAD",            "Kill Raven",                       new[] { "AllChapters" }),
+		Tuple.Create("LeaveJharkendar",    "LeaveWorld", "ADDONWORLD",             "Leave Jharkendar",                 new[] { "AllChapters" }),
+		Tuple.Create("JoinMilitia",        "Guild",      "2",                      "Join the Militia",                 new[] { "AllChapters" }),
+		Tuple.Create("BrokenEyeOfInnos",   "Item",       "ITMI_INNOSEYE_BROKEN",   "Collect broken Eye of Innos",      new[] { "AllChapters" }),
+		Tuple.Create("RuneOnar",           "Item",       "ITRU_TELEPORTFARM",      "Get teleport rune from Lee",       new[] { "AllChapters" }),
+		Tuple.Create("Chapter4",           "Chapter",    "4",                      "Reach Chapter 4",                  new[] { "AllChapters" }),
+		Tuple.Create("SwampDragon",        "Global",     "SWAPDRAGNISDEAD",        "Kill the Swamp Dragon",            new[] { "Any%", "AllChapters" }),
 		Tuple.Create("IceDragon",          "Global",     "ICDRAGNISDEAD",          "Kill the Ice Dragon",              new[] { "Any%" }),
-		Tuple.Create("Chapter5",           "Chapter",    "5",                      "Reach Chapter 5",                  new[] { "Any%", "All Chapters" }),
+		Tuple.Create("Chapter5",           "Chapter",    "5",                      "Reach Chapter 5",                  new[] { "Any%", "AllChapters" }),
 		Tuple.Create("SeaMap",             "Item",       "ITWR_SEAMAP_IRDORATH",   "Collect the sea map to Irdorath",  new[] { "Any%" }),
 		Tuple.Create("Bed",                "Animation",  "T_BEDHIGH_BACK_S0_2_S1", "Go to bed",                        new[] { "Any%" }),
 		//Tuple.Create("BrianLighthouse",    "Lighthouse", "2",                    "Brian becomes Lighthouse officer", new[] { "Any%" }),
-		Tuple.Create("EnterIrdorath",      "EnterWorld", "DRAGONISLAND",           "Enter Irdorath",                   new[] { "Any%", "All Chapters" }),
-		Tuple.Create("UndeadDragon",       "EnterWorld", "UNDEADDRAGONISDEAD",     "Kill the Undead Dragon",           new[] { "Any%", "All Chapters" }),
-		Tuple.Create("End",                "End",        "",                       "Finish the game",                  new[] { "Any%", "All Chapters" }),
+		Tuple.Create("EnterIrdorath",      "EnterWorld", "DRAGONISLAND",           "Enter Irdorath",                   new[] { "Any%", "AllChapters" }),
+		Tuple.Create("UndeadDragon",       "EnterWorld", "UNDEADDRAGONISDEAD",     "Kill the Undead Dragon",           new[] { "Any%", "AllChapters" }),
+		Tuple.Create("End",                "End",        "",                       "Finish the game",                  new[] { "Any%", "AllChapters" }),
 	};
 	
 	settings.Add("NewGame", true, "Reset+Start timer on New Game");
 
 	settings.Add("Splits", true, "Splits");
 		settings.Add("Any%", true, "Any%", "Splits");
-		settings.Add("All Chapters", true, "All Chapters", "Splits");
+		settings.Add("AllChapters", true, "All Chapters", "Splits");
 
 	foreach (var split in vars.Splits) {
 		string name         = split.Item1;
@@ -61,7 +61,7 @@ startup {
 		string[] categories = split.Item5;
 		
 		foreach (var category in categories) {
-			settings.Add(category + ":" + name, false, description, category);
+			settings.Add(category + "_" + name, false, description, category);
 		}
 	}
 
@@ -353,12 +353,16 @@ update {
 		}
 	}
 	*/
+
+	if (vars.Watchers["NewGames"].Changed && vars.Watchers["NewGames"].Current != 0) {
+		vars.IsNewGame = true;
+	}
 }
 
 start { 
-	if (vars.IsNewGame && current.igt < 500000) {
+	if (vars.IsNewGame && current.igt < 500000 && current.igt != 0) {
 		vars.IsNewGame = false;
-		return true;
+		return settings["NewGame"];
 	}
 }
 
@@ -369,11 +373,8 @@ onStart {
 	vars.Info("--- START ---");
 }
 
-reset {	
-	if (vars.Watchers["NewGames"].Changed && vars.Watchers["NewGames"].Current != 0) {
-		vars.IsNewGame = true;
-		return true;	
-	}
+reset {		
+	return vars.IsNewGame && settings["NewGame"];
 }
 
 onReset {
@@ -388,7 +389,7 @@ split {
 		string[] categories = split.Item5;
 
 		foreach (var category in categories) {
-			string setting = category + ":" + name;
+			string setting = category + "_" + name;
 
 			if (!settings[setting] || vars.CompletedSplits.Contains(name)) continue;
 
