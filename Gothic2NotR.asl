@@ -5,7 +5,7 @@ state("Gothic2") {
 	float x:                "Gothic2.exe", 0x4CEF4C;
 	float y:                "Gothic2.exe", 0x4CEF44;
 
-	// WORLD
+	// WORLD worldName
 	string20 world:         "Gothic2.exe", 0x6B0884, 0x8, 0x6274, 0x0;
 
 	// PLAYER
@@ -45,7 +45,7 @@ startup {
 		Tuple.Create("Bed",                "Animation",  "T_BEDHIGH_BACK_S0_2_S1", "Go to bed",                        new[] { "Any%" }),
 		//Tuple.Create("BrianLighthouse",    "Lighthouse", "2",                    "Brian becomes Lighthouse officer", new[] { "Any%" }),
 		Tuple.Create("EnterIrdorath",      "EnterWorld", "DRAGONISLAND",           "Enter Irdorath",                   new[] { "Any%", "AllChapters" }),
-		Tuple.Create("UndeadDragon",       "EnterWorld", "UNDEADDRAGONISDEAD",     "Kill the Undead Dragon",           new[] { "Any%", "AllChapters" }),
+		Tuple.Create("UndeadDragon",       "Global",     "UNDEADDRAGONISDEAD",     "Kill the Undead Dragon",           new[] { "Any%", "AllChapters" }),
 		Tuple.Create("End",                "End",        "",                       "Finish the game",                  new[] { "Any%", "AllChapters" }),
 	};
 	
