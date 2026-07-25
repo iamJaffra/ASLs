@@ -90,7 +90,6 @@ init {
 	};
 	
 	vars.EndingCutscenes = new HashSet<string> {
-		"EXTRO_KDF",
 		"EXTRO_XARDAS",
 		"CREDITS_EXTRO",
 		"CREDITS2"
