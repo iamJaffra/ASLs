@@ -42,6 +42,8 @@ startup {
 
 		Tuple.Create("Orc Talisman",                    "Item",          "ItAt_Amulet_Orc"),
 
+		Tuple.Create("Teleport Rune To Water Mages",    "Item",          "ItAr_Rune_TeleportToMagiciansOfWater"),
+
 		Tuple.Create("Prime Tongue of Fire",            "Item",          "ItAt_Firelizard_05"),
 		Tuple.Create("Horn of a Great Shadowbeast",     "Item",          "ItAt_Shadow_05"),
 		Tuple.Create("Teeth of a Swampshark Mother",    "Item",          "ItAt_Swampshark_04"),
