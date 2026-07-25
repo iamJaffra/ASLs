@@ -1075,14 +1075,16 @@ update {
 }
 
 reset {
-	if (current.world == "MenuMap") {
-		if (current.mainMenuDisplayedWidget != old.mainMenuDisplayedWidget) {
-			return settings["ResetNewGame"];
+	if (settings["ResetNewGame"] && current.world == "MenuMap") {
+		if (current.mainMenuDisplayedWidget != old.mainMenuDisplayedWidget && current.mainMenuDisplayedWidget == "W_DifficultySelectionMenu_C") {
+			vars.Info("--- RESET (New Game) ---");
+			return true;
 		}
 	}
 
-	if (current.world != old.world && current.world == "MenuMap") {
-		return settings["ResetMainMenu"];
+	if (settings["ResetMainMenu"] && current.world != old.world && current.world == "MenuMap") {
+		vars.Info("--- RESET (Main Menu) ---");
+		return true;
 	}
 }
 
