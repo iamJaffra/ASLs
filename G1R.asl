@@ -21,15 +21,26 @@ startup {
 		Tuple.Create("Essence of Spirit",               "Item",          "ItFo_Potion_Mana_Perma_01"),
 		
 		Tuple.Create("Bloodfly Scroll",                 "Item",          "ItAr_Scroll_TransformBloodfly"),
-		Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
+		//Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
+		Tuple.Create("Strange Amulet",                  "Item",          "ItAt_Amulet_Ulu_Talisman"),
+		Tuple.Create("Kalom's Recipe",                  "Item",          "ItWr_Scroll_Kalom"),
+		
 		Tuple.Create("Almanac",                         "Item",          "ItWr_Book_Focus"),
+
+		Tuple.Create("Queens Pheromone Gland",          "Item",          "ItAt_Minecrawlerqueen_01"),
 
 		Tuple.Create("Focus 1 (Ocean Cliff)",           "Item",          "ItMs_Focus_01"),
 		Tuple.Create("Focus 2 (Troll Canyon)",          "Item",          "ItMs_Focus_02"),
 		Tuple.Create("Focus 3 (Mountain Fortress)",     "Item",          "ItMs_Focus_03"),
 		Tuple.Create("Focus 4 (Monastery Ruins)",       "Item",          "ItMs_Focus_04"),
 		Tuple.Create("Focus 5 (Stone Circle)",          "Item",          "ItMs_Focus_05"),
+
+		Tuple.Create("Heart of a Stone Golem",          "Item",          "ItAt_Stonegolem_01"),
+		Tuple.Create("Heart of an Ice Golem",           "Item",          "ItAt_Icegolem_01"),
+		Tuple.Create("Heart of a Fire Golem",           "Item",          "ItAt_Firegolem_01"),
+
+		Tuple.Create("Orc Talisman",                    "Item",          "ItAt_Amulet_Orc"),
 
 		Tuple.Create("Prime Tongue of Fire",            "Item",          "ItAt_Firelizard_05"),
 		Tuple.Create("Horn of a Great Shadowbeast",     "Item",          "ItAt_Shadow_05"),
@@ -54,17 +65,21 @@ startup {
 
 		Tuple.Create("<Placeholder> (tell me which quests you'd like)",  
 		                                                "QuestStart",    "Quest_PLACEHOLDER"),
+		Tuple.Create("Start Test Of Faith",             "QuestStart",    "Quest_OldCamp_OCCHAPTER1_JOINOC_JOINOC_OBJ_TESTOFFAITH"),
 		
 		Tuple.Create("Torrez",                          "Talk",          "State_OC_KDF_Torrez"),
 		Tuple.Create("Sharky",                          "Talk",          "State_NC_ORG_Sharky"),
-
+		
+		Tuple.Create("Attend The Great Awakening",      "Cinematic",     "ProphecyCinematic"),
+		
+		Tuple.Create("Mordrag",                         "Kill",          "State_OC_ORG_Mordrag"),
 		Tuple.Create("Hänno",                           "Kill",          "State_NC_SLD_Haenno"),
 
 		Tuple.Create("Transform into Bloodfly",         "ViewTarget",    "CharacterCanTransformInto_Bloodfly_C"),
 		Tuple.Create("Go to bed",                       "ViewTarget",    "Interactive_Bed"),
 		
-		Tuple.Create("Sleeper Temple Entrance Barrier", "Cinematic",     "SleeperTempleOpeningCinematic"),
-		Tuple.Create("Sleeper Temple Final Barrier",    "ViewTarget",    "Interactive_DestroyFinalBarrier_C_UAID_30D042EE632F23B802"),
+		//Tuple.Create("Sleeper Temple Entrance Barrier", "Cinematic",     "SleeperTempleOpeningCinematic"),
+		//Tuple.Create("Sleeper Temple Final Barrier",    "ViewTarget",    "Interactive_DestroyFinalBarrier_C_UAID_30D042EE632F23B802"),
 
 		Tuple.Create("Harpies",                         "Location",      "82197.8904851777, 116451.914252969"),
 		Tuple.Create("Orcs",                            "Location",      "32259.6609909562, -271337.753909156"),
@@ -76,7 +91,14 @@ startup {
 		Tuple.Create("Xardas",                          "Location",      "80294.8305271158, -363925.52740662"),
 		Tuple.Create("Cor Kalom",                       "Location",      "147409.323357549, -385632.48318534"),
 
-		Tuple.Create("End",                             "Cinematic",     "ExtroCinematic"),
+		Tuple.Create("Teleport to the Fire Mages",      "Teleport",      "110420.000000000, -104999.317421"),
+		Tuple.Create("Teleport to Xardas after Duping Harpy Scrolls",      
+		                                                "HarpyDupe",     "124302.706645365, -142827.915340985"),
+		Tuple.Create("Take Focus from Lukor",           "LukorFocus",    "ItMs_Focus_01"),
+		Tuple.Create("Get Focus Stones Map from Diego", "FocusMapDiego", ""),
+		
+
+		Tuple.Create("End",                             "End",           "ExtroCinematic"),
 	};
 
 	settings.Add("Reset", true, "Reset");
@@ -95,9 +117,15 @@ startup {
 		settings.Add("KillSplits", true, "Kill", "Splits");
 		settings.Add("Other", true, "Other", "Splits");
 			settings.Add("Go to bed", false, "Go to bed", "Other");
-		settings.Add("BarrierSplits", true, "Barriers", "Splits");
-			settings.Add("Sleeper Temple Entrance Barrier", false, "Sleeper Temple Entrance Barrier", "BarrierSplits");
-			settings.Add("Sleeper Temple Final Barrier", false, "Sleeper Temple Final Barrier", "BarrierSplits");
+			settings.Add("Teleport to the Fire Mages", false, "Teleport to the Fire Mages", "Other");
+			settings.Add("Attend The Great Awakening", false, "Attend The Great Awakening", "Other");
+			settings.Add("Take Focus from Lukor", false, "Take Focus from Lukor", "Other");
+			settings.Add("Get Focus Stones Map from Diego", false, "Get Focus Stones Map from Diego", "Other");
+			settings.Add("Teleport to Xardas after Duping Harpy Scrolls", false, "Teleport to Xardas after Duping Harpy Scrolls", "Other");
+			
+		//settings.Add("BarrierSplits", true, "Barriers", "Splits");
+		//	settings.Add("Sleeper Temple Entrance Barrier", false, "Sleeper Temple Entrance Barrier", "BarrierSplits");
+		//	settings.Add("Sleeper Temple Final Barrier", false, "Sleeper Temple Final Barrier", "BarrierSplits");
 
 	foreach (var split in vars.Splits) {
 		string name = split.Item1;
@@ -801,7 +829,7 @@ init {
 					var participant = vars.FNameToString(participantFName);
 					
 					if (participant == npc) {
-						vars.Info("In Conversation with " + participant);
+						//vars.Info("In Conversation with " + participant);
 						return true;
 					}
 				}
@@ -957,6 +985,24 @@ init {
 		}
 	});
 
+	vars.DidPlayerTeleport = (Func<double, double, bool>)((x, y) => {
+		bool isIn = 
+			Math.Sqrt(
+				Math.Pow(x - vars.Watchers["X"].Current, 2) + 
+				Math.Pow(y - vars.Watchers["Y"].Current, 2)
+			) 
+			< 500;
+
+		bool wasOut = 
+			Math.Sqrt(
+				Math.Pow(x - vars.Watchers["X"].Old, 2) + 
+				Math.Pow(y - vars.Watchers["Y"].Old, 2)
+			) 
+			> 1000;
+		
+		return isIn && wasOut;
+	});
+
 #endregion
 
 	current.world = old.world = "";
@@ -1024,6 +1070,8 @@ update {
 	if (vars.Watchers["SyncMechanism"].Changed) {
 		vars.Info("SyncMechanism -> 0x" + vars.Watchers["SyncMechanism"].Current.ToString("X"));
 	}
+
+	//vars.Info("X,Y -> " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
 }
 
 reset {
@@ -1061,14 +1109,12 @@ split {
 			shouldSplit = vars.OwnedItems.Contains(arg);
 		} 
 		else if (type == "QuestStart") {
-			shouldSplit = 
-				vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 2;
+			shouldSplit = vars.QuestState(arg) == 2;
 		}
 		else if (type == "QuestComplete") {
-			shouldSplit = 
-				vars.Watchers["ActiveNotifications"].Changed && vars.QuestState(arg) == 4;
+			shouldSplit = vars.QuestState(arg) == 4;
 		}
-		else if (type == "Cinematic") {
+		else if (type == "End") {
 			shouldSplit = 
 				current.cinematic == arg 
 				// && vars.Watchers["CinematicState"].Current > 1
@@ -1089,6 +1135,9 @@ split {
 				vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation")
 				&& vars.IsInConversation(arg);
 		}
+		else if (type == "Cinematic") {
+			shouldSplit = old.cinematic == arg && current.cinematic == "None";
+		}
 		else if (type == "ViewTarget") {
 			shouldSplit = vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith(arg);
 		}
@@ -1104,6 +1153,28 @@ split {
 					Math.Pow(y - vars.Watchers["Y"].Current, 2)
 				) 
 				< 500;
+		}
+		else if (type == "Teleport") {
+			string input = arg;
+			string[] parts = input.Split(',');
+			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+			
+			shouldSplit = vars.DidPlayerTeleport(x, y);
+		}
+		else if (type == "HarpyDupe") {
+			string input = arg;
+			string[] parts = input.Split(',');
+			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+			
+			shouldSplit = vars.DidPlayerTeleport(x, y) && vars.OwnedItems.Contains("ItAr_Scroll_TransformHarpy");
+		}
+		else if (type == "LukorFocus") {
+			shouldSplit = vars.GetChapter() == 2 && vars.OwnedItems.Contains(arg);
+		}
+		else if (type == "FocusMapDiego") {
+			shouldSplit = vars.OwnedItems.Contains("ItWr_Map_Focus") && !vars.IsInConversation("State_OC_STT_Diego");
 		}
 
 		if (shouldSplit) {
