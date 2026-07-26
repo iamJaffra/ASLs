@@ -17,6 +17,7 @@ startup {
 	
 	vars.Splits = new List<Tuple<string, string, string>> {
 		//           name,                              type,            className / number
+		Tuple.Create("Molerat Scroll",                  "Item",          "ItAr_Scroll_TransformMolerat"),
 		Tuple.Create("Storm Of Fire Scroll",            "Item",          "ItAr_Scroll_StormOfFire"),
 		Tuple.Create("Essence of Spirit",               "Item",          "ItFo_Potion_Mana_Perma_01"),
 		
