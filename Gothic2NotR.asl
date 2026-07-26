@@ -91,8 +91,7 @@ init {
 	
 	vars.EndingCutscenes = new HashSet<string> {
 		"EXTRO_XARDAS",
-		"CREDITS_EXTRO",
-		"CREDITS2"
+		"CREDITS_EXTRO"
 	};
 
 	vars.Worlds = new HashSet<string> {
@@ -247,67 +246,51 @@ init {
 
 	#endregion
 
-	#region zError
+	#region HandleSelAction Hook
 
-	const int Z_ERROR = 0x004CDCD0;
-		const int FILTER_LEVEL_OFFSET = 0x20;
-
-	IntPtr zError = BASE + Z_ERROR;
-	
-	if (zError == IntPtr.Zero) {
-		throw new InvalidOperationException("zError was null. Trying again.");	
-	}
-	
-	// Enable logging
-	game.WriteBytes((IntPtr)(zError + FILTER_LEVEL_OFFSET), new byte[] { 4 } );		
-
-	// --
-
-	const int MESSAGE_ADDR = 0x004C1604;
-	const int HOOK_ADDR    = 0x0004C90D;
-	const int DETOUR_ADDR  = 0x0042D800;
 	const int COUNTER_ADDR = 0x004C1600;
+	const int MESSAGE_ADDR = 0x004C1604;
+	const int HOOK_ADDR    = 0x000DC896;
+	const int DETOUR_ADDR  = 0x0042D800;
 
 	// --
 
-	byte[] newGameMessage = {
-		0x42, 0x3A, 0x20, 0x4D, 0x45, 0x4E, 0x55, 0x3A, 0x20, 0x4E, 0x45, 0x57, 0x5F, 0x47, 0x41, 0x4D, 0x45 // B: MENU: NEW_GAME
-	};	
+	byte[] newGameMessage = { 0x4E, 0x45, 0x57, 0x5F, 0x47, 0x41, 0x4D, 0x45 };	 // NEW_GAME
 
 	game.WriteBytes((IntPtr)(BASE + MESSAGE_ADDR), newGameMessage);
 
 	// --
 
 	byte[] detour = {
-		0x60,                               // pushad 
-		0x9C,                               // pushfd 
-		0x8B, 0x43, 0x0C,                   // mov eax,[ebx+0C]
-		0x83, 0xF8, 0x11,                   // cmp eax,11 { 17 }
-		0x75, 0x18,                         // jne Gothic2.exe+42D822
-		0x8B, 0x73, 0x08,                   // mov esi,[ebx+08]
-		0x8D, 0x3D, 0x04, 0x16, 0x8C, 0x00, // lea edi,[Gothic2.exe+4C1604] { ("B: MENU: NEW_GAME") }
-		0xB9, 0x11, 0x00, 0x00, 0x00,       // mov ecx,00000011 { 17 }
-		0xF3, 0xA6,                         // repe cmpsb 
-		0x75, 0x06,                         // jne Gothic2.exe+42D822
-		0xFF, 0x05, 0x00, 0x16, 0x8C, 0x00, // inc [Gothic2.exe+4C1600] { (0) }
-		0x9D,                               // popfd 
-		0x61,                               // popad 
-		0x8B, 0x43, 0x0C,                   // mov eax,[ebx+0C]
-		0x83, 0xF8, 0x02,                   // cmp eax,02 { 2 }
-		0xE9, 0xE4, 0xF0, 0xC1, 0xFF        // jmp Gothic2.exe+4C913
+		0x8B, 0xB4, 0x24, 0xCC, 0x00, 0x00, 0x00,  // mov esi,[esp+000000CC]
+		0x60,                                      // pushad 
+		0x9C,                                      // pushfd 
+		0x8B, 0x46, 0x0C,                          // mov eax,[esi+0C]
+		0x83, 0xF8, 0x08,                          // cmp eax,08 { 8 }
+		0x75, 0x1A,                                // jne Gothic2.exe+42D82B
+		0x56,                                      // push esi
+		0x8B, 0x76, 0x08,                          // mov esi,[esi+08]
+		0x8D, 0x3D, 0x04, 0x16, 0x8C, 0x00,        // lea edi,[Gothic2.exe+4C1604] { ("NEW_GAME") }
+		0xB9, 0x08, 0x00, 0x00, 0x00,              // mov ecx,00000008 { 8 }
+		0xF3, 0xA6,                                // repe cmpsb 
+		0x5E,                                      // pop esi
+		0x75, 0x06,                                // jne Gothic2.exe+42D82B
+		0xFF, 0x05, 0x00, 0x16, 0x8C, 0x00,        // inc [Gothic2.exe+4C1600] { (0) }
+		0x9D,                                      // popfd 
+		0x61,                                      // popad 
+		0xE9, 0x6B, 0xF0, 0xCA, 0xFF               // jmp Gothic2.exe+DC89D
 	};
 
 	game.WriteBytes((IntPtr)(BASE + DETOUR_ADDR), detour);
 
 	// --
-
-	byte[] hook = { 0xE9, 0xEE, 0x0E, 0x3E, 0x00, 0x90 };
+	byte[] hook = { 0xE9, 0x65, 0x0F, 0x35, 0x00, 0x90, 0x90 };
 
 	game.WriteBytes((IntPtr)(BASE + HOOK_ADDR), hook);
 
 	// --
 
-	vars.Info("Applied zError hook.");
+	vars.Info("Applied HandleSelAction hook.");
 
 	vars.Watchers["NewGames"] = new MemoryWatcher<int>(new DeepPointer((IntPtr)(BASE + COUNTER_ADDR)));
 
@@ -354,6 +337,7 @@ update {
 	*/
 
 	if (vars.Watchers["NewGames"].Changed && vars.Watchers["NewGames"].Current != 0) {
+		vars.Info("Selected NEW_GAME.");
 		vars.IsNewGame = true;
 	}
 }
