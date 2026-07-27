@@ -37,6 +37,8 @@ startup {
 		Tuple.Create("Focus 4 (Monastery Ruins)",       "Item",          "ItMs_Focus_04"),
 		Tuple.Create("Focus 5 (Stone Circle)",          "Item",          "ItMs_Focus_05"),
 
+		Tuple.Create("Get Focus Stones Map from Diego", "Item",          "ItWr_Map_Focus"),
+
 		Tuple.Create("Heart of a Stone Golem",          "Item",          "ItAt_Stonegolem_01"),
 		Tuple.Create("Heart of an Ice Golem",           "Item",          "ItAt_Icegolem_01"),
 		Tuple.Create("Heart of a Fire Golem",           "Item",          "ItAt_Firegolem_01"),
@@ -98,8 +100,6 @@ startup {
 		Tuple.Create("Teleport to Xardas after Duping Harpy Scrolls",      
 		                                                "HarpyDupe",     "124302.706645365, -142827.915340985"),
 		Tuple.Create("Take Focus from Lukor",           "LukorFocus",    "ItMs_Focus_01"),
-		Tuple.Create("Get Focus Stones Map from Diego", "FocusMapDiego", ""),
-		
 
 		Tuple.Create("End",                             "End",           "ExtroCinematic"),
 	};
@@ -123,7 +123,6 @@ startup {
 			settings.Add("Teleport to the Fire Mages", false, "Teleport to the Fire Mages", "Other");
 			settings.Add("Attend The Great Awakening", false, "Attend The Great Awakening", "Other");
 			settings.Add("Take Focus from Lukor", false, "Take Focus from Lukor", "Other");
-			settings.Add("Get Focus Stones Map from Diego", false, "Get Focus Stones Map from Diego", "Other");
 			settings.Add("Teleport to Xardas after Duping Harpy Scrolls", false, "Teleport to Xardas after Duping Harpy Scrolls", "Other");
 			
 		//settings.Add("BarrierSplits", true, "Barriers", "Splits");
@@ -802,7 +801,9 @@ init {
 		return false;
 	});
 
-	vars.IsInConversation = (Func<string, bool>)((npc) => {
+	vars.PlayerIsInConversationWith = (Func<string, bool>)((npc) => {
+		if (!vars.PlayerIsInConversation()) return false;
+
 		IntPtr abilitySystemComponentPtr = (IntPtr)
 			new DeepPointer(
 				gWorld, 
@@ -840,6 +841,10 @@ init {
 		}
 		
 		return false;
+	});
+
+	vars.PlayerIsInConversation = (Func<bool>)(() => {
+		return vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation");
 	});
 
 	vars.PrintAllNPCs = (Action)(() => {
@@ -988,7 +993,7 @@ init {
 		}
 	});
 
-	vars.DidPlayerTeleport = (Func<double, double, bool>)((x, y) => {
+	vars.PlayerTeleported = (Func<double, double, bool>)((x, y) => {
 		bool isIn = 
 			Math.Sqrt(
 				Math.Pow(x - vars.Watchers["X"].Current, 2) + 
@@ -1074,6 +1079,7 @@ update {
 		vars.Info("SyncMechanism -> 0x" + vars.Watchers["SyncMechanism"].Current.ToString("X"));
 	}
 
+	
 	//vars.Info("X,Y -> " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
 }
 
@@ -1111,13 +1117,13 @@ split {
 
 		bool shouldSplit = false;
 		if (type == "Item") {
-			shouldSplit = vars.OwnedItems.Contains(arg);
+			shouldSplit = vars.OwnedItems.Contains(arg) && !vars.PlayerIsInConversation();
 		} 
 		else if (type == "QuestStart") {
-			shouldSplit = vars.QuestState(arg) == 2;
+			shouldSplit = vars.QuestState(arg) == 2 && !vars.PlayerIsInConversation();
 		}
 		else if (type == "QuestComplete") {
-			shouldSplit = vars.QuestState(arg) == 4;
+			shouldSplit = vars.QuestState(arg) == 4 && !vars.PlayerIsInConversation();
 		}
 		else if (type == "End") {
 			shouldSplit = 
@@ -1128,7 +1134,7 @@ split {
 		}
 		else if (type == "Chapter") {
 			int chapter = int.Parse(arg);
-			shouldSplit = vars.GetChapter() == chapter;
+			shouldSplit = vars.GetChapter() == chapter && !vars.PlayerIsInConversation();
 		}
 		else if (type == "Kill") {
 			shouldSplit = 
@@ -1136,9 +1142,7 @@ split {
 				&& vars.IsDead(arg);
 		}
 		else if (type == "Talk") {
-			shouldSplit = 
-				vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation")
-				&& vars.IsInConversation(arg);
+			shouldSplit = vars.PlayerIsInConversationWith(arg);
 		}
 		else if (type == "Cinematic") {
 			shouldSplit = old.cinematic == arg && current.cinematic == "None";
@@ -1165,7 +1169,7 @@ split {
 			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
 			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
 			
-			shouldSplit = vars.DidPlayerTeleport(x, y);
+			shouldSplit = vars.PlayerTeleported(x, y);
 		}
 		else if (type == "HarpyDupe") {
 			string input = arg;
@@ -1173,13 +1177,10 @@ split {
 			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
 			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
 			
-			shouldSplit = vars.DidPlayerTeleport(x, y) && vars.OwnedItems.Contains("ItAr_Scroll_TransformHarpy");
+			shouldSplit = vars.PlayerTeleported(x, y) && vars.OwnedItems.Contains("ItAr_Scroll_TransformHarpy");
 		}
 		else if (type == "LukorFocus") {
 			shouldSplit = vars.GetChapter() == 2 && vars.OwnedItems.Contains(arg);
-		}
-		else if (type == "FocusMapDiego") {
-			shouldSplit = vars.OwnedItems.Contains("ItWr_Map_Focus") && !vars.IsInConversation("State_OC_STT_Diego");
 		}
 
 		if (shouldSplit) {
