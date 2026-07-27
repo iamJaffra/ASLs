@@ -29,6 +29,8 @@ startup {
 		
 		Tuple.Create("Almanac",                         "Item",          "ItWr_Book_Focus"),
 
+		Tuple.Create("Ian's List",                      "Item",          "ItWr_Scroll_List"),
+		
 		Tuple.Create("Queens Pheromone Gland",          "Item",          "ItAt_Minecrawlerqueen_01"),
 
 		Tuple.Create("Focus 1 (Ocean Cliff)",           "Item",          "ItMs_Focus_01"),
