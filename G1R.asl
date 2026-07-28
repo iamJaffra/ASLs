@@ -83,6 +83,7 @@ startup {
 		Tuple.Create("Hänno",                           "Kill",          "State_NC_SLD_Haenno"),
 
 		Tuple.Create("Transform into Bloodfly",         "ViewTarget",    "CharacterCanTransformInto_Bloodfly_C"),
+		Tuple.Create("Transform into Wolf",             "ViewTarget",    "CharacterCanTransformInto_Wolf_C"),
 		Tuple.Create("Go to bed",                       "ViewTarget",    "Interactive_Bed"),
 		
 		//Tuple.Create("Sleeper Temple Entrance Barrier", "Cinematic",     "SleeperTempleOpeningCinematic"),
