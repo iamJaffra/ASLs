@@ -119,6 +119,7 @@ startup {
 		settings.Add("QuestSplits", true, "Quests", "Splits");
 		settings.Add("TransformSplits", true, "Transform into ...", "Splits");
 			settings.Add("Transform into Bloodfly", false, "Bloodfly", "TransformSplits");
+			settings.Add("Transform into Wolf", false, "Wolf", "TransformSplits");
 		settings.Add("TalkSplits", true, "Talk to ...", "Splits");
 		settings.Add("KillSplits", true, "Kill", "Splits");
 		settings.Add("Other", true, "Other", "Splits");
