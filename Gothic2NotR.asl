@@ -156,15 +156,19 @@ init {
 		{ "MIS_JACK_NEWLIGHTHOUSEOFFICER" },
 	};
 
-	// cur_table.table
-	int symtab = new DeepPointer("Gothic2.exe", 0x6B6428, 0x8).Deref<int>(game);
-	int size = new DeepPointer("Gothic2.exe", 0x6B6428, 0x8 + 0x4).Deref<int>(game);
+	const int PARSER = 0x00AB40C0;   // zCParser* parser = (zCParser* )
+
+	const int SYMTAB_OFFSET = 0x10;  // zCPar_SymbolTable symtab;
+	const int TABLE_OFFSET = 0x8;    // zCArray<zCPar_Symbol*> table;
+
+	IntPtr tablePtr = (IntPtr)new DeepPointer((IntPtr)PARSER + SYMTAB_OFFSET + TABLE_OFFSET).Deref<int>(game);
+	int size = new DeepPointer((IntPtr)PARSER + SYMTAB_OFFSET + TABLE_OFFSET + 0x4).Deref<int>(game);
 	
 	for (int i = 0; i < size; i++) {
-		var symbol = new DeepPointer((IntPtr)symtab + i * 0x4).Deref<int>(game); 
-		string name = new DeepPointer((IntPtr)symbol + 0x8, 0x0).DerefString(game, 100); 
-		int address = symbol + 0x18;
-
+		IntPtr symbolPtr = (IntPtr)new DeepPointer((IntPtr)tablePtr + i * 0x4).Deref<int>(game); 
+		string name = new DeepPointer((IntPtr)symbolPtr + 0x8, 0x0).DerefString(game, 100); 
+		IntPtr address = symbolPtr + 0x18;
+		
 		foreach (var global in requiredGlobals) {
 			if (name == global) {
 				vars.Info(name + " = table[" + i + "] at 0x" + address.ToString("X"));
