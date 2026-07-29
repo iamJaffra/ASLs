@@ -24,7 +24,7 @@ startup {
 		Tuple.Create("Bloodfly Scroll",                 "Item",          "ItAr_Scroll_TransformBloodfly"),
 		//Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
-		Tuple.Create("Sleep Scrolll",                   "Item",          "ItAr_Scroll_Sleep"),
+		Tuple.Create("Sleep Scroll",                    "Item",          "ItAr_Scroll_Sleep"),
 
 		Tuple.Create("Strange Amulet",                  "Item",          "ItAt_Amulet_Ulu_Talisman"),
 		Tuple.Create("Kalom's Recipe",                  "Item",          "ItWr_Scroll_Kalom"),
@@ -77,6 +77,7 @@ startup {
 		Tuple.Create("Start Test Of Faith",             "QuestStart",    "Quest_OldCamp_OCCHAPTER1_JOINOC_JOINOC_OBJ_TESTOFFAITH"),
 		
 		Tuple.Create("Torrez",                          "Talk",          "State_OC_KDF_Torrez"),
+		Tuple.Create("Y'Berion",                        "Talk",          "State_SC_GUR_YBerion"),
 		Tuple.Create("Sharky",                          "Talk",          "State_NC_ORG_Sharky"),
 		
 		Tuple.Create("Attend The Great Awakening",      "Cinematic",     "ProphecyCinematic"),
@@ -106,6 +107,8 @@ startup {
 		                                                "HarpyDupe",     "124302.706645365, -142827.915340985"),
 		Tuple.Create("Take Focus from Lukor",           "LukorFocus",    "ItMs_Focus_01"),
 
+		Tuple.Create("Grazkrak",                        "Grazkrak",      "110420.000000000, -104999.317421"),
+
 		Tuple.Create("End",                             "End",           "ExtroCinematic"),
 	};
 
@@ -129,7 +132,9 @@ startup {
 			settings.Add("Teleport to the Fire Mages", false, "Teleport to the Fire Mages", "Other");
 			settings.Add("Attend The Great Awakening", false, "Attend The Great Awakening", "Other");
 			settings.Add("Take Focus from Lukor", false, "Take Focus from Lukor", "Other");
+			settings.Add("Grazkrak", false, "Teleport to Fire Mages after killing Grazkrak", "Other");
 			settings.Add("Teleport to Xardas after Duping Harpy Scrolls", false, "Teleport to Xardas after Duping Harpy Scrolls", "Other");
+			
 			
 		//settings.Add("BarrierSplits", true, "Barriers", "Splits");
 		//	settings.Add("Sleeper Temple Entrance Barrier", false, "Sleeper Temple Entrance Barrier", "BarrierSplits");
@@ -999,7 +1004,12 @@ init {
 		}
 	});
 
-	vars.PlayerTeleported = (Func<double, double, bool>)((x, y) => {
+	vars.PlayerTeleported = (Func<string, bool>)((arg) => {
+		string input = arg;
+		string[] parts = input.Split(',');
+		double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+		double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+
 		bool isIn = 
 			Math.Sqrt(
 				Math.Pow(x - vars.Watchers["X"].Current, 2) + 
@@ -1017,11 +1027,27 @@ init {
 		return isIn && wasOut;
 	});
 
+	vars.PlayerIsAt = (Func<string, bool>)((arg) => {
+		string input = arg;
+		string[] parts = input.Split(',');
+		double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+		double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
+
+		return 
+			Math.Sqrt(
+				Math.Pow(x - vars.Watchers["X"].Current, 2) + 
+				Math.Pow(y - vars.Watchers["Y"].Current, 2)
+			) 
+			< 500;
+	});
+
 #endregion
 
 	current.world = old.world = "";
 	current.cinematic = old.cinematic = "";
 	current.mainMenuDisplayedWidget = current.mainMenuDisplayedWidget = "";
+
+	vars.GrazkrakIsDead = false;
 }
 
 update {
@@ -1085,7 +1111,6 @@ update {
 		vars.Info("SyncMechanism -> 0x" + vars.Watchers["SyncMechanism"].Current.ToString("X"));
 	}
 
-	
 	//vars.Info("X,Y -> " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
 }
 
@@ -1157,36 +1182,36 @@ split {
 			shouldSplit = vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith(arg);
 		}
 		else if (type == "Location") {
-			string input = arg;
-			string[] parts = input.Split(',');
-			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-			
-			shouldSplit = 
-				Math.Sqrt(
-					Math.Pow(x - vars.Watchers["X"].Current, 2) + 
-					Math.Pow(y - vars.Watchers["Y"].Current, 2)
-				) 
-				< 500;
+			shouldSplit = vars.PlayerIsAt(arg);
 		}
 		else if (type == "Teleport") {
-			string input = arg;
-			string[] parts = input.Split(',');
-			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-			
-			shouldSplit = vars.PlayerTeleported(x, y);
+			shouldSplit = vars.PlayerTeleported(arg);
 		}
-		else if (type == "HarpyDupe") {
-			string input = arg;
-			string[] parts = input.Split(',');
-			double x = double.Parse(parts[0].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-			double y = double.Parse(parts[1].Trim(), System.Globalization.CultureInfo.InvariantCulture);
-			
-			shouldSplit = vars.PlayerTeleported(x, y) && vars.OwnedItems.Contains("ItAr_Scroll_TransformHarpy");
+		else if (type == "HarpyDupe") {	
+			shouldSplit = vars.PlayerTeleported(arg) && vars.OwnedItems.Contains("ItAr_Scroll_TransformHarpy");
 		}
 		else if (type == "LukorFocus") {
 			shouldSplit = vars.GetChapter() == 2 && vars.OwnedItems.Contains(arg);
+		}
+		else if (type == "Grazkrak") {
+			if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
+				vars.GrazkrakIsDead = false;
+				vars.Info("Set vars.GrazkrakIsDead to " + vars.GrazkrakIsDead);
+
+				if (vars.IsDead("State_OW_OWR_Grazkrak")) {
+					vars.GrazkrakIsDead = true;
+					vars.Info("Set vars.GrazkrakIsDead to " + vars.GrazkrakIsDead);
+				}
+			}
+
+			if (vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old && !vars.GrazkrakIsDead) {
+				if (vars.IsDead("State_OW_OWR_Grazkrak")) {
+					vars.GrazkrakIsDead = true;
+					vars.Info("Set vars.GrazkrakIsDead to " + vars.GrazkrakIsDead);
+				}
+			}
+
+			shouldSplit = vars.PlayerTeleported(arg) && vars.GrazkrakIsDead;
 		}
 
 		if (shouldSplit) {
