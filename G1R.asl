@@ -24,6 +24,8 @@ startup {
 		Tuple.Create("Bloodfly Scroll",                 "Item",          "ItAr_Scroll_TransformBloodfly"),
 		//Tuple.Create("Scavenger Whistle",               "Item",          "ItMs_ScavengerWhistle"),
 
+		Tuple.Create("Sleep Scrolll",                   "Item",          "ItAr_Scroll_Sleep"),
+
 		Tuple.Create("Strange Amulet",                  "Item",          "ItAt_Amulet_Ulu_Talisman"),
 		Tuple.Create("Kalom's Recipe",                  "Item",          "ItWr_Scroll_Kalom"),
 		
