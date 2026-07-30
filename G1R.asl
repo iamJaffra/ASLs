@@ -745,6 +745,19 @@ init {
 			vars.Info(" - " + id);
 		}
 	});
+
+	vars.PrintAllStartedQuests = (Action)(() => {
+		vars.Info("Listing every started or completed quest:");
+
+		foreach (var questPtr in vars.QuestCache.Values) { 
+			var idFName = new DeepPointer(questPtr + 0x10, 0x18).Deref<ulong>(game);
+			var id = vars.FNameToString(idFName);
+			
+			if (vars.QuestState(id) == 2 || vars.QuestState(id) == 4) {
+				vars.Info(" - " + id);
+			}			
+		}
+	});
 #endregion
 
 #region NPC Functions
@@ -787,7 +800,7 @@ init {
 						npcPtr 
 						+ 0x378,   // AbilitySystemComponent
 						0x9A8      // ActiveGameplayEffects
-						+ 0x8      // ArrayNum
+						+ 0xC      // ArrayMax
 					)
 					.Deref<int>(game);
 
@@ -1229,8 +1242,8 @@ onSplit {
 	//vars.PrintPlayerGameplayEffects();
 	//vars.PrintPlayerGameplayAbilities();
 	//vars.Info("(X, Y): " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
-
 	//vars.SetQuestState("Instance_Quest_SwampCamp_SCCHAPTER2_FINDINGCAINE", 4);
+	//vars.PrintAllStartedQuests();
 }
 
 isLoading {
