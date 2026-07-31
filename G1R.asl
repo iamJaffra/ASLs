@@ -203,7 +203,8 @@ startup {
 }
 
 init {
-#region Attaching to the right process
+	#region Attaching to the right process
+
 	if (File.Exists(Path.Combine(
 		Path.GetDirectoryName(modules[0].FileName),
 		"G1R", "Binaries", "Win64", "G1R-Win64-Shipping.exe"
@@ -224,9 +225,11 @@ init {
 		}
 		return;
 	}
-#endregion
 
-#region Signature scanning
+	#endregion
+
+	#region Signature scanning
+
 	var scanner = new SignatureScanner(game, modules[0].BaseAddress, modules[0].ModuleMemorySize);
 
 	SigScanTarget.OnFoundCallback onFound = (p, _, addr) => addr + 0x4 + p.ReadValue<int>(addr);
@@ -280,9 +283,11 @@ init {
 	if (moviePlayer == IntPtr.Zero) {
 		throw new InvalidOperationException("MoviePlayer not found. Trying again.");
 	}
-#endregion
 
-#region FNameToString()
+	#endregion
+
+	#region FNameToString()
+
 	var fNamePoolCache = new Dictionary<ulong, string>() {{0, "None"}};
 
 	vars.FNameToString = (Func<ulong, string>)(fName => {
@@ -301,7 +306,10 @@ init {
 			var nameEntry = chunk + (int)nameIdx * 0x2;
 
 			var length = game.ReadValue<short>(nameEntry) >> 6;
+			if (length <= 0 || length > 1024) return "None";
+
 			name = game.ReadString(nameEntry + 0x2, length);
+			if (string.IsNullOrEmpty(name))	return "None";
 
 			fNamePoolCache[nameLookup] = name;
 		}
@@ -309,9 +317,11 @@ init {
 		return name;
 		//return number == 0 ? name : name + "_" + number;
 	});
-#endregion
 
-#region Memory Watchers
+	#endregion
+
+	#region Memory Watchers
+
 	vars.Watchers = new Dictionary<string, MemoryWatcher> {
 		{ "GWorldFName",
 			new MemoryWatcher<ulong>(new DeepPointer(
@@ -442,9 +452,11 @@ init {
 	};
 
 	vars.Watchers["CinematicState"].FailAction = MemoryWatcher.ReadFailAction.SetZeroOrNull;
-#endregion
 
-#region Subsystems
+	#endregion
+
+	#region Subsystems
+
 	vars.GetGameStateSubsystemIndex = (Func<string, int>)(targetSubsystem => {
 		IntPtr gameStateSubsystemComponent = new DeepPointer(
 			gWorld, 
@@ -486,9 +498,11 @@ init {
 
 		return -1;
 	});
-#endregion
 
-#region Story
+	#endregion
+
+	#region Story
+
 	vars.STORY_SUBSYSTEM_INDEX = -1;
 
 	vars.GetChapter = (Func<int>)(() => {
@@ -511,9 +525,11 @@ init {
 			.Deref<int>(game);
 		}
 	});
-#endregion
 
-#region Cinematics
+	#endregion
+
+	#region Cinematics
+
 	vars.CINEMATIC_MANAGER_SUBSYSTEM_INDEX = -1;
 
 	vars.GetCinematic = (Func<string>)(() => {
@@ -542,9 +558,11 @@ init {
 			return cinematic;
 		}
 	});
-#endregion
 
-#region Inventory
+	#endregion
+
+	#region Inventory
+
 	vars.OwnedItems = new HashSet<string>();
 
 	vars.UpdateOwnedItems = (Action)(() => {
@@ -659,9 +677,11 @@ init {
 			}
 		}
 	});
-#endregion
 
-#region Quests
+	#endregion
+
+	#region Quests
+
 	// Quest state values:
 	// Started = 2
 	// Completed = 4
@@ -758,10 +778,17 @@ init {
 			}			
 		}
 	});
-#endregion
 
-#region NPC Functions
-	vars.IsDead = (Func<string, bool>)((npc) => {
+	#endregion
+
+	#region NPCs
+
+	vars.NPCIndices = new Dictionary<string, int>();
+
+	vars.RebuildNPCIndices = (Action)(() => {
+		//vars.Info("(Re-)building NPC indices...");
+		vars.NPCIndices.Clear();
+
 		IntPtr npcArrayPtr = (IntPtr)
 			new DeepPointer(
 				gWorld, 
@@ -783,47 +810,92 @@ init {
 			IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (i * 0x8));
 			if (npcPtr == IntPtr.Zero) continue;
 
-			var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
+			var idFName = game.ReadValue<ulong>(npcPtr + 0x18);
 			var id = vars.FNameToString(idFName);
 
-			if (id == npc) {
-				var gameplayEffectsPtr = (IntPtr)
-					new DeepPointer(
-						npcPtr 
-						+ 0x378,   // AbilitySystemComponent
-						0x9A8      // ActiveGameplayEffects
-					)
-					.Deref<ulong>(game);
+			if (string.IsNullOrEmpty(id) || !id.StartsWith("State_")) continue;
 
-				var gameplayEffectsNum =
-					new DeepPointer(
-						npcPtr 
-						+ 0x378,   // AbilitySystemComponent
-						0x9A8      // ActiveGameplayEffects
-						+ 0xC      // ArrayMax
-					)
-					.Deref<int>(game);
+			vars.NPCIndices[id] = i;
+		}
 
-				for (int j = 0; j < gameplayEffectsNum; j++) {					
-					IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
-						gameplayEffectsPtr 
-						+ (j * 0x360 + 0x18)   // GameplayEffects_Internal.Spec.Def
-					); 
+		//vars.Info("  => Built NPC indices dictionary with " + vars.NPCIndices.Count + " keys.");
+	});
 
-					if (gameplayEffectPtr == IntPtr.Zero) continue;
+	vars.IsDead = (Func<string, bool>)((npc) => {
+		if (!vars.NPCIndices.ContainsKey(npc)) {
+			vars.RebuildNPCIndices();
+			if (!vars.NPCIndices.ContainsKey(npc)) return false;
+		}
 
-					var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
-					var gameplayEffect = vars.FNameToString(gameplayEffectFName);
-					
-					if (gameplayEffect == "Default__GE_Death") {
-						return true;
-					}
-				}
+		IntPtr npcPtr = (IntPtr)
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x2A8,    // PlayerArray
+				vars.NPCIndices[npc] * 0x8
+			)
+			.Deref<ulong>(game);
+
+		var idFName = game.ReadValue<ulong>(npcPtr + 0x18);
+		var id = vars.FNameToString(idFName);
+
+		if (id != npc) {
+			vars.RebuildNPCIndices();
+			if (!vars.NPCIndices.ContainsKey(npc)) return false;
+
+			npcPtr = (IntPtr)
+				new DeepPointer(
+					gWorld, 
+					0x160,    // GameState
+					0x2A8,    // PlayerArray
+					vars.NPCIndices[npc] * 0x8
+				)
+				.Deref<ulong>(game);
+		}
+
+		var gameplayEffectsPtr = (IntPtr)
+			new DeepPointer(
+				npcPtr
+				+ 0x378,   // AbilitySystemComponent
+				0x9A8      // ActiveGameplayEffects
+			)
+			.Deref<ulong>(game);
+
+		var gameplayEffectsNum =
+			new DeepPointer(
+				npcPtr
+				+ 0x378,   // AbilitySystemComponent
+				0x9A8      // ActiveGameplayEffects
+				+ 0xC      // ArrayMax
+			)
+			.Deref<int>(game);
+
+		if (gameplayEffectsPtr == IntPtr.Zero || gameplayEffectsNum < 0 || gameplayEffectsNum > 256) {
+			return false;
+		}
+
+		for (int j = 0; j < gameplayEffectsNum; j++) {
+			IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
+				gameplayEffectsPtr
+				+ (j * 0x360 + 0x18)   // GameplayEffects_Internal.Spec.Def
+			);
+
+			if (gameplayEffectPtr == IntPtr.Zero) continue;
+
+			var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
+			var gameplayEffect = vars.FNameToString(gameplayEffectFName);
+
+			if (gameplayEffect == "Default__GE_Death") {
+				return true;
 			}
 		}
-		
+
 		return false;
 	});
+
+	#endregion
+
+	#region Talking to NPCs
 
 	vars.PlayerIsInConversationWith = (Func<string, bool>)((npc) => {
 		if (!vars.PlayerIsInConversation()) return false;
@@ -871,6 +943,10 @@ init {
 		return vars.FNameToString(vars.Watchers["ViewTarget"].Current).StartsWith("Conversation");
 	});
 
+	#endregion
+
+	#region Effects and Abilities
+
 	vars.PrintAllNPCs = (Action)(() => {
 		IntPtr npcArrayPtr = (IntPtr)
 			new DeepPointer(
@@ -897,11 +973,11 @@ init {
 			var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
 			var id = vars.FNameToString(idFName);
 
-			vars.Info(" - " + id);	
+			vars.Info(i.ToString() + ") " + id);	
 		}
 	});
 
-	vars.PrintPlayerGameplayEffects = (Action)(() => {
+	vars.PrintGameplayEffects = (Action<string>)((npc) => {
 		IntPtr npcArrayPtr = (IntPtr)
 			new DeepPointer(
 				gWorld, 
@@ -919,39 +995,47 @@ init {
 			)
 			.Deref<int>(game);
 
-		IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (0 * 0x8));
+		for (int i = 1; i < npcArraySize; i++) { 
+			IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (i * 0x8));
+			if (npcPtr == IntPtr.Zero) continue;
 
-		var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
-		var id = vars.FNameToString(idFName);
+			var idFName = new DeepPointer(npcPtr + 0x18).Deref<ulong>(game);
+			var id = vars.FNameToString(idFName);
 
-		var gameplayEffectsPtr = (IntPtr)
-			new DeepPointer(
-				npcPtr 
-				+ 0x378,   // AbilitySystemComponent
-				0x9A8      // ActiveGameplayEffects
-			)
-			.Deref<ulong>(game);
+			if (id == npc) {
+				var gameplayEffectsPtr = (IntPtr)
+					new DeepPointer(
+						npcPtr 
+						+ 0x378,   // AbilitySystemComponent
+						0x9A8      // ActiveGameplayEffects
+					)
+					.Deref<ulong>(game);
 
-		var gameplayEffectsNum =
-			new DeepPointer(
-				npcPtr 
-				+ 0x378,   // AbilitySystemComponent
-				0x9A8      // ActiveGameplayEffects
-				+ 0x8      // ArrayNum
-			)
-			.Deref<int>(game);
+				var gameplayEffectsNum =
+					new DeepPointer(
+						npcPtr 
+						+ 0x378,   // AbilitySystemComponent
+						0x9A8      // ActiveGameplayEffects
+						+ 0xC      // ArrayMax
+					)
+					.Deref<int>(game);
 
-		for (int j = 0; j < gameplayEffectsNum; j++) {					
-			IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
-				gameplayEffectsPtr 
-				+ (j * 0x360 + 0x18)   // GameplayEffects_Internal.Spec.Def
-			); 
+				vars.Info("Printing gameplay effects for " + npc + ":");
 
-			if (gameplayEffectPtr == IntPtr.Zero) continue;
+				for (int j = 0; j < gameplayEffectsNum; j++) {					
+					IntPtr gameplayEffectPtr = game.ReadValue<IntPtr>(
+						gameplayEffectsPtr 
+						+ (j * 0x360 + 0x18)   // GameplayEffects_Internal.Spec.Def
+					); 
 
-			var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
-			var gameplayEffect = vars.FNameToString(gameplayEffectFName);
-			vars.Info("GameplayEffect["+j+"] = " + gameplayEffect);
+					if (gameplayEffectPtr == IntPtr.Zero) continue;
+
+					var gameplayEffectFName = new DeepPointer(gameplayEffectPtr + 0x18).Deref<ulong>(game);
+					var gameplayEffect = vars.FNameToString(gameplayEffectFName);
+					
+					vars.Info(" - " + gameplayEffect);
+				}
+			}
 		}
 	});
 
@@ -1017,6 +1101,10 @@ init {
 		}
 	});
 
+	#endregion
+
+	#region Location-based Functions
+
 	vars.PlayerTeleported = (Func<string, bool>)((arg) => {
 		string input = arg;
 		string[] parts = input.Split(',');
@@ -1054,13 +1142,19 @@ init {
 			< 500;
 	});
 
-#endregion
+	#endregion
 
 	current.world = old.world = "";
 	current.cinematic = old.cinematic = "";
-	current.mainMenuDisplayedWidget = current.mainMenuDisplayedWidget = "";
+	current.mainMenuDisplayedWidget = old.mainMenuDisplayedWidget = "";
 
 	vars.GrazkrakIsDead = false;
+
+	//vars.ItemWorker.IsBackground = true;
+	//vars.ItemWorker.Start();
+
+	//vars.NPCWorker.IsBackground = true;
+	//vars.NPCWorker.Start();
 }
 
 update {
@@ -1073,8 +1167,8 @@ update {
     }
     vars.LastTick = now;
 
-	vars.UpdateOwnedItems();
 	vars.UpdateQuestCache();
+	vars.UpdateOwnedItems();
 
 	foreach (var watcher in vars.Watchers.Values) {
 		watcher.Update(game);
@@ -1181,9 +1275,7 @@ split {
 			shouldSplit = vars.GetChapter() == chapter && !vars.PlayerIsInConversation();
 		}
 		else if (type == "Kill") {
-			shouldSplit = 
-				vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old 
-				&& vars.IsDead(arg);
+			shouldSplit = vars.IsDead(arg);
 		}
 		else if (type == "Talk") {
 			shouldSplit = vars.PlayerIsInConversationWith(arg);
@@ -1217,7 +1309,7 @@ split {
 				}
 			}
 
-			if (vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old && !vars.GrazkrakIsDead) {
+			if (!vars.GrazkrakIsDead) {
 				if (vars.IsDead("State_OW_OWR_Grazkrak")) {
 					vars.GrazkrakIsDead = true;
 					vars.Info("Set vars.GrazkrakIsDead to " + vars.GrazkrakIsDead);
@@ -1244,6 +1336,9 @@ onSplit {
 	//vars.Info("(X, Y): " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
 	//vars.SetQuestState("Instance_Quest_SwampCamp_SCCHAPTER2_FINDINGCAINE", 4);
 	//vars.PrintAllStartedQuests();
+	//vars.PrintLooseTagsByGlobalId();
+	//vars.PrintGameplayEffects("State_OC_ORG_Mordrag");
+	//vars.PrintDeadNPCs();
 }
 
 isLoading {
@@ -1256,6 +1351,11 @@ isLoading {
 exit {
 	timer.IsGameTimePaused = true;
 	vars.timerPaused = true;
+
+	//vars.IsItemWorkerRunning = false;
+	//vars.IsNPCWorkerRunning = false;
+	//vars.ItemWorker.Join(200);
+	//vars.NPCWorker.Join(200);
 
 	vars.Info("--- EXIT ---");
 }
