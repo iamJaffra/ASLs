@@ -73,8 +73,6 @@ startup {
 		Tuple.Create("Chapter 5",                       "Chapter",       "5"),
 		Tuple.Create("Chapter 6",                       "Chapter",       "6"),
 
-		Tuple.Create("<Placeholder> (tell me which quests you'd like)",  
-		                                                "QuestStart",    "Quest_PLACEHOLDER"),
 		Tuple.Create("Start Test Of Faith",             "QuestStart",    "Quest_OldCamp_OCCHAPTER1_JOINOC_JOINOC_OBJ_TESTOFFAITH"),
 		
 		Tuple.Create("Dexter",                          "Talk",          "State_OC_STT_Dexter"),
@@ -366,6 +364,7 @@ init {
 				+ 0x8     // Y
 			))
 		},
+		/*
 		{ "Exp",
 			new MemoryWatcher<float>(new DeepPointer(
 				gWorld, 
@@ -379,6 +378,7 @@ init {
 				+ 0xC     // CurrentValue
 			))
 		},
+		*/
 		{ "CinematicState",
 			new MemoryWatcher<byte>(new DeepPointer(
 				gWorld, 
@@ -398,6 +398,7 @@ init {
 			// Unloading = 4
 			))
 		},
+		/*
 		{ "ActiveNotifications",
 			new MemoryWatcher<int>(new DeepPointer(
 				gWorld, 
@@ -415,6 +416,7 @@ init {
 				+ 0x8      // ArrayNum
 			))
 		},
+		*/
 		{ "ViewTarget",
 			new MemoryWatcher<ulong>(new DeepPointer(
 				gWorld, 
@@ -537,28 +539,26 @@ init {
 	vars.GetCinematic = (Func<string>)(() => {
 		if (vars.CINEMATIC_MANAGER_SUBSYSTEM_INDEX == -1) {
 			vars.CINEMATIC_MANAGER_SUBSYSTEM_INDEX = vars.GetGameStateSubsystemIndex("GothicCinematicManagerSubsystemScript");
-			
 			return "None";
 		}
-		else {
-			var cinematicFName =
-				new DeepPointer(
-					gWorld, 
-					0x160,    // GameState
-					0x218,    // ~GameState Subsystems~ 
-					0 * 0x8,  // [0] (GameStateSubsystemComponent) 
-					0xA8,     // ??TMap 
-					vars.CINEMATIC_MANAGER_SUBSYSTEM_INDEX * 0x18 // [vars.CINEMATIC_MANAGER_SUBSYSTEM_INDEX] 
-					+ 0x8,    // .Value (GothicCinematicManagerSubsystem)
-					0x70,     // m_Cinematic
-					0x18      // NamePrivate
-				)
-				.Deref<ulong>(game);
-			
-			var cinematic = vars.FNameToString(cinematicFName);
+		
+		var cinematicFName =
+			new DeepPointer(
+				gWorld, 
+				0x160,    // GameState
+				0x218,    // ~GameState Subsystems~ 
+				0 * 0x8,  // [0] (GameStateSubsystemComponent) 
+				0xA8,     // ??TMap 
+				vars.CINEMATIC_MANAGER_SUBSYSTEM_INDEX * 0x18 // [vars.CINEMATIC_MANAGER_SUBSYSTEM_INDEX] 
+				+ 0x8,    // .Value (GothicCinematicManagerSubsystem)
+				0x70,     // m_Cinematic
+				0x18      // NamePrivate
+			)
+			.Deref<ulong>(game);
+		
+		var cinematic = vars.FNameToString(cinematicFName);
 
-			return cinematic;
-		}
+		return cinematic;
 	});
 
 	#endregion
@@ -567,7 +567,7 @@ init {
 
 	vars.OwnedItems = new HashSet<string>();
 
-	vars.UpdateOwnedItems = (Action)(() => {
+	vars.UpdateItems = (Action)(() => {
 		vars.OwnedItems.Clear();
 
 		IntPtr dataModuleContainerPtr =
@@ -688,72 +688,79 @@ init {
 	// Started = 2
 	// Completed = 4
 
-	vars.QuestCache = new Dictionary<string, IntPtr>();
-	vars.CachedQuestInstancesPtr = IntPtr.Zero;
+	vars.QuestCache = new Dictionary<string, int>();
 	vars.QUEST_SUBSYSTEM_INDEX = -1;
 
-	vars.UpdateQuestCache = (Action)(() => {
+	vars.UpdateQuests = (Action)(() => {
 		if (vars.QUEST_SUBSYSTEM_INDEX == -1) {
 			vars.QUEST_SUBSYSTEM_INDEX = vars.GetGameStateSubsystemIndex("QuestSubsystem");
-
 			return ;
 		}
-		else {
-			IntPtr questSubsystemPtr =
-				new DeepPointer(
-					gWorld, 
-					0x160,    // GameState
-					0x218,    // ??Array
-					0 * 0x8,  // [0] (GameStateSubsystemComponent)
-					0xA8,     // ??TMap
-					vars.QUEST_SUBSYSTEM_INDEX * 0x18  // [vars.QUEST_SUBSYSTEM_INDEX] 
-					+ 0x8     // Value (QuestSubsystem)
-				)
-				.Deref<IntPtr>(game);
 
-			IntPtr questInstancesArrayPtr =
-				new DeepPointer(
-					questSubsystemPtr
-					+ 0x90    // AllQuestInstances
-				)
-				.Deref<IntPtr>(game);
+		vars.QuestCache.Clear();
 
-			if (questInstancesArrayPtr == vars.CachedQuestInstancesPtr) return ;
-			if (questInstancesArrayPtr == IntPtr.Zero) return ;
+		IntPtr questSubsystemPtr =
+			new DeepPointer(
+				gWorld,
+				0x160,    // GameState
+				0x218,    // ??Array
+				0 * 0x8,  // [0] (GameStateSubsystemComponent)
+				0xA8,     // ??TMap
+				vars.QUEST_SUBSYSTEM_INDEX * 0x18 + 0x8  // Value (QuestSubsystem)
+			)
+			.Deref<IntPtr>(game);
 
-			vars.Info("Quest instances array pointer changed: -> 0x" + questInstancesArrayPtr.ToString("X"));
-			vars.Info("(Re-)building Quest Cache...");
+		IntPtr questInstancesArrayPtr = game.ReadValue<IntPtr>(questSubsystemPtr + 0x90); // AllQuestInstances.Data
+		if (questInstancesArrayPtr == IntPtr.Zero) return ;
 
-			vars.QuestCache.Clear();
-			vars.CachedQuestInstancesPtr = questInstancesArrayPtr;
+		int questInstancesArraySize = game.ReadValue<int>(questSubsystemPtr + 0x90 + 0x8); // AllQuestInstances.Num
 
-			var questInstancesArraySize = 
-				new DeepPointer(
-					questSubsystemPtr
-					+ 0x90    // AllQuestInstances
-					+ 0x8     // Num
-				)
-				.Deref<int>(game);
+		for (int i = 0; i < questInstancesArraySize; i++) {
+			IntPtr questPtr = game.ReadValue<IntPtr>(questInstancesArrayPtr + (i * 0x8));
+			if (questPtr == IntPtr.Zero) continue;
 
-			for (int i = 0; i < questInstancesArraySize; i++) {
-				IntPtr questPtr = game.ReadValue<IntPtr>(questInstancesArrayPtr + (i * 0x8));
-				if (questPtr == IntPtr.Zero) continue;
+			var idFName = new DeepPointer(questPtr + 0x10, 0x18).Deref<ulong>(game);
+			var id = vars.FNameToString(idFName);
 
-				var idFName = new DeepPointer(questPtr + 0x10, 0x18).Deref<ulong>(game);
-				var id = vars.FNameToString(idFName);
-
-				if (!string.IsNullOrEmpty(id)) {
-					vars.QuestCache[id] = questPtr;
-				}
+			if (!string.IsNullOrEmpty(id) && id.StartsWith("Quest_")) {
+				vars.QuestCache[id] = i;
 			}
-
-			vars.Info("  => Built quest dictionary with " + vars.QuestCache.Count + " keys.");
 		}
 	});
 
 	vars.QuestState = (Func<string, int>)((quest) => {
-		IntPtr questPtr;
-		if (!vars.QuestCache.TryGetValue(quest, out questPtr)) return -1;
+		if (!vars.QuestCache.ContainsKey(quest)) {
+			vars.UpdateQuests();
+			if (!vars.QuestCache.ContainsKey(quest)) return -1;
+		}
+
+		Func<IntPtr> GetQuestSubsystem = () =>
+			new DeepPointer(
+				gWorld,
+				0x160,    // GameState
+				0x218,    // ??Array
+				0 * 0x8,  // [0] (GameStateSubsystemComponent)
+				0xA8,     // ??TMap
+				vars.QUEST_SUBSYSTEM_INDEX * 0x18 + 0x8  // Value (QuestSubsystem)
+			)
+			.Deref<IntPtr>(game);
+
+		IntPtr questSubsystemPtr = GetQuestSubsystem();
+		IntPtr questInstancesArrayPtr = game.ReadValue<IntPtr>(questSubsystemPtr + 0x90);
+		IntPtr questPtr = game.ReadValue<IntPtr>(questInstancesArrayPtr + (int)(vars.QuestCache[quest] * 0x8));
+
+		var idFName = new DeepPointer(questPtr + 0x10, 0x18).Deref<ulong>(game);
+		var id = vars.FNameToString(idFName);
+
+		if (id != quest) {
+			vars.UpdateQuests();
+			if (!vars.QuestCache.ContainsKey(quest)) return -1;
+
+			questSubsystemPtr = GetQuestSubsystem();
+			questInstancesArrayPtr = game.ReadValue<IntPtr>(questSubsystemPtr + 0x90);
+			questPtr = game.ReadValue<IntPtr>(questInstancesArrayPtr + (int)(vars.QuestCache[quest] * 0x8));
+		}
+
 		return new DeepPointer(questPtr + 0x50).Deref<byte>(game);
 	});
 
@@ -785,11 +792,11 @@ init {
 
 	#region NPCs
 
-	vars.NPCIndices = new Dictionary<string, int>();
+	vars.NPCs = new Dictionary<string, int>();
 
-	vars.RebuildNPCIndices = (Action)(() => {
+	vars.UpdateNPCs = (Action)(() => {
 		//vars.Info("(Re-)building NPC indices...");
-		vars.NPCIndices.Clear();
+		vars.NPCs.Clear();
 
 		IntPtr npcArrayPtr = (IntPtr)
 			new DeepPointer(
@@ -817,16 +824,16 @@ init {
 
 			if (string.IsNullOrEmpty(id) || !id.StartsWith("State_")) continue;
 
-			vars.NPCIndices[id] = i;
+			vars.NPCs[id] = i;
 		}
 
-		//vars.Info("  => Built NPC indices dictionary with " + vars.NPCIndices.Count + " keys.");
+		//vars.Info("  => Built NPC indices dictionary with " + vars.NPCs.Count + " keys.");
 	});
 
 	vars.IsDead = (Func<string, bool>)((npc) => {
-		if (!vars.NPCIndices.ContainsKey(npc)) {
-			vars.RebuildNPCIndices();
-			if (!vars.NPCIndices.ContainsKey(npc)) return false;
+		if (!vars.NPCs.ContainsKey(npc)) {
+			vars.UpdateNPCs();
+			if (!vars.NPCs.ContainsKey(npc)) return false;
 		}
 
 		IntPtr npcPtr = (IntPtr)
@@ -834,7 +841,7 @@ init {
 				gWorld, 
 				0x160,    // GameState
 				0x2A8,    // PlayerArray
-				vars.NPCIndices[npc] * 0x8
+				vars.NPCs[npc] * 0x8
 			)
 			.Deref<ulong>(game);
 
@@ -842,15 +849,15 @@ init {
 		var id = vars.FNameToString(idFName);
 
 		if (id != npc) {
-			vars.RebuildNPCIndices();
-			if (!vars.NPCIndices.ContainsKey(npc)) return false;
+			vars.UpdateNPCs();
+			if (!vars.NPCs.ContainsKey(npc)) return false;
 
 			npcPtr = (IntPtr)
 				new DeepPointer(
 					gWorld, 
 					0x160,    // GameState
 					0x2A8,    // PlayerArray
-					vars.NPCIndices[npc] * 0x8
+					vars.NPCs[npc] * 0x8
 				)
 				.Deref<ulong>(game);
 		}
@@ -1151,12 +1158,6 @@ init {
 	current.mainMenuDisplayedWidget = old.mainMenuDisplayedWidget = "";
 
 	vars.GrazkrakIsDead = false;
-
-	//vars.ItemWorker.IsBackground = true;
-	//vars.ItemWorker.Start();
-
-	//vars.NPCWorker.IsBackground = true;
-	//vars.NPCWorker.Start();
 }
 
 update {
@@ -1169,12 +1170,11 @@ update {
     }
     vars.LastTick = now;
 
-	vars.UpdateQuestCache();
-	vars.UpdateOwnedItems();
-
 	foreach (var watcher in vars.Watchers.Values) {
 		watcher.Update(game);
 	}
+
+	vars.UpdateItems();
 	
 	var world = vars.FNameToString(vars.Watchers["GWorldFName"].Current);
 	if (!string.IsNullOrEmpty(world) && world != "None") {
@@ -1184,32 +1184,27 @@ update {
 	if (old.world != current.world) {
 		vars.Info("World: " + old.world + " -> " + current.world);
 	}
-
-	if (vars.Watchers["ActiveNotifications"].Changed) {
-		vars.Info("Active Notifications: -> " + vars.Watchers["ActiveNotifications"].Current);
-	}
-
+	
 	if (vars.Watchers["ViewTarget"].Changed) {
 		vars.Info("View Target -> " + vars.FNameToString(vars.Watchers["ViewTarget"].Current));
-	}
-
-	if (vars.timerPaused) {
-		if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
-			vars.timerPaused = false;
-		}
 	}
 
 	current.cinematic = vars.GetCinematic();
 	if (current.cinematic != old.cinematic) {
 		vars.Info("Cinematic: -> " + current.cinematic);
 	}
+	/*
 	if (vars.Watchers["CinematicState"].Changed) {
 		vars.Info("CinematicState -> " + vars.Watchers["CinematicState"].Current);
 	}
-
+	*/
+	/*
 	if (vars.Watchers["Exp"].Changed) {
 		vars.Info("Exp -> " + vars.Watchers["Exp"].Current);
 	}
+	*/
+
+	//vars.Info("X,Y -> " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
 
 	current.mainMenuDisplayedWidget = vars.FNameToString(vars.Watchers["MainMenuDisplayedWidget"].Current);
 	if (current.mainMenuDisplayedWidget != old.mainMenuDisplayedWidget) {
@@ -1220,7 +1215,11 @@ update {
 		vars.Info("SyncMechanism -> 0x" + vars.Watchers["SyncMechanism"].Current.ToString("X"));
 	}
 
-	//vars.Info("X,Y -> " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
+	if (vars.timerPaused) {
+		if (vars.Watchers["LoadingScreen"].Old && !vars.Watchers["LoadingScreen"].Current) {
+			vars.timerPaused = false;
+		}
+	}
 }
 
 reset {
@@ -1353,11 +1352,6 @@ isLoading {
 exit {
 	timer.IsGameTimePaused = true;
 	vars.timerPaused = true;
-
-	//vars.IsItemWorkerRunning = false;
-	//vars.IsNPCWorkerRunning = false;
-	//vars.ItemWorker.Join(200);
-	//vars.NPCWorker.Join(200);
 
 	vars.Info("--- EXIT ---");
 }
