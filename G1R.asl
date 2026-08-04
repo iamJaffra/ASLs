@@ -605,19 +605,14 @@ init {
 			)
 			.Deref<int>(game);
 		
-		byte[] inventoryPointers = game.ReadBytes(itemsPtr, itemsArrayNum * 0x88);
-
 		for (int i = 0; i < itemsArrayNum; i++) {
-			IntPtr inventoryPtr = (IntPtr)BitConverter.ToUInt64(inventoryPointers, i * 0x88 + 0x48);
+			IntPtr inventoryPtr = game.ReadValue<IntPtr>(itemsPtr + (i * 0x88) + 0x48);
 			if (inventoryPtr == IntPtr.Zero) continue;
 
-			int inventorySize = BitConverter.ToInt32(inventoryPointers, i * 0x88 + 0x48 + 0xC);
-			if (inventorySize <= 0) continue;
-
-			byte[] slotPointers = game.ReadBytes(inventoryPtr, inventorySize * 0xB0);
+			int inventorySize = game.ReadValue<int>(itemsPtr + (i * 0x88) + 0x48 + 0xC);
 
 			for (int j = 0; j < inventorySize; j++) {
-				IntPtr slotPtr = (IntPtr)BitConverter.ToUInt64(slotPointers, j * 0xB0 + 0x8);
+				IntPtr slotPtr = (IntPtr)game.ReadValue<ulong>(inventoryPtr + (j * 0xB0) + 0x8);
 				if (slotPtr == IntPtr.Zero) continue;
 
 				var idFName = game.ReadValue<ulong>(slotPtr + 0x18);
@@ -720,10 +715,8 @@ init {
 
 		int questInstancesArraySize = game.ReadValue<int>(questSubsystemPtr + 0x90 + 0x8); // AllQuestInstances.Num
 
-		byte[] questPointers = game.ReadBytes(questInstancesArrayPtr, questInstancesArraySize * 0x8);
-
 		for (int i = 0; i < questInstancesArraySize; i++) {
-			IntPtr questPtr = (IntPtr)BitConverter.ToUInt64(questPointers, i * 0x8);
+			IntPtr questPtr = game.ReadValue<IntPtr>(questInstancesArrayPtr + (i * 0x8));
 			if (questPtr == IntPtr.Zero) continue;
 
 			var idFName = new DeepPointer(questPtr + 0x10, 0x18).Deref<ulong>(game);
@@ -822,12 +815,8 @@ init {
 			)
 			.Deref<int>(game);
 
-		if (npcArraySize <= 0) return ;
-
-		byte[] npcPointers = game.ReadBytes(npcArrayPtr, npcArraySize * 0x8);
-
-		for (int i = 1; i < npcArraySize; i++) {
-			IntPtr npcPtr = (IntPtr)BitConverter.ToUInt64(npcPointers, i * 0x8);
+		for (int i = 1; i < npcArraySize; i++) { 
+			IntPtr npcPtr = game.ReadValue<IntPtr>(npcArrayPtr + (i * 0x8));
 			if (npcPtr == IntPtr.Zero) continue;
 
 			var idFName = game.ReadValue<ulong>(npcPtr + 0x18);
