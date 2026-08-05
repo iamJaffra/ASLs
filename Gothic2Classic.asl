@@ -30,7 +30,7 @@ startup {
 		Tuple.Create("TalkToIgnaz",            "Talk",         "VLK_498_IGNAZ",        "",                 "Talk to Ignaz"                                       ),
 		Tuple.Create("TalkToVatrasCh3",        "Talk+Chapter", "VLK_439_VATRAS",       "3",                "Talk to Vatras in Chapter 3"                         ),
 		Tuple.Create("TalkToPyrokarCh3",       "Talk+Chapter", "KDF_500_PYROKAR",      "3",                "Talk to Pyrokar in Chapter 3"                        ),
-		Tuple.Create("TalkToXardasCh3",        "Talk+Chapter", "VLK_439_VATRAS",       "3",                "Talk to Xardas in Chapter 3"                         ),
+		Tuple.Create("TalkToXardasCh3",        "Talk+Chapter", "NONE_100_XARDAS",      "3",                "Talk to Xardas in Chapter 3"                         ),
 		// Guild
 		Tuple.Create("GuildMilitia",           "Guild",        "2",                    "",                 "Join the Militia"                                    ),
 		Tuple.Create("GuildPaladin",           "Guild",        "1",                    "",                 "Join the Paladins"                                   ),
@@ -55,7 +55,7 @@ startup {
 	settings.Add("NewGameReset", true, "Reset timer on New Game");
 
 	settings.Add("Splits", true, "Splits");
-		settings.Add("End",            true, "Finish the game.", "Splits");
+		settings.Add("End",                true, "Finish the game",  "Splits");
 
 		settings.Add("ChapterSplits",      true, "Chapters",         "Splits");
 		settings.Add("WorldSplits",        true, "Worlds",           "Splits");
@@ -536,7 +536,7 @@ split {
 				shouldSplit = vars.Watchers["IsPlayerInDialogue"].Current == 1 && vars.IsInDialogue(arg1);
 				break;
 			case "Talk+Chapter":
-				shouldSplit = vars.Globals["KAPITEL"].Current == 3 && vars.Watchers["IsPlayerInDialogue"].Current == 1 && vars.IsInDialogue(arg1);
+				shouldSplit = vars.Globals["KAPITEL"].Current == int.Parse(arg2) && vars.Watchers["IsPlayerInDialogue"].Current == 1 && vars.IsInDialogue(arg1);
 				break;
 			case "Kill":
 				shouldSplit = vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old && vars.IsDead(arg1);
