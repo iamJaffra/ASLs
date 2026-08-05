@@ -1,602 +1,565 @@
-state("Gothic2") {
-	long igt:          "ZSPEEDRUNTIMER.DLL", 0x19F70;
-	
-	// POS VECTOR
-	float x:           "Gothic2.exe", 0x4C0894;
-	float y:           "Gothic2.exe", 0x4C088C;
-
-	// WORLD
-	int world:         "Gothic2.exe", 0x4C0664, 0xB8, 0x91C;
-	
-	// PLAYER
-	int guild:         "Gothic2.exe", 0x5831DC, 0x21C;
-	int exp:           "Gothic2.exe", 0x5831DC, 0x3A0;
-	int inDialogue:    "Gothic2.exe", 0x5831DC, 0x284;
-	string32 mobName:  "Gothic2.exe", 0x5831DC, 0x8D0, 0x198, 0x0;
-	int mobState:      "Gothic2.exe", 0x5831DC, 0x8D0, 0x1F4;
-
-	// MISC
-	byte inCutscene:   "Gothic2.exe", 0x4C38B8;
-	//int inventoryOpen: "Gothic2.exe", 0x57DCA8;
-}
+state("Gothic2") {}
 
 startup {
-	// Any%
-	settings.Add("Any%", true, "Any%");
-		settings.Add("Any%_EnterValley", true, "Enter valley of mines", "Any%");
-			settings.Add("Any%_EnterValleyWithFieldraider", true, "... with fieldraider in inventory", "Any%_EnterValley");
-		settings.Add("Any%_CollectTeleportToPass", true, "Collect teleport rune to pass", "Any%");
-		settings.Add("Any%_CollectTeleportToCastle", true, "Collect teleport rune to castle", "Any%");
-		settings.Add("Any%_TeleportToCastle", true, "Teleport to castle", "Any%");
-		settings.Add("Any%_CollectFirerain", true, "Collect firerain", "Any%");
-		settings.Add("Any%_OpenGate", true, "Open gate in castle", "Any%");
-		settings.Add("Any%_RockDragon", true, "Kill Rock Dragon", "Any%");
-		settings.Add("Any%_Chapter5", true, "Reach chapter 5", "Any%");
-		settings.Add("Any%_CollectMap", true, "Collect sea map to Irdorath", "Any%");
-		settings.Add("Any%_RecruitTorlof", true, "Torlof becomes your captain", "Any%");
-		settings.Add("Any%_Irdorath", true, "Enter Irdorath", "Any%");
-		settings.Add("Any%_UndeadDragon", true, "Kill Undead Dragon", "Any%");
-		settings.Add("Any%_End", true, "Finish Game", "Any%");
+	vars.Splits = new List<Tuple<string, string, string, string, string>> {
+		//           name,                     type,           arg1,                   arg2,               description                                           
+		// Chapter
+		Tuple.Create("Chapter2",               "Global",       "KAPITEL",              "2",                "Reach Chapter 2"                                     ),
+		Tuple.Create("Chapter3",               "Global",       "KAPITEL",              "3",                "Reach Chapter 3"                                     ),
+		Tuple.Create("Chapter4",               "Global",       "KAPITEL",              "4",                "Reach Chapter 4"                                     ),
+		Tuple.Create("Chapter5",               "Global",       "KAPITEL",              "5",                "Reach Chapter 5"                                     ),
+		// World
+		Tuple.Create("EnterValley",            "World",        "OLDWORLD",             "",                 "Enter the Valley of Mines"                           ),
+		Tuple.Create("EnterValleyFieldraider", "World+Item",   "OLDWORLD",             "ITSC_TRFGIANTBUG", "Enter the Valley of Mines (with Fieldraider Scroll)" ),
+		Tuple.Create("EnterIrdorath",          "World",        "DRAGONISLAND",         "",                 "Enter Irdorath"                                      ),
+		// Item
+		Tuple.Create("RuneTeleportPass",       "Item",         "ITRU_TELEPORTPASSOW",  "",                 "Rune: Teleport to Pass (Valley of Mines)"            ),
+		Tuple.Create("RuneTeleportCastle",     "Item",         "ITRU_TELEPORTOC",      "",                 "Rune: Teleport to Castle"                            ),
+		Tuple.Create("RuneTeleportTavern",     "Item",         "ITRU_TELEPORTTAVERNE", "",                 "Rune: Teleport to Orlan's Tavern"                    ),
+		Tuple.Create("RuneTeleportOnar",       "Item",         "ITRU_TELEPORTFARM",    "",                 "Rune: Teleport to Onar's Farm"                       ),
+		Tuple.Create("Firerain",               "Item",         "ITSC_FIRERAIN",        "",                 "Scroll: Rain of Fire"                                ),
+		Tuple.Create("SeaMap",                 "Item",         "ITWR_SEAMAP_IRDORATH", "",                 "Sea Map to Irdorath"                                 ),
+		// Kill
+		Tuple.Create("KillRockDragon",         "Kill",         "DRAGON_ROCK",          "",                 "Kill the Rock Dragon"                                ),
+		Tuple.Create("KillSwampDragon",        "Kill",         "DRAGON_SWAMP",         "",                 "Kill the Swamp Dragon"                               ),
+		Tuple.Create("KillFireDragon",         "Kill",         "DRAGON_FIRE",          "",                 "Kill the Fire Dragon"                                ),
+		Tuple.Create("KillIceDragon",          "Kill",         "DRAGON_ICE",           "",                 "Kill the Ice Dragon"                                 ),
+		Tuple.Create("KillUndeadDragon",       "Global",       "UNDEADDRAGONISDEAD",   "1",                "Kill the Undead Dragon"                              ),
+		// Talk
+		Tuple.Create("TalkToZuris",            "Talk",         "VLK_409_ZURIS",        "",                 "Talk to Zuris"                                       ),
+		Tuple.Create("TalkToIgnaz",            "Talk",         "VLK_498_IGNAZ",        "",                 "Talk to Ignaz"                                       ),
+		Tuple.Create("TalkToVatrasCh3",        "Talk+Chapter", "VLK_439_VATRAS",       "3",                "Talk to Vatras in Chapter 3"                         ),
+		Tuple.Create("TalkToPyrokarCh3",       "Talk+Chapter", "KDF_500_PYROKAR",      "3",                "Talk to Pyrokar in Chapter 3"                        ),
+		Tuple.Create("TalkToXardasCh3",        "Talk+Chapter", "VLK_439_VATRAS",       "3",                "Talk to Xardas in Chapter 3"                         ),
+		// Guild
+		Tuple.Create("GuildMilitia",           "Guild",        "2",                    "",                 "Join the Militia"                                    ),
+		Tuple.Create("GuildPaladin",           "Guild",        "1",                    "",                 "Join the Paladins"                                   ),
+		// Teleport
+		Tuple.Create("TeleportToCastle",       "Teleport",     "1012.7",               "893.4",            "Teleport to the Castle"                              ),
+		Tuple.Create("TeleportToXardasTower",  "Teleport",     "-11382.5",             "3695.3",           "Teleport to the Old Demon Tower"                     ),
+		Tuple.Create("TeleportToTavern",       "Teleport",     "39127.6",              "3900.8",           "Teleport to Onar's Tavern"                           ),
+		// Global Variables
+		Tuple.Create("OpenCastleGate",         "Global",       "MIS_OCGATEOPEN",       "1",                "Open the castle gate"                                ),
+		Tuple.Create("RecruitTorlof",          "Global",       "TORLOFISCAPTAIN",      "1",                "Make Torlof your captain"                            ),
+		// Interactables
+		Tuple.Create("IrdorathSwitch1",        "Interactable", "EVT_RIGHT_ROOM_01_MSG_SWITCH", "",         "Irdorath: Activate the 1st Switch."                  ),
+		Tuple.Create("IrdorathSwitch2",        "Interactable", "EVT_LEFT_ROOM_01_MSG_SWITCH", "",          "Irdorath: Activate the 2nd Switch."                  ),
+		Tuple.Create("IrdorathSwitch3",        "Interactable", "EVT_RIGHT_ROOM_02_MSG_SWITCH", "",         "Irdorath: Activate the 3rd Switch."                  ),
+		Tuple.Create("IrdorathSwitch4",        "Interactable", "EVT_LEFT_ROOM_02_MSG_SWITCH", "",          "Irdorath: Activate the 4th Switch."                  ),
+		Tuple.Create("IrdorathFinalSwitch",    "Interactable", "EVENT_TRIGGERLIST_FOR_LOCK_FINAL", "",     "Irdorath: Activate the Final Switch."                ),
+		// End
+		Tuple.Create("End",                    "End",          "",                     "",                 "Finish the Game"                                     ),
+	};
 
-	// Any% No Flying
-	settings.Add("Any%NoFlying", false, "Any% No Flying");
-		settings.Add("Any%NoFlying_EnterValley", true, "Enter the valley of mines", "Any%NoFlying");
-		settings.Add("Any%NoFlying_CollectTeleportToPass", true, "Collect teleport rune to pass", "Any%NoFlying");
-		settings.Add("Any%NoFlying_CollectTeleportToCastle", true, "Collect teleport rune to castle", "Any%NoFlying");
-		settings.Add("Any%NoFlying_TeleportToCastle", true, "Teleport to castle", "Any%NoFlying");
-		settings.Add("Any%NoFlying_OpenGate", true, "Open gate in castle", "Any%NoFlying");
-		settings.Add("Any%NoFlying_RockDragon", false, "Kill Rock Dragon (easy route)", "Any%NoFlying");
-		settings.Add("Any%NoFlying_SwampDragon", true, "Kill Swamp Dragon (fast route)", "Any%NoFlying");
-		settings.Add("Any%NoFlying_FireDragon", false, "Kill Fire Dragon", "Any%NoFlying");
-		settings.Add("Any%NoFlying_Chapter5", true, "Reach chapter 5", "Any%NoFlying");
-		settings.Add("Any%NoFlying_CollectTeleportToTavern", true, "Buy teleport rune from Orlan", "Any%NoFlying");
-		settings.Add("Any%NoFlying_CollectMap", true, "Collect sea map to Irdorath", "Any%NoFlying");
-		settings.Add("Any%NoFlying_RecruitTorlof", true, "Torlof becomes your captain", "Any%NoFlying");
-		settings.Add("Any%NoFlying_Irdorath", true, "Enter Irdorath", "Any%NoFlying");
-		settings.Add("Any%NoFlying_UndeadDragon", true, "Kill Undead Dragon", "Any%NoFlying");
-		settings.Add("Any%NoFlying_End", true, "Finish Game", "Any%NoFlying");
+	settings.Add("NewGameStart", true, "Start timer on New Game");
+	settings.Add("NewGameReset", true, "Reset timer on New Game");
 
-	// All Chapters
-	settings.Add("AllChapters", false, "All Chapters");
-		settings.Add("AllChapters_Chapter2", true, "Reach chapter 2", "AllChapters");
-		settings.Add("AllChapters_EnterValley", true, "Enter the valley of mines", "AllChapters");
-		settings.Add("AllChapters_OpenGate", true, "Open gate in castle", "AllChapters");
-		settings.Add("AllChapters_Chapter3", true, "Reach chapter 3", "AllChapters");
-		settings.Add("AllChapters_ZurisDead", true, "Kill Zuris", "AllChapters");
-		settings.Add("AllChapters_Militia", true, "Join the militia", "AllChapters");
-		settings.Add("AllChapters_Paladin", true, "Become paladin", "AllChapters");
-		settings.Add("AllChapters_Vatras", true, "Talk to Vatras", "AllChapters");
-		settings.Add("AllChapters_Pyrokar", true, "Talk to Pyrokar", "AllChapters");
-		settings.Add("AllChapters_Xardas", true, "Talk to Xardas", "AllChapters");
-		settings.Add("AllChapters_Lee", true, "Get teleport rune from Lee", "AllChapters");
-		settings.Add("AllChapters_Chapter4", true, "Reach chapter 4", "AllChapters");
-		settings.Add("AllChapters_Chapter5", true, "Reach chapter 5", "AllChapters");
-		settings.Add("AllChapters_Irdorath", true, "Enter Irdorath", "AllChapters");
-		settings.Add("AllChapters_UndeadDragon", true, "Kill Undead Dragon", "AllChapters");
-		settings.Add("AllChapters_End", true, "Finish Game", "AllChapters");
+	settings.Add("Splits", true, "Splits");
+		settings.Add("End",            true, "Finish the game.", "Splits");
 
-	// Glitch-Restricted
-	settings.Add("GlitchRestricted", false, "Glitch-Restricted");
-		settings.Add("GlitchRestricted_Ignaz", true, "Talk to Ignaz", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Militia", true, "Join the militia", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Chapter2", true, "Reach chapter 2", "GlitchRestricted");
-		settings.Add("GlitchRestricted_EnterValley", true, "Enter the valley of mines", "GlitchRestricted");
-		settings.Add("GlitchRestricted_CollectTeleportToPass", true, "Collect teleport rune to pass", "GlitchRestricted");
-		settings.Add("GlitchRestricted_CollectTeleportToCastle", true, "Collect teleport rune to castle", "GlitchRestricted");
-		settings.Add("GlitchRestricted_TeleportToCastle", true, "Teleport to castle", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Chapter3", true, "Reach chapter 3", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Paladin", true, "Become paladin", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Vatras", true, "Talk to Vatras", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Xardas", true, "Talk to Xardas", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Lee", true, "Get teleport rune from Lee", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Chapter4", true, "Reach chapter 4", "GlitchRestricted");
-		settings.Add("GlitchRestricted_FireDragon", true, "Kill Fire Dragon", "GlitchRestricted");
-		settings.Add("GlitchRestricted_RockDragon", true, "Kill Rock Dragon", "GlitchRestricted");
-		settings.Add("GlitchRestricted_SwampDragon", true, "Kill Swamp Dragon", "GlitchRestricted");
-		settings.Add("GlitchRestricted_IceDragon", false, "Kill Ice Dragon", "GlitchRestricted");
-		settings.Add("GlitchRestricted_Chapter5", true, "Reach chapter 5", "GlitchRestricted");
-		settings.Add("GlitchRestricted_IrdorathGroup", true, "Irdorath splits", "GlitchRestricted");
-			settings.Add("GlitchRestricted_Irdorath", true, "Enter Irdorath", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathMasterKey", false, "Collect the key from the Key Master", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch1", false, "Activate switch 1", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch2", false, "Activate switch 2", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch3", false, "Activate switch 3", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathSwitch4", false, "Activate switch 4", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_IrdorathOpenHall", false, "Open the Hall of the Seekers", "GlitchRestricted_IrdorathGroup");
-			settings.Add("GlitchRestricted_UndeadDragon", true, "Kill Undead Dragon", "GlitchRestricted_IrdorathGroup");
-		settings.Add("GlitchRestricted_End", true, "Finish Game", "GlitchRestricted");
+		settings.Add("ChapterSplits",      true, "Chapters",         "Splits");
+		settings.Add("WorldSplits",        true, "Worlds",           "Splits");
+		settings.Add("ItemSplits",         true, "Items",            "Splits");
+		settings.Add("KillSplits",         true, "Kill",             "Splits");
+		settings.Add("TalkSplits",         true, "Talk",             "Splits");
+		settings.Add("GuildSplits",        true, "Guild",            "Splits");
+		settings.Add("GlobalSplits",       true, "Global Variables", "Splits");
+		settings.Add("TeleportSplits",     true, "Teleport",         "Splits");
+		settings.Add("InteractableSplits", true, "Interactables",    "Splits");
+	
+	foreach (var split in vars.Splits) {
+		string name        = split.Item1;
+		string type        = split.Item2;
+		string description = split.Item5;
+		
+		string parent = type + "Splits";
 
-	// Undead Dragon Kill
-	settings.Add("UndeadDragonKill", false, "Undead Dragon Kill");
-		settings.Add("UndeadDragonKill_Irdorath", true, "Enter Irdorath", "UndeadDragonKill");
-		settings.Add("UndeadDragonKill_UndeadDragon", true, "Kill Undead Dragon", "UndeadDragonKill");
+		if (name == "End") continue;
 
-	// General settings
-	settings.Add("NewGame", true, "Reset+Start timer on New Game");
+		if (type.StartsWith("World")) {
+			parent = "WorldSplits";
+		}
+		else if (type.StartsWith("Talk")) {
+			parent = "TalkSplits";
+		}
+		else if (name.StartsWith("Chapter")) {
+			parent = "ChapterSplits";
+		}
+		else if (name.StartsWith("Kill")) {
+			parent = "KillSplits";
+		}
+		
+		settings.Add(name, false, description, parent);
+	}
 
-	// Flags
-	vars.completedSplits = new HashSet<string>();
+	vars.Info = (Action<string>)((msg) => {
+		print("[Gothic 2 ASL] " + msg);
+	});
 
-	// Variable to save IGT in case the game crashes
-	vars.timeKeeper = new TimeSpan();
+	vars.CompletedSplits = new HashSet<string>();
+
+	// Variable to save IGT in case the game crashes or softlocks
+	vars.TimeKeeper = new TimeSpan();
 }
 
 init {
-	// Find global variables
-	vars.globals = new Dictionary<string, MemoryWatcher>();
+	#region Statics
 
-	var globalsDict = new Dictionary<string, string> {
-		{ "KAPITEL",            "chapter"      },
-		{ "UNDEADDRAGONISDEAD", "undeadDragon" },
-		{ "TORLOFISCAPTAIN",    "Torlof"       },
-		//{ "PLAYER_ISAPPRENTICE", "apprentice" }
-		{ "MIS_OCGATEOPEN",     "gateOpen" },
-	};
+	const int WORLD        = 0x008C380C;   // zCWorld*& zCMenu::world
+	const int PLAYER       = 0x009831DC;   // oCNpc*& oCNpc::player
+	const int GAME_MANAGER = 0x008B4398;   // CGameManager*& gameMan
+	const int GAME         = 0x009813DC;   // oCGame*& ogame
+	const int PARSER       = 0x00984C08;   // zCParser* parser = (zCParser* )
 
-	// cur_table.table
-	int symtab = new DeepPointer("Gothic2.exe", 0x585F70, 0x8).Deref<int>(game);
-	int size = new DeepPointer("Gothic2.exe", 0x585F70, 0x8 + 0x4).Deref<int>(game);
+	#endregion
+
+	#region Offsets
+
+	// oCGame : zSession
+	const int WORLD_OFFSET              = 0x8;      // zCWorld* world;
+	const int IN_LOAD_SAVEGAME_OFFSET   = 0x28;     // int inLoadSaveGame; 
+	const int IN_LEVEL_CHANGE_OFFSET    = 0x2C;     // int inLevelChange;
+
+	// oCWorld
+	const int WORLD_NAME_OFFSET         = 0x6268;   // zSTRING worldName;
+	const int VOBLIST_NPC_OFFSET        = 0x6280;   // zCListSort<oCNpc>* voblist_npcs;
+
+	// zCObject
+	const int OBJECT_NAME_OFFSET        = 0x10;     // zSTRING objectName;
+
+	// zString
+	const int ZSTRING_VECTOR_OFFSET     = 0x8;      // char* vector;
+
+	// oCNpc
+	const int ATTRIBUTE_OFFSET          = 0x1A4;    // int attribute[NPC_ATR_MAX];
+	const int GUILD_OFFSET              = 0x21C;    // int guild;
+	const int AI_SCRIPT_VARS_OFFSET     = 0x274;    // int aiscriptvars[70];
+	const int EXPERIENCE_POINTS_OFFSET  = 0x3A0;    // unsigned long experience_points;
+	const int INVENTORY2_OFFSET         = 0x5DC;    // oCNpcInventory inventory2;
+	const int BODYSTATE_OFFSET          = 0x6E0;    // int bodyState : 19;
+	const int INTERACT_MOB_OFFSET       = 0x8D0;    // oCMobInter* interactMob; 
 	
-	for (int i = 0; i < size; i++) {
-		var symbol = new DeepPointer((IntPtr)symtab + i * 0x4).Deref<int>(game); 
-		string name = new DeepPointer((IntPtr)symbol + 0x8, 0x0).DerefString(game, 100); 
-		int address = symbol + 0x18;
+	// oCMOB
+	const int MOB_TRIGGER_TARGET_OFFSET = 0x190;    // zSTRING triggerTarget;
+	const int MOB_STATE_OFFSET          = 0x1F4;    // int state; 
 
-		foreach (var global in globalsDict) {
-			if (name == global.Key) {
-				print(name + " = table[" + i + "] at 0x" + address.ToString("X"));
+	// zCVideoPlayer
+	const int M_VIDEO_FILENAME_OFFSET   = 0x04;     // zSTRING mVideoFilename;
+	const int M_PLAYING_OFFSET          = 0x20;     // int mPlaying;
+	const int VIDEO_PLAYER_OFFSET       = 0x78;     // oCBinkPlayer* videoPlayer;
 
-				vars.globals[global.Value] = new MemoryWatcher<int>(new DeepPointer((IntPtr)address));
+	// zCParser
+	const int SYMTAB_OFFSET             = 0x10;     // zCPar_SymbolTable symtab;
+
+	// zCPar_SymbolTable
+	const int TABLE_OFFSET              = 0x8;      // zCArray<zCPar_Symbol*> table;
+
+	// zCPar_Symbol
+	const int SYMBOL_DATA_OFFSET        = 0x18;     // int* intdata;
+
+	// zCArray
+	const int NUM_ALLOC_OFFSET          = 0x4;      // int numAlloc;
+	const int NUM_IN_ARRAY_OFFSET       = 0x8;      // int numInArray;
+
+	// oCItemContainer
+	const int CONTENTS_OFFSET           = 0x4;      // zCListSort<oCItem>* contents;
+
+	// zCListSort
+	const int ZCLISTSORT_DATA_OFFSET    = 0x4;      // T* data;
+	const int ZCLISTSORT_NEXT_OFFSET    = 0x8;      // zCListSort* next;
+
+	// zMAT4 trafoObjToWorld;
+	const int TRAFO_OBJ_TO_WORLD_OFFSET = 0x3C;     // zMAT4 trafoObjToWorld;
+	
+	const int ZMAT4_COL_SIZE            = 0x4;
+	const int ZMAT4_ROW_LENGTH          = 0x10;
+
+	const int VOB_WORLD_POS_X_OFFSET = TRAFO_OBJ_TO_WORLD_OFFSET + 0 * ZMAT4_ROW_LENGTH + 3 * ZMAT4_COL_SIZE;
+	const int VOB_WORLD_POS_Y_OFFSET = TRAFO_OBJ_TO_WORLD_OFFSET + 1 * ZMAT4_ROW_LENGTH + 3 * ZMAT4_COL_SIZE;
+	const int VOB_WORLD_POS_Z_OFFSET = TRAFO_OBJ_TO_WORLD_OFFSET + 2 * ZMAT4_ROW_LENGTH + 3 * ZMAT4_COL_SIZE;
+	
+	#endregion
+
+	#region Constants
+
+	const int BS_DEAD = 23;
+
+	#endregion
+
+	#region Global Variables
+
+	vars.Globals = new Dictionary<string, MemoryWatcher>();
+
+	var requiredGlobals = new HashSet<string>();
+
+	foreach (var split in vars.Splits) {
+		string type = split.Item2;
+
+		if (type == "Global") {
+			string global = split.Item3;
+			requiredGlobals.Add(global);
+		}
+	}
+
+	IntPtr tablePtr = game.ReadPointer((IntPtr)PARSER + SYMTAB_OFFSET + TABLE_OFFSET);
+	int tableSize = game.ReadValue<int>((IntPtr)PARSER + SYMTAB_OFFSET + TABLE_OFFSET + NUM_ALLOC_OFFSET);
+	
+	for (int i = 0; i < tableSize; i++) {
+		IntPtr symbolPtr = game.ReadPointer(tablePtr + i * 0x4); 
+		
+		string name = new DeepPointer(symbolPtr + ZSTRING_VECTOR_OFFSET, 0x0).DerefString(game, 100); 
+		
+		foreach (var global in requiredGlobals) {
+			if (name == global) {
+				IntPtr dataAddr = symbolPtr + SYMBOL_DATA_OFFSET;
+
+				vars.Info(name + " = table[" + i + "] at 0x" + dataAddr.ToString("X"));
+
+				vars.Globals[global] = new MemoryWatcher<int>(new DeepPointer(dataAddr));
 			}
 		} 
 	}
 
-	foreach (var global in globalsDict) {
-		if (!vars.globals.ContainsKey(global.Value)) {
-			throw new InvalidOperationException("Not all globals found. Trying again.");
+	foreach (var global in requiredGlobals) {
+		if (!vars.Globals.ContainsKey(global)) {
+			throw new InvalidOperationException("Global " + global + " not found. Trying again.");
 		}
 	}
 
-	// Starting coordinates
-	vars.startX = -15710.02637; 
-	vars.startY =  29912.93750;
+	vars.Info("  => All globals found.");
 
-	// NPC IDs	
-	vars.XARDAS = 100;
-	vars.ZURIS = 409;
-	vars.VATRAS = 439;
-	vars.IGNAZ = 498;
-	vars.PYROKAR = 500;
-	vars.TORLOF = 801;
-	vars.ROCK_DRAGON = 9148;
-	vars.SWAMP_DRAGON = 9151;
-	vars.FIRE_DRAGON = 9141;
-	vars.ICE_DRAGON = 9145;
-	vars.UNDEAD_DRAGON = 9154;
+	#endregion
 
-	// Functions
+	#region oCBinkPlayer / zCVideoPlayer
 
-	vars.IsDead = (Func<int, bool>)((npcID) => {
-		// ogame.world.voblist_npc.data
-		IntPtr npc = (IntPtr) new DeepPointer("Gothic2.exe", 0x5813DC, 0x8, 0x6280, 0x8).Deref<int>(game);
+	vars.EndingCutscenes = new HashSet<string> {
+		"EXTRO_XARDAS",
+		"CREDITS_EXTRO"
+	};
+	
+	vars.GetCurrentCutscene = (Func<string>)(() => {
+		IntPtr videoPlayer = (IntPtr)new DeepPointer((IntPtr)GAME_MANAGER, VIDEO_PLAYER_OFFSET).Deref<int>(game);
+		if (videoPlayer == IntPtr.Zero) return "";
+		
+		bool isVideoPlaying = game.ReadValue<bool>((IntPtr)videoPlayer + M_PLAYING_OFFSET);
 
-		while (npc != IntPtr.Zero) {
-			var npcData = game.ReadPointer(npc + 0x4);
-			var id = game.ReadValue<int>(npcData + 0x120);
-			var hp = game.ReadValue<int>(npcData + 0x1A4);
+		if (isVideoPlaying) {	
+			string cutscenePath = new DeepPointer((IntPtr)videoPlayer + M_VIDEO_FILENAME_OFFSET + ZSTRING_VECTOR_OFFSET, 0x0).DerefString(game, 1000);
+			string cutscene = Path.GetFileNameWithoutExtension(cutscenePath);
+
+			return cutscene;
+		}
+		
+		return "";
+	});
+
+	#endregion
+
+	#region Inventory
+
+	vars.OwnedItems = new HashSet<string>();
+
+	vars.UpdateItems = (Action)(() => {
+		vars.OwnedItems.Clear();
+
+		IntPtr itemPtr = (IntPtr)new DeepPointer((IntPtr)PLAYER, INVENTORY2_OFFSET + CONTENTS_OFFSET, ZCLISTSORT_NEXT_OFFSET).Deref<int>(game);
+
+		while (itemPtr != IntPtr.Zero) {
+			IntPtr itemDataPtr = game.ReadPointer(itemPtr + ZCLISTSORT_DATA_OFFSET);
+
+			string itemName = game.ReadString(game.ReadPointer(itemDataPtr + OBJECT_NAME_OFFSET + ZSTRING_VECTOR_OFFSET), 20);
 			
-			if (id == npcID && hp == 0) {
-				return true;
+			if (!string.IsNullOrEmpty(itemName)) {
+				vars.OwnedItems.Add(itemName);
 			}
 	
-			npc = game.ReadPointer(npc + 0x8);
+			itemPtr = game.ReadPointer(itemPtr + ZCLISTSORT_NEXT_OFFSET);
 		}
-
-		return false;
-	});
-	
-	vars.IsInDialogue = (Func<int, bool>)((npcID) => {
-		// ogame.world.voblist_npc.data
-		IntPtr npc = (IntPtr) new DeepPointer("Gothic2.exe", 0x5813DC, 0x8, 0x6280, 0x8).Deref<int>(game);
-
-		while (npc != IntPtr.Zero) {
-			var npcData = game.ReadPointer(npc + 0x4);
-			var id = game.ReadValue<int>(npcData + 0x120);
-			var inDialogue = game.ReadValue<int>(npcData + 0x284);
-
-			if (id == npcID && inDialogue == 1) {
-				return true;
-			}
-	
-			npc = game.ReadPointer(npc + 0x8);
-		}
-
-		return false;
 	});
 
-	vars.PlayerHasItem = (Func<string, bool>)(TargetItemName => {
-		// player.inventory2.contents
-		IntPtr item = (IntPtr) new DeepPointer("Gothic2.exe", 0x5831DC, 0x5E0, 0x8).Deref<int>(game);    
+	vars.PlayerHasItem = (Func<string, bool>)(itemName => {
+		return vars.OwnedItems.Contains(itemName);
+	});
 
-		while (item != IntPtr.Zero) {
-			var itemData = game.ReadPointer(item + 0x4);
-	
-			string itemName = game.ReadString(game.ReadPointer(itemData + 0x18), 20);
+	vars.IsInventoryOpen = (Func<bool>)(() => {
+		// oCItemContainer
+		// virtual int IsOpen()        zCall( 0x006AB710 );
+		// Gothic2.exe+2AB710 - A1 281B9800  - mov eax,[Gothic2.exe+581B28] <-- pointer to list of open inventories
+		return game.ReadValue<int>((IntPtr)0x00981B28) != 0;
+	});
+
+	#endregion
+
+	#region NPCs
+
+	vars.IsInDialogue = (Func<string, bool>)((targetName) => {
+		IntPtr npcPtr = (IntPtr)new DeepPointer((IntPtr)GAME, WORLD_OFFSET, VOBLIST_NPC_OFFSET, ZCLISTSORT_NEXT_OFFSET).Deref<int>(game);
+
+		while (npcPtr != IntPtr.Zero) {
+			IntPtr npcDataPtr = game.ReadPointer(npcPtr + ZCLISTSORT_DATA_OFFSET);
+
+			string name = game.ReadString(game.ReadPointer(npcDataPtr + OBJECT_NAME_OFFSET + ZSTRING_VECTOR_OFFSET), 20);
+			int isInDialogue = game.ReadValue<int>(npcDataPtr + AI_SCRIPT_VARS_OFFSET + 4 * 0x4); // aiscriptvars[4]
 			
-			if (itemName == TargetItemName) {
+			if (name == targetName && isInDialogue == 1) {
 				return true;
 			}
 	
-			item = game.ReadPointer(item + 0x8);
-		}
-		return false;
-	});
-
-	vars.IsActive = (Func<string, bool>)((str) => {
-		// ogame.world.voblist.data
-		IntPtr vob = (IntPtr) new DeepPointer("Gothic2.exe", 0x5813DC, 0x8, 0x627C, 0x8).Deref<int>(game);
-
-		while (vob != IntPtr.Zero) {
-			var vobData = game.ReadPointer(vob + 0x4);
-			string vobString = game.ReadString(game.ReadPointer(vobData + 0x198), 32);
-			var status = game.ReadValue<int>(vobData + 0x1F4);
-
-			if (vobString == str && status == 1) {
-				return true;
-			}
-	
-			vob = game.ReadPointer(vob + 0x8);
+			npcPtr = game.ReadPointer(npcPtr + ZCLISTSORT_NEXT_OFFSET);
 		}
 
 		return false;
 	});
 
-	vars.canReset = true;
+	vars.IsDead = (Func<string, bool>)((targetName) => {
+		IntPtr npcPtr = (IntPtr)new DeepPointer((IntPtr)GAME, WORLD_OFFSET, VOBLIST_NPC_OFFSET, ZCLISTSORT_NEXT_OFFSET).Deref<int>(game);
+
+		while (npcPtr != IntPtr.Zero) {
+			IntPtr npcDataPtr = game.ReadPointer(npcPtr + ZCLISTSORT_DATA_OFFSET);
+
+			string name = game.ReadString(game.ReadPointer(npcDataPtr + OBJECT_NAME_OFFSET + ZSTRING_VECTOR_OFFSET), 20);
+			int bodystateField = game.ReadValue<int>(npcDataPtr + BODYSTATE_OFFSET);
+			int bodystate = bodystateField & 0x7F;
+			
+			if (name == targetName && bodystate == BS_DEAD) {
+				return true;
+			}
+	
+			npcPtr = game.ReadPointer(npcPtr + ZCLISTSORT_NEXT_OFFSET);
+		}
+
+		return false;
+	});
+
+	#endregion
+
+	#region Teleport
+
+	vars.PlayerTeleported = (Func<string, string, bool>)((arg1, arg2) => {
+		float x = float.Parse(arg1, System.Globalization.CultureInfo.InvariantCulture);
+		float y = float.Parse(arg2, System.Globalization.CultureInfo.InvariantCulture);
+		
+		bool isIn = 
+			Math.Sqrt(
+				Math.Pow(x - vars.Watchers["X"].Current, 2) + 
+				Math.Pow(y - vars.Watchers["Y"].Current, 2)
+			) 
+			< 200;
+
+		bool wasOut = 
+			Math.Sqrt(
+				Math.Pow(x - vars.Watchers["X"].Old, 2) + 
+				Math.Pow(y - vars.Watchers["Y"].Old, 2)
+			) 
+			> 500;
+		
+		return isIn && wasOut;
+	});
+
+	#endregion
+
+	#region Mobs
+
+	vars.LastInteractable = IntPtr.Zero;
+
+	vars.UpdateInteractable = (Action)(() => {
+		bool inLevelChange  = new DeepPointer((IntPtr)GAME, IN_LEVEL_CHANGE_OFFSET).Deref<bool>(game);
+		bool inLoadSaveGame = new DeepPointer((IntPtr)GAME, IN_LOAD_SAVEGAME_OFFSET).Deref<bool>(game);
+		
+		if (inLevelChange || inLoadSaveGame) {
+			vars.LastInteractable = IntPtr.Zero;
+		}
+
+		IntPtr mob = (IntPtr)new DeepPointer((IntPtr)PLAYER, INTERACT_MOB_OFFSET).Deref<int>(game);
+
+		if (mob == IntPtr.Zero) {
+			return ;
+		}
+
+		vars.LastInteractable = mob;
+	});
+
+	vars.GetMobTarget = (Func<IntPtr, string>)((mob) => {
+		return game.ReadString(game.ReadPointer(mob + MOB_TRIGGER_TARGET_OFFSET + ZSTRING_VECTOR_OFFSET), 32);
+	});
+
+	vars.GetMobState = (Func<IntPtr, int>)((mob) => {
+		return game.ReadValue<int>(mob + MOB_STATE_OFFSET);
+	});
+
+	#endregion
+
+	#region HandleSelAction() Hook
+
+	const int COUNTER_ADDR = 0x008B4C00;
+	const int MESSAGE_ADDR = 0x008B4C04;
+	const int HOOK_ADDR    = 0x004DA1F6;
+	const int DETOUR_ADDR  = 0x0081FFA0;
+
+	byte[] newGameMessage = { 0x4E, 0x45, 0x57, 0x5F, 0x47, 0x41, 0x4D, 0x45 };	 // NEW_GAME
+	game.WriteBytes((IntPtr)MESSAGE_ADDR, newGameMessage);
+
+	byte[] detour = {
+		0x8B, 0xB4, 0x24, 0xCC, 0x00, 0x00, 0x00,  // mov esi,[esp+000000CC]
+		0x60,                                      // pushad 
+		0x9C,                                      // pushfd 
+		0x8B, 0x46, 0x0C,                          // mov eax,[esi+0C]
+		0x83, 0xF8, 0x08,                          // cmp eax,08 { 8 }
+		0x75, 0x1A,                                // jne Gothic2.exe+42D82B
+		0x56,                                      // push esi
+		0x8B, 0x76, 0x08,                          // mov esi,[esi+08]
+		0x8D, 0x3D, 0x04, 0x4C, 0x8B, 0x00,        // lea edi,[MESSAGE_ADDR] { ("NEW_GAME") }
+		0xB9, 0x08, 0x00, 0x00, 0x00,              // mov ecx,00000008 { 8 }
+		0xF3, 0xA6,                                // repe cmpsb 
+		0x5E,                                      // pop esi
+		0x75, 0x06,                                // jne Gothic2.exe+42D82B
+		0xFF, 0x05, 0x00, 0x4C, 0x8B, 0x00,        // inc [COUNTER_ADDR] { (0) }
+		0x9D,                                      // popfd 
+		0x61,                                      // popad 
+		0xE9, 0x2A, 0xA2, 0xCB, 0xFF               // jmp HOOK_ADDR+7
+	};
+	game.WriteBytes((IntPtr)DETOUR_ADDR, detour);
+
+	byte[] hook = { 0xE9, 0xA5, 0x5D, 0x34, 0x00, 0x90, 0x90 };
+	game.WriteBytes((IntPtr)HOOK_ADDR, hook);
+
+	vars.Info("Applied HandleSelAction() hook.");
+
+	#endregion
+
+	#region Watchers
+
+	vars.Watchers = new Dictionary<string, MemoryWatcher> {
+		{ "IGT",                new MemoryWatcher<long>(new DeepPointer("ZSPEEDRUNTIMER.DLL", 0x19F70)) },
+		// World
+		{ "World",              new StringWatcher(new DeepPointer((IntPtr)WORLD, WORLD_NAME_OFFSET + ZSTRING_VECTOR_OFFSET, 0x0), 20) },
+		// Player
+		{ "Exp",                new MemoryWatcher<int>  (new DeepPointer((IntPtr)PLAYER, EXPERIENCE_POINTS_OFFSET)) }, 
+		{ "Guild",              new MemoryWatcher<int>  (new DeepPointer((IntPtr)PLAYER, GUILD_OFFSET)) },
+		{ "IsPlayerInDialogue", new MemoryWatcher<int>  (new DeepPointer((IntPtr)PLAYER, AI_SCRIPT_VARS_OFFSET + 4 * 0x4)) },
+		{ "X",                  new MemoryWatcher<float>(new DeepPointer((IntPtr)PLAYER, VOB_WORLD_POS_X_OFFSET)) }, 
+		{ "Y",                  new MemoryWatcher<float>(new DeepPointer((IntPtr)PLAYER, VOB_WORLD_POS_Y_OFFSET)) }, 
+		// New Game
+		{ "NewGameCounter",     new MemoryWatcher<int>(new DeepPointer((IntPtr)COUNTER_ADDR)) }, 
+	};
+
+	#endregion
+
+	vars.IsNewGame = false;
+	current.cutscene = old.cutscene = "";
+	current.interactable = old.interactable = IntPtr.Zero;
 }
-
+	
 update {
-	if (!vars.canReset && current.igt > 500000) {
-		vars.canReset = true;
+	foreach (var watcher in vars.Globals.Values) { watcher.Update(game); }
+	foreach (var watcher in vars.Watchers.Values) {	watcher.Update(game); }
+	vars.UpdateItems();
+	vars.UpdateInteractable();
+	
+	current.cutscene = vars.GetCurrentCutscene();
+	if (current.cutscene != old.cutscene) {
+		if (!string.IsNullOrEmpty(current.cutscene)) {
+			vars.Info("Cutscene -> " + current.cutscene);
+		}
+		else {
+			vars.Info("Cutscene ended.");
+		}
 	}
 
-	foreach (var watcher in vars.globals.Values) {
-		watcher.Update(game);
+	if (vars.Watchers["World"].Changed) {
+		vars.Info("World: " + vars.Watchers["World"].Old + " -> " + vars.Watchers["World"].Current);
+	}
+	
+	if (vars.Watchers["Exp"].Changed) {
+		vars.Info("Exp -> " + vars.Watchers["Exp"].Current);
+	}
+
+	/*
+	if (vars.Watchers["X"].Changed || vars.Watchers["Y"].Changed) {
+		vars.Info("(X,Y) -> " + vars.Watchers["X"].Current + ", " + vars.Watchers["Y"].Current);
+	}
+	*/
+
+	if (vars.Watchers["NewGameCounter"].Changed && vars.Watchers["NewGameCounter"].Current != 0) {
+		vars.Info("Selected NEW_GAME.");
+		vars.IsNewGame = true;
 	}
 }
 
-start {
-	if (settings["NewGame"]) {
-		if (current.igt < 500000
-				&& Math.Abs(current.x - vars.startX) < 0.0001
-				&& Math.Abs(current.y - vars.startY) < 0.0001) {
-			
-			vars.canReset = false;
-			return true;
-		}
+start { 
+	if (vars.IsNewGame && vars.Watchers["IGT"].Current < 500000 && vars.Watchers["IGT"].Current != 0) {
+		vars.IsNewGame = false;
+		return settings["NewGameStart"];
 	}
 }
 
 onStart {
-	vars.completedSplits.Clear();
-	vars.timeKeeper = TimeSpan.FromMilliseconds(0);
+	vars.CompletedSplits.Clear();
+	vars.TimeKeeper = TimeSpan.FromMilliseconds(0);
+
+	vars.Info("--- START ---");
 }
 
-reset {
-	if (settings["NewGame"]) {
-		if (current.igt < 500000 && vars.canReset
-				&& Math.Abs(current.x - vars.startX) < 0.0001
-				&& Math.Abs(current.y - vars.startY) < 0.0001) {
+reset {		
+	return vars.IsNewGame && settings["NewGameReset"];
+}
 
+onReset {
+	vars.Info("--- RESET ---");
+}
+
+split {
+	foreach (var split in vars.Splits) {
+		string name         = split.Item1;
+		string type         = split.Item2;
+		string arg1         = split.Item3;
+		string arg2         = split.Item4;
+
+		if (!settings[name] || vars.CompletedSplits.Contains(name)) continue;
+
+		bool shouldSplit = false;
+
+		switch (type) {
+			case "World": 
+				shouldSplit = vars.Watchers["World"].Current == arg1;
+				break;
+			case "Global":
+				shouldSplit = vars.Globals[arg1].Current == int.Parse(arg2) && vars.Watchers["IsPlayerInDialogue"].Current == 0;
+				break;
+			case "Item": 
+				shouldSplit = vars.PlayerHasItem(arg1) && !vars.IsInventoryOpen();
+				break;
+			case "World+Item": 
+				shouldSplit = vars.Watchers["World"].Current == arg1 && vars.PlayerHasItem(arg2);
+				break;
+			case "Talk":
+				shouldSplit = vars.Watchers["IsPlayerInDialogue"].Current == 1 && vars.IsInDialogue(arg1);
+				break;
+			case "Talk+Chapter":
+				shouldSplit = vars.Globals["KAPITEL"].Current == 3 && vars.Watchers["IsPlayerInDialogue"].Current == 1 && vars.IsInDialogue(arg1);
+				break;
+			case "Kill":
+				shouldSplit = vars.Watchers["Exp"].Current > vars.Watchers["Exp"].Old && vars.IsDead(arg1);
+				break;	
+			case "Guild":
+				shouldSplit = vars.Watchers["Guild"].Current == int.Parse(arg1);
+				break;
+			case "Teleport":
+				shouldSplit = vars.PlayerTeleported(arg1, arg2);
+				break;
+			case "Interactable":
+				IntPtr mob = vars.LastInteractable;
+				shouldSplit = vars.GetMobTarget(mob) == arg1 && vars.GetMobState(mob) == 1;
+				break;							
+			case "End":
+				shouldSplit = vars.EndingCutscenes.Contains(current.cutscene);
+				break;
+		}
+			
+		if (shouldSplit) {
+			vars.Info("Split: " + name + " (" + (!string.IsNullOrEmpty(arg1) ? arg1 : "-") + ", " + (!string.IsNullOrEmpty(arg2) ? arg2 : "-") + ")");
+			vars.CompletedSplits.Add(name);
 			return true;
-		}
-	}
-}
-
-split {	
-	// Any%
-
-	if (settings["Any%"]) {
-		if (settings["Any%_EnterValleyWithFieldraider"] && !vars.completedSplits.Contains("CollectedFieldraider") && vars.PlayerHasItem("ITSC_TRFGIANTBUG")) {
-			vars.completedSplits.Add("CollectedFieldraider");
-		}
-		if (settings["Any%_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
-			if ((settings["Any%_EnterValleyWithFieldraider"] && vars.completedSplits.Contains("CollectedFieldraider")) || !settings["Any%_EnterValleyWithFieldraider"]) {
-				print("Split: EnterValley");
-				return vars.completedSplits.Add("EnterValley");
-			}
-		}
-		if (settings["Any%_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
-				&& Math.Sqrt(Math.Pow(27444.02148 - current.x, 2) + Math.Pow(-333.9581604 - current.y, 2)) < 1000) {
-			print("Split: CollectTeleportToPass");
-			return vars.completedSplits.Add("CollectTeleportToPass");
-		}
-		if (settings["Any%_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC")
-				&& Math.Sqrt(Math.Pow(-3099.234131 - current.x, 2) + Math.Pow(1561.480957 - current.y, 2)) < 1000) {
-			print("Split: CollectTeleportToCastle");
-			return vars.completedSplits.Add("CollectTeleportToCastle");
-		}
-		if (settings["Any%_CollectFirerain"] && !vars.completedSplits.Contains("CollectFirerain") && current.world == 2 && vars.PlayerHasItem("ITSC_FIRERAIN")
-				&& Math.Sqrt(Math.Pow(-13257.24512 - current.x, 2) + Math.Pow(-3468.070312 - current.y, 2)) < 1000) {
-			print("Split: CollectFirerain");
-			return vars.completedSplits.Add("CollectFirerain");
-		}
-		if (settings["Any%_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
-				&& Math.Sqrt(Math.Pow(-3140 - current.x, 2) + Math.Pow(1012 - current.y, 2)) < 200 
-				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
-			print("Split: TeleportToCastle");
-			return vars.completedSplits.Add("TeleportToCastle");
-		}
-		if (settings["Any%_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.world == 2 && vars.globals["gateOpen"].Old == 0 && vars.globals["gateOpen"].Current == 1) {
-			print("Split: OpenGate");
-			return vars.completedSplits.Add("OpenGate");
-		}
-		if (settings["Any%_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
-			print("Split: RockDragon");
-			return vars.completedSplits.Add("RockDragon");
-		}
-		if (settings["Any%_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
-			print("Split: Chapter5");
-			return vars.completedSplits.Add("Chapter5");
-		}
-		if (settings["Any%_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && current.world == 1 && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")
-				&& Math.Sqrt(Math.Pow(19408.43555 - current.x, 2) + Math.Pow(51082.89062 - current.y, 2)) < 1000) {
-			print("Split: CollectMap");
-			return vars.completedSplits.Add("CollectMap");
-		}
-		if (settings["Any%_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && vars.globals["Torlof"].Current == 1) {
-			print("Split: RecruitTorlof");
-			return vars.completedSplits.Add("RecruitTorlof");
-		}
-		if (settings["Any%_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
-			print("Split: Irdorath");
-			return vars.completedSplits.Add("Irdorath");
-		}
-		if (settings["Any%_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
-			print("Split: UndeadDragon");
-			return vars.completedSplits.Add("UndeadDragon");
-		}
-		if (settings["Any%_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
-			print("Split: End");
-			return vars.completedSplits.Add("End");
-		}
-	}
-	
-	// Any% No Flying
-
-	if (settings["Any%NoFlying"]) {
-		if (settings["Any%NoFlying_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
-			print("Split: EnterValley");
-			return vars.completedSplits.Add("EnterValley");
-		}
-		if (settings["Any%NoFlying_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")
-				&& Math.Sqrt(Math.Pow(27444.02148 - current.x, 2) + Math.Pow(-333.9581604 - current.y, 2)) < 1000) {
-			print("Split: CollectTeleportToPass");
-			return vars.completedSplits.Add("CollectTeleportToPass");
-		}
-		if (settings["Any%NoFlying_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && current.world == 2 && vars.PlayerHasItem("ITRU_TELEPORTOC")
-				&& Math.Sqrt(Math.Pow(-3099.234131 - current.x, 2) + Math.Pow(1561.480957 - current.y, 2)) < 1000) {
-			print("Split: CollectTeleportToCastle");
-			return vars.completedSplits.Add("CollectTeleportToCastle");
-		}
-		if (settings["Any%NoFlying_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
-				&& Math.Sqrt(Math.Pow(-3140 - current.x, 2) + Math.Pow(1012 - current.y, 2)) < 200 
-				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
-			print("Split: TeleportToCastle");
-			return vars.completedSplits.Add("TeleportToCastle");
-		}
-		if (settings["Any%NoFlying_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.world == 2 && vars.globals["gateOpen"].Old == 0 && vars.globals["gateOpen"].Current == 1) {
-			print("Split: OpenGate");
-			return vars.completedSplits.Add("OpenGate");
-		}
-		if (settings["Any%NoFlying_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
-			print("Split: SwampDragon");
-			return vars.completedSplits.Add("SwampDragon");
-		}
-		if (settings["Any%NoFlying_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.FIRE_DRAGON)) {
-			print("Split: FireDragon");
-			return vars.completedSplits.Add("FireDragon");
-		}
-		if (settings["Any%NoFlying_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
-			print("Split: RockDragon");
-			return vars.completedSplits.Add("RockDragon");
-		}
-		if (settings["Any%NoFlying_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
-			print("Split: Chapter5");
-			return vars.completedSplits.Add("Chapter5");
-		}
-		if (settings["Any%NoFlying_CollectTeleportToTavern"] && !vars.completedSplits.Contains("CollectTeleportToTavern") && vars.PlayerHasItem("ITRU_TELEPORTTAVERNE")) {
-			print("Split: CollectTeleportToTavern");
-			return vars.completedSplits.Add("CollectTeleportToTavern");
-		}
-		if (settings["Any%NoFlying_CollectMap"] && !vars.completedSplits.Contains("CollectMap") && vars.PlayerHasItem("ITWR_SEAMAP_IRDORATH")) {
-			print("Split: CollectMap");
-			return vars.completedSplits.Add("CollectMap");
-		}
-		if (settings["Any%NoFlying_RecruitTorlof"] && !vars.completedSplits.Contains("RecruitTorlof") && vars.globals["Torlof"].Old == 0 && vars.globals["Torlof"].Current == 1) {
-			print("Split: RecruitTorlof");
-			return vars.completedSplits.Add("RecruitTorlof");
-		}
-		if (settings["Any%NoFlying_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
-			print("Split: Irdorath");
-			return vars.completedSplits.Add("Irdorath");
-		}
-		if (settings["Any%NoFlying_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
-			print("Split: UndeadDragon");
-			return vars.completedSplits.Add("UndeadDragon");
-		}
-		if (settings["Any%NoFlying_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && vars.globals["undeadDragon"].Current == 1 && current.inCutscene == 1) {
-			print("Split: End");
-			return vars.completedSplits.Add("End");
-		}
-	}
-	
-	// All Chapters
-	
-	if (settings["AllChapters"]) {
-		if (settings["AllChapters_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.globals["chapter"].Current == 2) {
-			print("Split chapter 2");
-			return vars.completedSplits.Add("Chapter2");
-		}
-		if (settings["AllChapters_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
-			print("Split enter valley");
-			return vars.completedSplits.Add("EnterValley");
-		}
-		if (settings["AllChapters_OpenGate"] && !vars.completedSplits.Contains("OpenGate") && current.world == 2 && vars.globals["gateOpen"].Old == 0 && vars.globals["gateOpen"].Current == 1) {
-			print("Split open gate");
-			return vars.completedSplits.Add("OpenGate");
-		}
-		if (settings["AllChapters_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.globals["chapter"].Current == 3) {
-			print("Split chapter 3");
-			return vars.completedSplits.Add("Chapter3");
-		}
-		if (settings["AllChapters_ZurisDead"] && !vars.completedSplits.Contains("ZurisDead") && current.world == 1 && current.exp > old.exp && vars.IsDead(vars.ZURIS)) {
-			print("Split zuris dead");
-			return vars.completedSplits.Add("ZurisDead");
-		}
-		if (settings["AllChapters_Militia"] && !vars.completedSplits.Contains("Militia") && current.guild == 2) {
-			print("Split militia");
-			return vars.completedSplits.Add("Militia");
-		}
-		if (settings["AllChapters_Paladin"] && !vars.completedSplits.Contains("Paladin") && current.guild == 1) {
-			print("Split paladin");
-			return vars.completedSplits.Add("Paladin");
-		}
-		if (settings["AllChapters_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
-			print("Split vatras");
-			return vars.completedSplits.Add("Vatras");
-		}
-		if (settings["AllChapters_Pyrokar"] && !vars.completedSplits.Contains("Pyrokar") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.PYROKAR)) {
-			print("Split pyrokar");
-			return vars.completedSplits.Add("Pyrokar");
-		}
-		if (settings["AllChapters_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
-			print("Split xardas");
-			return vars.completedSplits.Add("Xardas");
-		}
-		if (settings["AllChapters_Lee"] && !vars.completedSplits.Contains("Lee") && vars.PlayerHasItem("ITRU_TELEPORTFARM")) {
-			print("Split lee");
-			return vars.completedSplits.Add("Lee");
-		}
-		if (settings["AllChapters_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.globals["chapter"].Current == 4) {
-			print("Split chapter 4");
-			return vars.completedSplits.Add("Chapter4");
-		}
-		if (settings["AllChapters_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
-			print("Split chapter 5");
-			return vars.completedSplits.Add("Chapter5");
-		}
-		if (settings["AllChapters_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
-			return vars.completedSplits.Add("Irdorath");
-			print("Split Irdorath");
-		}
-		if (settings["AllChapters_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
-			print("Split UndeadDragon");
-			return vars.completedSplits.Add("UndeadDragon");
-		}
-		if (settings["AllChapters_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && vars.globals["undeadDragon"].Current == 1 && current.inCutscene == 1) {
-			print("Split End");
-			return vars.completedSplits.Add("End");
-		}
-	}
-	
-	// Glitch-Restricted
-
-	if (settings["GlitchRestricted"]) {
-		if (settings["GlitchRestricted_Ignaz"] && !vars.completedSplits.Contains("Ignaz") && current.world == 1 && current.inDialogue == 1 && vars.IsInDialogue(vars.IGNAZ)) {
-			return vars.completedSplits.Add("Ignaz");
-		}
-		if (settings["GlitchRestricted_Militia"] && !vars.completedSplits.Contains("Militia") && current.guild == 2) {
-			return vars.completedSplits.Add("Militia");
-		}
-		if (settings["GlitchRestricted_Chapter2"] && !vars.completedSplits.Contains("Chapter2") && vars.globals["chapter"].Current == 2) {
-			return vars.completedSplits.Add("Chapter2");
-		}
-		if (settings["GlitchRestricted_EnterValley"] && !vars.completedSplits.Contains("EnterValley") && current.world == 2) {
-			return vars.completedSplits.Add("EnterValley");
-		}
-		if (settings["GlitchRestricted_CollectTeleportToPass"] && !vars.completedSplits.Contains("CollectTeleportToPass") && vars.PlayerHasItem("ITRU_TELEPORTPASSOW")) {
-			return vars.completedSplits.Add("CollectTeleportToPass");
-		}
-		if (settings["GlitchRestricted_CollectTeleportToCastle"] && !vars.completedSplits.Contains("CollectTeleportToCastle") && vars.PlayerHasItem("ITRU_TELEPORTOC")) {
-			return vars.completedSplits.Add("CollectTeleportToCastle");
-		}
-		if (settings["GlitchRestricted_TeleportToCastle"] && !vars.completedSplits.Contains("TeleportToCastle") && current.world == 2
-				&& Math.Sqrt(Math.Pow(-3140 - current.x, 2) + Math.Pow(1012 - current.y, 2)) < 200 
-				&& Math.Sqrt(Math.Pow(-3140 - old.x, 2) + Math.Pow(1012 - old.y, 2)) > 1000) {
-			return vars.completedSplits.Add("TeleportToCastle");
-		}
-		if (settings["GlitchRestricted_Chapter3"] && !vars.completedSplits.Contains("Chapter3") && vars.globals["chapter"].Current == 3) {
-			return vars.completedSplits.Add("Chapter3");
-		}		
-		if (settings["GlitchRestricted_Paladin"] && !vars.completedSplits.Contains("Paladin") && current.guild == 1) {
-			return vars.completedSplits.Add("Paladin");
-		}
-		if (settings["GlitchRestricted_Vatras"] && !vars.completedSplits.Contains("Vatras") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.VATRAS)) {
-			return vars.completedSplits.Add("Vatras");
-		}
-		if (settings["GlitchRestricted_Xardas"] && !vars.completedSplits.Contains("Xardas") && current.world == 1 && vars.globals["chapter"].Current == 3 && current.inDialogue == 1 && vars.IsInDialogue(vars.XARDAS)) {
-			return vars.completedSplits.Add("Xardas");
-		}
-		if (settings["GlitchRestricted_Lee"] && !vars.completedSplits.Contains("Lee") && vars.PlayerHasItem("ITRU_TELEPORTFARM")) {
-			return vars.completedSplits.Add("Lee");
-		}
-		if (settings["GlitchRestricted_Chapter4"] && !vars.completedSplits.Contains("Chapter4") && vars.globals["chapter"].Current == 4) {
-			return vars.completedSplits.Add("Chapter4");
-		}
-		if (settings["GlitchRestricted_FireDragon"] && !vars.completedSplits.Contains("FireDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.FIRE_DRAGON)) {
-			return vars.completedSplits.Add("FireDragon");
-		}
-		if (settings["GlitchRestricted_RockDragon"] && !vars.completedSplits.Contains("RockDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ROCK_DRAGON)) {
-			return vars.completedSplits.Add("RockDragon");
-		}
-		if (settings["GlitchRestricted_SwampDragon"] && !vars.completedSplits.Contains("SwampDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.SWAMP_DRAGON)) {
-			return vars.completedSplits.Add("SwampDragon");
-		}
-		if (settings["GlitchRestricted_IceDragon"] && !vars.completedSplits.Contains("IceDragon") && current.world == 2 && current.exp > old.exp && vars.IsDead(vars.ICE_DRAGON)) {
-			return vars.completedSplits.Add("IceDragon");
-		}
-		if (settings["GlitchRestricted_Chapter5"] && !vars.completedSplits.Contains("Chapter5") && vars.globals["chapter"].Current == 5) {
-			return vars.completedSplits.Add("Chapter5");
-		}
-		if (settings["GlitchRestricted_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
-			return vars.completedSplits.Add("Irdorath");
-		}
-
-		if (settings["GlitchRestricted_IrdorathMasterKey"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathMasterKey") && current.world == 3 && vars.PlayerHasItem("ITKE_EVT_UNDEAD_02")) {
-			return vars.completedSplits.Add("GlitchRestricted_IrdorathMasterKey");
-		}
-
-		if (settings["GlitchRestricted_IrdorathSwitch1"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch1") && current.world == 3 && Math.Sqrt(Math.Pow(23888 - current.x, 2) + Math.Pow(-15424 - current.y, 2)) < 500 && vars.IsActive("EVT_RIGHT_ROOM_01_MSG_SWITCH")) {
-			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch1");
-		}
-		if (settings["GlitchRestricted_IrdorathSwitch2"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch2") && current.world == 3 && Math.Sqrt(Math.Pow(23875 - current.x, 2) + Math.Pow(-19488 - current.y, 2)) < 500 && vars.IsActive("EVT_LEFT_ROOM_01_MSG_SWITCH")) {
-			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch2");
-		}
-		if (settings["GlitchRestricted_IrdorathSwitch3"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch3") && current.world == 3 && Math.Sqrt(Math.Pow(19686 - current.x, 2) + Math.Pow(-15408 - current.y, 2)) < 500 && vars.IsActive("EVT_RIGHT_ROOM_02_MSG_SWITCH")) {
-			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch3");
-		}
-		if (settings["GlitchRestricted_IrdorathSwitch4"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathSwitch4") && current.world == 3 && Math.Sqrt(Math.Pow(19676 - current.x, 2) + Math.Pow(-19505 - current.y, 2)) < 500 && vars.IsActive("EVT_LEFT_ROOM_02_MSG_SWITCH")) {
-			return vars.completedSplits.Add("GlitchRestricted_IrdorathSwitch4");
-		}
-		if (settings["GlitchRestricted_IrdorathOpenHall"] && !vars.completedSplits.Contains("GlitchRestricted_IrdorathOpenHall") && current.world == 3 && Math.Sqrt(Math.Pow(22138 - current.x, 2) + Math.Pow(-17461 - current.y, 2)) < 500 && vars.IsActive("EVENT_TRIGGERLIST_FOR_LOCK_FINAL")) {
-			return vars.completedSplits.Add("GlitchRestricted_IrdorathOpenHall");
-		}
-
-		if (settings["GlitchRestricted_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
-			return vars.completedSplits.Add("UndeadDragon");
-		}
-		if (settings["GlitchRestricted_End"] && !vars.completedSplits.Contains("End") && current.world == 3 && current.inDialogue == 1 && current.inCutscene == 1) {
-			return vars.completedSplits.Add("End");
-		}
-	}
-
-	// Undead Dragon Kill
-	if (settings["UndeadDragonKill"]) {
-		if (settings["UndeadDragonKill_Irdorath"] && !vars.completedSplits.Contains("Irdorath") && current.world == 3) {
-			return vars.completedSplits.Add("Irdorath");
-		}
-		if (settings["UndeadDragonKill_UndeadDragon"] && !vars.completedSplits.Contains("UndeadDragon") && vars.globals["undeadDragon"].Current == 1) {
-			return vars.completedSplits.Add("UndeadDragon");
 		}
 	}
 }
@@ -606,9 +569,9 @@ isLoading {
 }
 
 gameTime {
-	return (vars.timeKeeper + TimeSpan.FromMilliseconds(current.igt / 1000));
+	return (vars.TimeKeeper + TimeSpan.FromMilliseconds(vars.Watchers["IGT"].Current / 1000));
 }
 
 exit {
-	vars.timeKeeper = timer.CurrentTime.GameTime;
+	vars.TimeKeeper = timer.CurrentTime.GameTime;
 }
