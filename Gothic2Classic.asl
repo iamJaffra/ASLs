@@ -394,33 +394,46 @@ init {
 	const int COUNTER_ADDR = 0x008B4C00;
 	const int MESSAGE_ADDR = 0x008B4C04;
 	const int HOOK_ADDR    = 0x004DA1F6;
-	const int DETOUR_ADDR  = 0x0081FFA0;
+	const int CAVE1_ADDR   = 0x0081FF9C;
+	const int CAVE2_ADDR   = 0x0081FFEE;
+	const int CAVE3_ADDR   = 0x0081F992;
 
 	byte[] newGameMessage = { 0x4E, 0x45, 0x57, 0x5F, 0x47, 0x41, 0x4D, 0x45 };	 // NEW_GAME
 	game.WriteBytes((IntPtr)MESSAGE_ADDR, newGameMessage);
 
-	byte[] detour = {
+	byte[] cave1 = {
 		0x8B, 0xB4, 0x24, 0xCC, 0x00, 0x00, 0x00,  // mov esi,[esp+000000CC]
-		0x60,                                      // pushad 
-		0x9C,                                      // pushfd 
+		0x60,                                      // pushad
+		0x9C,                                      // pushfd
 		0x8B, 0x46, 0x0C,                          // mov eax,[esi+0C]
 		0x83, 0xF8, 0x08,                          // cmp eax,08 { 8 }
-		0x75, 0x1A,                                // jne Gothic2.exe+42D82B
+		0x75, 0x4C,                                // jne CAVE2_ADDR+11
 		0x56,                                      // push esi
 		0x8B, 0x76, 0x08,                          // mov esi,[esi+08]
 		0x8D, 0x3D, 0x04, 0x4C, 0x8B, 0x00,        // lea edi,[MESSAGE_ADDR] { ("NEW_GAME") }
 		0xB9, 0x08, 0x00, 0x00, 0x00,              // mov ecx,00000008 { 8 }
-		0xF3, 0xA6,                                // repe cmpsb 
-		0x5E,                                      // pop esi
-		0x75, 0x06,                                // jne Gothic2.exe+42D82B
-		0xFF, 0x05, 0x00, 0x4C, 0x8B, 0x00,        // inc [COUNTER_ADDR] { (0) }
-		0x9D,                                      // popfd 
-		0x61,                                      // popad 
-		0xE9, 0x2A, 0xA2, 0xCB, 0xFF               // jmp HOOK_ADDR+7
+		0xEB, 0x30                                 // jmp CAVE2_ADDR
 	};
-	game.WriteBytes((IntPtr)DETOUR_ADDR, detour);
 
-	byte[] hook = { 0xE9, 0xA5, 0x5D, 0x34, 0x00, 0x90, 0x90 };
+	byte[] cave2 = {
+		0xF3, 0xA6,                                // repe cmpsb
+		0x5E,                                      // pop esi
+		0x75, 0x06,                                // jne CAVE2_ADDR+11
+		0xFF, 0x05, 0x00, 0x4C, 0x8B, 0x00,        // inc [COUNTER_ADDR] { (0) }
+		0xE9, 0x94, 0xF9, 0xFF, 0xFF               // jmp CAVE3_ADDR
+	};
+
+	byte[] cave3 = {
+		0x9D,                                      // popfd
+		0x61,                                      // popad
+		0xE9, 0x64, 0xA8, 0xCB, 0xFF               // jmp 0x004DA1FD
+	};
+
+	game.WriteBytes((IntPtr)CAVE1_ADDR, cave1);
+	game.WriteBytes((IntPtr)CAVE2_ADDR, cave2);
+	game.WriteBytes((IntPtr)CAVE3_ADDR, cave3);
+
+	byte[] hook = { 0xE9, 0xA1, 0x5D, 0x34, 0x00, 0x90, 0x90 };
 	game.WriteBytes((IntPtr)HOOK_ADDR, hook);
 
 	vars.Info("Applied HandleSelAction() hook.");
