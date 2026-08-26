@@ -135,10 +135,15 @@ init {
 	const int GUILD_OFFSET              = 0x21C;    // int guild;
 	const int AI_SCRIPT_VARS_OFFSET     = 0x274;    // int aiscriptvars[70];
 	const int EXPERIENCE_POINTS_OFFSET  = 0x3A0;    // unsigned long experience_points;
+	const int STATE_OFFSET              = 0x4FC;    // oCNpc_States state;
 	const int INVENTORY2_OFFSET         = 0x5DC;    // oCNpcInventory inventory2;
 	const int BODYSTATE_OFFSET          = 0x6E0;    // int bodyState : 19;
 	const int INTERACT_MOB_OFFSET       = 0x8D0;    // oCMobInter* interactMob; 
 	
+	// oNpc_States
+	const int CURSTATE_OFFSET           = 0x1C;     // TNpcAIState curState;
+	const int STATE_NAME_OFFSET         = 0x1C;     // zSTRING name;
+
 	// oCMOB
 	const int MOB_TRIGGER_TARGET_OFFSET = 0x190;    // zSTRING triggerTarget;
 	const int MOB_STATE_OFFSET          = 0x1F4;    // int state; 
@@ -299,9 +304,9 @@ init {
 			IntPtr npcDataPtr = game.ReadPointer(npcPtr + ZCLISTSORT_DATA_OFFSET);
 
 			string name = game.ReadString(game.ReadPointer(npcDataPtr + OBJECT_NAME_OFFSET + ZSTRING_VECTOR_OFFSET), 20);
-			int isInDialogue = game.ReadValue<int>(npcDataPtr + AI_SCRIPT_VARS_OFFSET + 4 * 0x4); // aiscriptvars[4]
+			string state = game.ReadString(game.ReadPointer(npcDataPtr + STATE_OFFSET + CURSTATE_OFFSET + STATE_NAME_OFFSET + ZSTRING_VECTOR_OFFSET), 100);
 			
-			if (name == targetName && isInDialogue == 1) {
+			if (name == targetName && state == "ZS_TALK") {
 				return true;
 			}
 	

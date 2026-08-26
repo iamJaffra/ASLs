@@ -165,8 +165,8 @@ init {
 	int size = new DeepPointer((IntPtr)PARSER + SYMTAB_OFFSET + TABLE_OFFSET + 0x4).Deref<int>(game);
 	
 	for (int i = 0; i < size; i++) {
-		IntPtr symbolPtr = (IntPtr)new DeepPointer((IntPtr)tablePtr + i * 0x4).Deref<int>(game); 
-		string name = new DeepPointer((IntPtr)symbolPtr + 0x8, 0x0).DerefString(game, 100); 
+		IntPtr symbolPtr = (IntPtr)new DeepPointer(tablePtr + i * 0x4).Deref<int>(game); 
+		string name = new DeepPointer(symbolPtr + 0x8, 0x0).DerefString(game, 100); 
 		IntPtr address = symbolPtr + 0x18;
 		
 		foreach (var global in requiredGlobals) {
@@ -214,9 +214,12 @@ init {
 		while (npc != IntPtr.Zero) {
 			var npcData = game.ReadPointer(npc + 0x4);
 			var id = game.ReadValue<int>(npcData + 0x120);
-			var inDialogue = game.ReadValue<int>(npcData + 0x298);
+			//var inDialogue = game.ReadValue<int>(npcData + 0x298); // INVINCIBLE
 
-			if (id == npcID && inDialogue == 1) {
+			// npc.state.curState.name.vector
+			var state = game.ReadString(game.ReadPointer(npcData + 0x588 + 0x1C + 0x1C + 0x8), 100);
+
+			if (id == npcID && state == "ZS_TALK") {
 				return true;
 			}
 	
@@ -246,6 +249,13 @@ init {
 	
 			item = game.ReadPointer(item + 0x8);
 		}
+	});
+
+	vars.IsInventoryOpen = (Func<bool>)(() => {
+		// oCItemContainer
+		// virtual int IsOpen()        zCall( 0x00709200 );
+		// Gothic2.exe+309200 - A1 D80FAB00  - mov eax,[Gothic2.exe+6B0FD8] <-- pointer to list of open inventories
+		return game.ReadValue<int>((IntPtr)0x00AB0FD8) != 0;
 	});
 
 	#endregion
@@ -387,7 +397,7 @@ split {
 					shouldSplit = current.overlay == arg;
 					break;
 				case "Item": 
-					shouldSplit = vars.OwnedItems.Contains(arg);
+					shouldSplit = vars.OwnedItems.Contains(arg) && !vars.IsInventoryOpen();
 					break;
 				case "Talk":
 					shouldSplit = 
@@ -395,7 +405,7 @@ split {
 					break;
 				case "Chapter":
 					int chapter = int.Parse(arg);
-					shouldSplit = vars.Globals["KAPITEL"].Current == chapter;
+					shouldSplit = vars.Globals["KAPITEL"].Current == chapter && current.isPlayerInDialogue == 0;
 					break;
 				case "EnterWorld": 
 					shouldSplit = current.world != old.world && current.world == arg;
