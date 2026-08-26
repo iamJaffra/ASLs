@@ -400,8 +400,7 @@ split {
 					shouldSplit = vars.OwnedItems.Contains(arg) && !vars.IsInventoryOpen();
 					break;
 				case "Talk":
-					shouldSplit = 
-						current.isPlayerInDialogue == 1 && vars.IsInDialogue(vars.NPCs[arg]);
+					shouldSplit = vars.IsInDialogue(vars.NPCs[arg]);
 					break;
 				case "Chapter":
 					int chapter = int.Parse(arg);

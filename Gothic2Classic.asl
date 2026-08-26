@@ -551,7 +551,7 @@ split {
 				shouldSplit = vars.Watchers["World"].Current == arg1 && vars.PlayerHasItem(arg2);
 				break;
 			case "Talk":
-				shouldSplit = vars.Watchers["IsPlayerInDialogue"].Current == 1 && vars.IsInDialogue(arg1);
+				shouldSplit = vars.IsInDialogue(arg1);
 				break;
 			case "Talk+Chapter":
 				shouldSplit = vars.Globals["KAPITEL"].Current == int.Parse(arg2) && vars.Watchers["IsPlayerInDialogue"].Current == 1 && vars.IsInDialogue(arg1);
