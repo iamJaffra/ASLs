@@ -78,7 +78,7 @@ startup {
 		Tuple.Create("Dexter",                          "Talk",          "State_OC_STT_Dexter"),
 		Tuple.Create("Torrez",                          "Talk",          "State_OC_KDF_Torrez"),
 		Tuple.Create("Y'Berion",                        "Talk",          "State_SC_GUR_YBerion"),
-		Tuple.Create("Chronos",                         "Talk",          "State_NC_KDW_Cronos"),
+		Tuple.Create("Cronos",                          "Talk",          "State_NC_KDW_Cronos"),
 		Tuple.Create("Sharky",                          "Talk",          "State_NC_ORG_Sharky"),
 		
 		Tuple.Create("Attend The Great Awakening",      "Cinematic",     "ProphecyCinematic"),
